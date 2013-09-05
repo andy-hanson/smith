@@ -1,0 +1,99 @@
+#TODO: init
+
+use ./Singleton
+
+∙ T
+	`_prelude.Type`
+
+∙ defs |
+
+	‣ 'method |name
+		∙ p
+			proto
+		`p[name]`
+
+	‣ 'alias |old-name new-name
+		∙ old
+			old-name
+		‣ new-name
+			`this[old].apply(this, arguments)`
+
+	‣ 'read |name
+		‣ name
+			`this['_prop_' + name]`
+
+	read 'name
+	read 'super
+	read 'proto
+
+	#‣ 'proto
+	#	`console.log(this)`
+	#	`this._prop_proto`
+
+	‣ 'self
+		`this`
+
+	‣ 'toString
+		"<Type {name}>"
+
+	# TODO:
+	# does Singleton
+	#`console.log(Singleton._prop_proto)`
+	#`console.log(Singleton._prop_name)`
+	#`console.log(Singleton.self)`
+
+
+	‣ '‣‣ (Singleton.method '‣‣)
+	‣ 'val (Singleton.method 'val)
+
+	‣ 'static |name value
+		`this[name] = value`
+
+	‣ 'subsumes? |obj
+		`obj['is-a-id-' + this.__id]()`
+
+	‣ 'sub-type-id? |typeid
+		`this.__id == typeid || this.__parents.some(function(parent) {
+			return parent['_sub-type-id?'](typeid)
+		})`
+
+	‣ 'sub-type? |type
+		`true` #`(this === type) || ???`
+
+	‣ 'type+ |name do-to
+		∙ type
+			T name
+		∙ doto
+			do-to
+		`(doto != null) ? type.do(doto) : null`
+		type
+
+	‣ 'object+ |name do-to
+		∙ obj
+			Singleton name
+		∙ doto
+			do-to
+		`(doto != null) ? obj.do(doto) : null`
+		#obj.do do-to
+		obj
+
+
+defs.unbound.call T
+
+#{
+∙ fff |
+	=+of |name
+		∙ type
+			Type name
+		type.do
+			is Singleton
+			+name
+				name
+		∙ single
+			type.of
+		single
+
+`fff.__unBound.call(Singleton)`
+}#
+
+export T

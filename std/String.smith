@@ -1,0 +1,50 @@
+use ./Type
+use ./Object
+use ./Bag
+use ./Fun
+
+∙ S
+	Type 'String' `global.String.prototype`
+
+S.do
+	‣ '+ |x
+		`this + x`
+
+	‣‣ 'of |a
+		`
+		(function() {
+			switch (typeof a) {
+				case 'undefined':
+					return 'Undefined';
+				case 'object':
+					if (a == null)
+						return 'Null';
+					// fall through
+				default:
+					return a.toString();
+			}
+		})()
+		`
+
+	#{
+	+index-of-substring~ |needle
+		. js-index-of
+			`this.indexOf(needle)`
+		(Some `this.indexOf(needle)`).filterOut -1.=_
+	}#
+
+	alias 'toUpperCase 'to-upper-case
+	alias 'toLowerCase 'to-lower-case
+
+	‣ 'split-whitespace
+		`this.split("\\s+")`
+
+	‣ 'size
+		`this.length`
+
+	#(Bag '<' '>' '<=' '>=').each |name
+	#	‣ name (Fun.fromJS 'a' "return this {name} a")
+
+	# Iterator?
+
+export S

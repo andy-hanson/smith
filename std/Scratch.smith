@@ -1,0 +1,64 @@
+|x { x.+ 1 } .blah
+
+a b
+a.b
+a_
+a .b_
+_a
+
+#a b.c d
+
+#a
+#_a
+#a_
+#x.a
+#x.a_
+
+#{
+
+
+use ./Stuff
+#"An {interpolated} string"
+'A {literal} string'
+`A javascript literal`
+
+me
+it
+
+#call |x:Type y:Type
+#	z
+
+
+. foo #:Type
+	Foo ()
+	{ }
+
+foo.bar.baz
+
+Console.log 2
+Console.log! 2.3.show
+foo! on.you
+you.foo! (on me)
+
+# Pair.smith
+
+
+read+ 'a'
+read- 'b'
+init |a b
+	addProperty a
+	addProperty b
+
+Console.log! (map 3) (map 4) (map 5)
+
+construct '+a' '-b'
+	blah
+
+construct
+	+a
+	-b
+	do
+		stuff
+
+data 'a' 'b'
+

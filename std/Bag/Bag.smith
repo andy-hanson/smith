@@ -1,0 +1,12 @@
+#‣‣ 'of
+#	`global.Array.prototype.slice.call(arguments)`
+
+‣ 'make-string
+	use ./String
+	(map String.of_).join " "
+
+‣ 'toString
+	"({type.name} {make-string})"
+
+
+

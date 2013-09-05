@@ -1,0 +1,3 @@
+#!/usr/bin/sh
+script/compile
+bin/smith --in std --out js-std

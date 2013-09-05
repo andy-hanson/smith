@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE language SYSTEM "language.dtd">
+
+<!-- kate -->
+
+<!--
+This regex detects word characters:
+([^{}\[\]()\s\|\:\,\.])
+Use replace all when updating this!
+-->
+
+<language name="Smith" section="Sources" extensions="*.smith" mimetype="">
+<highlighting>
+		<list name="special values">
+			<item> me </item>
+			<item> it </item>
+		</list>
+
+		<list name="keywords">
+			<item> arguments </item>
+			<item> doc </item>
+			<item> in </item>
+			<item> out </item>
+			<item> eg </item>
+			<item> how </item>
+		</list>
+
+		<contexts>
+			<context name="Normal" attribute="Normal" lineEndContext="#stay">
+				<keyword attribute="Special Value" context="#stay" String="special values"/>
+				<keyword attribute="Keyword" context="#stay" String="keywords"/>
+
+				<DetectChar attribute="Javascript Literal" context="Javascript Literal" char="`"/>
+
+				<DetectChar attribute="Comma" context="#stay" char=","/>
+
+				<RegExpr attribute="Comment" context="Multi Line Comment" String="#\{" lineEndContext="#stay"/>
+				<RegExpr attribute="Comment" context="#stay" String="#.*"/>
+
+				<RegExpr attribute="Fun Start" context="Fun" String="\|"/>
+
+				<RegExpr attribute="Use" context="Use" String="^use"/>
+
+				<RegExpr attribute="Local Start" context="Local Def" String="\.\s"/>
+
+				<RegExpr attribute="Type" context="#stay" String="\:\S*"/>
+
+				<RegExpr attribute="Brackets" context="#stay" String="[\(\)\[\]\{\}]"/>
+
+				<RegExpr attribute="Number" context="#stay" String="-?[0-9.]*[0-9]"/>
+
+				<keyword attribute="Lambda" context="#stay" String="lambdas"/>
+
+				<DetectChar attribute="Quote" context="Quote" char="&quot;"/>
+				<RegExpr attribute="String Literal" context="#stay" String="'([^{}\[\]()\s\|\:\,\.])*"/>
+				<RegExpr attribute="String Literal" context="#stay" String="'$"/>
+
+				<RegExpr attribute="At Name" context="#stay" String="@[^{}\[\]()\s\|\:\,\.]+"/>
+
+				<RegExpr attribute="Capitalized" context="#stay" String="(^|\s)[A-Z][^{}\[\]()\s\|\:\,\.]*"/>
+
+				<RegExpr attribute="Action" context="#stay" String="[^{}\[\]()\s\|\:\,\.]*!"/>
+				<RegExpr attribute="Method Action" context="#stay" String="\.[^{}\[\]()\s\|\:\,\.]*!"/>
+				<RegExpr attribute="Method Call" context="#stay" String="\.[^{}\[\]()\s\|\:\,\.]+"/>
+			</context>
+
+			<context name="Javascript Literal" attribute="Javascript Literal" lineEndContext="#stay">
+				<DetectChar attribute="JavascriptLiteral" context="#pop" char="`"/>
+			</context>
+
+			<context name="Local Def" lineEndContext="#pop">
+				<RegExpr attribute="Local Defd" context="#pop" String="[^{}\[\]()\s\|\:\,\.]*"/>
+				<RegExpr attribute="Type" context="#stay" String="\:\S*"/>
+			</context>
+
+			<context name="Use" lineEndContext="#pop">
+				<RegExpr attribute="Used" context="#pop" String="\S*"/>
+			</context>
+
+			<context name="Fun" attribute="Fun" lineEndContext="#pop">
+				<RegExpr attribute="Var Name" context="#stay" String="([^{}\[\]()\s\|\:\,\.])"/>
+				<RegExpr attribute="Type" context="#stay" String="\:\S*"/>
+			</context>
+
+			<context name="Multi Line Comment" attribute="Comment" lineEndContext="#stay">
+				<RegExpr attribute="Comment" context="#pop" String="\}#"/>
+			</context>
+
+			<context name="Quote" attribute="Quote" lineEndContext="#pop">
+				<RegExpr attribute="Escaped Char" context="#stay" String="\\."/>
+				<HlCStringChar attribute="String Char" context="#stay"/>
+				<DetectChar attribute="String" context="#pop" char="&quot;"/>
+				<RegExpr attribute="Interpolated" context="#stay" String="\{.*\}"/>
+			</context>
+		</contexts>
+
+		<itemDatas>
+			<itemData name="Number" 		defStyleNum="dsFloat"/>
+
+			<itemData name="Comma"			defStyleNum="dsKeyword" color="#804000"/>
+
+			<itemData name="Normal"			defStyleNum="dsNormal"/>
+			<itemData name="Capitalized"	defStyleNum="dsNormal" bold="1"/>
+			<itemData name="Action"			defStyleNum="dsNormal" color="#ff00c0"/>
+			<itemData name="Method Call"	defStyleNum="dsNormal" color="#000080"/>
+			<itemData name="Method Action"	defStyleNum="dsNormal" color="#ff0080"/>
+
+			<itemData name="Quote"			defStyleNum="dsOthers" color="#ff4000"/>
+			<itemData name="Escaped Char"	defStyleNum="dsOthers" color="#ff0040"/>
+			<itemData name="String Literal"		defStyleNum="dsOthers" color="#ff8000"/>
+			<itemData name="Javascript Literal"		defStyleNum="dsOthers" color="#ff0080" bold="1"/>
+
+			<itemData name="Special Value"	defStyleNum="dsKeyword" color="#008000"/>
+			<itemData name="Keyword"	defStyleNum="dsKeyword" color="#000080"/>
+
+			<itemData name="Local Start"	defStyleNum="dsKeyword" color="#0000f0"/>
+			<itemData name="Local Defd"		defStyleNum="dsKeyword" color="#0080f0"/>
+
+			<itemData name="String"			defStyleNum="dsString"/>
+			<itemData name="Comment"		defStyleNum="dsComment"/>
+
+			<itemData name="Brackets"		defStyleNum="dsNormal" color="#0000ff" selColor="#00ff00" bold="1" italic="0"/>
+
+			<itemData name="At Name"		defStyleNum="dsOthers"/>
+			<itemData name="Var Name"		defStyleNum="dsOthers" color="#800080"/>
+			<itemData name="Fun Start"		defStyleNum="dsNormal" color="#0080ff" bold="1"/>
+
+			<itemData name="Interpolated"	defStyleNum="dsKeyword" color="#ff0080"/>
+
+			<itemData name="Use"			defStyleNum="dsNormal" color="#0040c0"/>
+			<itemData name="Used"			defStyleNum="dsNormal" color="#0040c0" bold="1"/>
+		</itemDatas>
+	</highlighting>
+
+	<general>
+		<folding indentationsensitive="1"/>
+		<keywords casesensitive="1" weakDeliminator="-+*?!&lt;&gt;=/:#\"/>
+		<comments>
+			<comment name="singleLine" start="#	" position="afterwhitespace"/>
+		</comments>
+	</general>
+</language>

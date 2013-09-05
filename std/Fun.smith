@@ -1,0 +1,31 @@
+use ./Type
+use ./Object
+use ./Bool
+
+∙ F
+	`global.Function`.toType
+
+F.do
+	‣ 'from-JS
+		`global.Function.apply(null, Array.prototype.slice.call(arguments))`
+
+	‣ 'new-bound-call
+		`unBound.apply(arguments[0], Array.prototype.slice.call(arguments, 1))`
+
+	‣ 'of
+		`this.apply(null, Array.prototype.slice.call(arguments))`
+
+	‣ 'argument-names
+		∙ strip-comments
+			`/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg`
+		∙ str
+			un-bound.toString.replace strip-comments ''
+		∙ args-part
+			str.slice (str.indexOf '(').inc (str.indexOf ')')
+		∙ result
+			args-part.match `/([^\s,]+)/g`
+
+		(`result === null`).? { Bag () } { result }
+
+export F
+

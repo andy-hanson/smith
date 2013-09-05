@@ -1,0 +1,32 @@
+use ./Type
+
+∙ B
+	Type 'Bool' `global.Boolean.prototype`
+
+B.do
+	‣‣ 'Yes
+		`true`
+
+	‣‣ 'No
+		`false`
+
+	‣ '? |then elze #TODO: mangle else
+		`this.valueOf() ? then() : elze()`
+
+	‣ 'or |fun
+		`this || fun()`
+
+	‣ 'and |fun
+		`this && fun()`
+
+	‣ 'not
+		`!this`
+
+	‣ 'xor |other
+		(= other).not
+
+	‣ 'nor |other
+		(or other).not
+
+
+export B

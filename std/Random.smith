@@ -1,0 +1,19 @@
+∙ Math
+	`global.Math`
+
++in-0-1
+	`Math.random()`
+
++in-range |min max
+	∙ size
+		max.- min
+	∙ offset
+		in-0-1.* diff
+	min.+ offset
+
++int-in-range |min max
+	(in-range min max).round-down
+
++bool
+	in-0-1.< 0.5
+

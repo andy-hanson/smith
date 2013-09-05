@@ -1,0 +1,3 @@
+#!/usr/bin/sh
+coffee  --compile --bare --map --output js src
+

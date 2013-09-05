@@ -1,0 +1,167 @@
+use ./Type
+use ./Object
+use ./Bag
+use ./Fun
+use ./Option
+
+∙ N
+	Type 'Number' `global.Number.prototype`
+
+∙ Math
+	`global.Math`
+
+N.do
+	(Bag '+' '-' '*' '/' '<' '>' '<=' '>=').each |name
+		def-public name (Fun.fromJS 'a' "return this {name} a")
+
+	(Bag 'round' 'abs' 'acos' 'asin' 'atan' 'cos' 'sin' 'tan').each |name
+		def-public name (Fun.fromJS "return Math.{name}(this)")
+
+	+// |divisor
+		(/ divisor).floor
+
+	+neg
+		`this`
+
+	+= |a
+		`
+		(typeof a === 'number') ?
+			this == a
+		:
+			this === a
+		`
+
+	+positive?
+		> 0
+	+negative?
+		< 0
+	+zero?
+		= 0
+
+	+round-down
+		Math.floor me
+
+	+round-up
+		Math.ceil me
+
+	+difference |num
+		(- num).abs
+
+	+remainder |divisor
+		`me % divisor`
+
+	+divisible? |divisor
+		(remainder divisor).zero?
+
+	+dec
+		- 1
+
+	+inc
+		+ 1
+
+	+^ |power
+		Math.pow me power
+
+	+log-e
+		Math.log me
+
+	+log |base
+		log-e./ base.log-e
+
+	+log-10
+		log-base 10
+
+	+log-2
+		log-base 2
+
+	+inverse
+		1./ me
+
+	+half
+		/ 2
+
+	+twice
+		* 2
+
+	+square
+		* me
+
+	+cube
+		* square
+
+	+square-root
+		`Math.sqrt(this)`
+
+	+cube-root
+		`Math.pow(this, 1/3)`
+
+	+nth-root |n
+		^ (n.inverse)
+
+	+int?
+		= round-down
+
+	+try-divide-evenly
+		(Option.Some (/ divisor)).filter _int?
+
+	+factorial
+		TODO
+		#(Range.int 1 inc).fold _*
+
+	+min |a
+		(< a).? { me } { a }
+	+max |a
+		(> a).? { me } { a }
+
+	+square-hypoteneuse |a
+		square.+ a.square
+
+	+hypoteneuse
+		square-hypoteneuse.square
+
+	+crop |min max
+		(min max).max min
+
+	+greatest-common-divisor |a
+		(= 0).? { a }
+			greatest-common-divisor (a.remainder me)
+
+	+least-common-multiple |b
+		(* b)./ (greatest-common-divisor b)
+
+	+binary-or |a
+		`this | a`
+
+	+binary-and |a
+		`this & a`
+
+	+binary-xor |a
+		`this ^ a`
+
+	+binary-not |a
+		`~this`
+
+	+binary-shift-left |n
+		`this << n`
+
+	+binary-shift-right-signed |n
+		`this >> n`
+
+	+binary-shift-right-unsigned |n
+		`this >>> n`
+
+	val+ 'Pi'
+		`Math.PI`
+
+	val+ 'Pi2'
+		Pi.twice
+
+	val+ 'E'
+		`Math.E`
+
+	val+ 'Golden-Ratio'
+		5.square-root.inc.half
+
+
+
+export N
