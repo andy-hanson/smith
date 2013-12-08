@@ -5,25 +5,48 @@ use ./Fun
 use ./Option
 
 ∙ N
-	Type 'Number' `global.Number.prototype`
+	Type 'Number `global.Number.prototype`
 
 ∙ Math
 	`global.Math`
 
 N.do
-	(Bag '+' '-' '*' '/' '<' '>' '<=' '>=').each |name
-		def-public name (Fun.fromJS 'a' "return this {name} a")
+	(Bag 'round 'abs 'acos 'asin 'atan 'cos 'sin 'tan).each |name
+		‣ name (Fun.from-JS "return Math.{name}(this)")
 
-	(Bag 'round' 'abs' 'acos' 'asin' 'atan' 'cos' 'sin' 'tan').each |name
-		def-public name (Fun.fromJS "return Math.{name}(this)")
+	‣ '< |a
+		`this < a`
 
-	+// |divisor
-		(/ divisor).floor
+	‣ '> |a
+		`this > a`
 
-	+neg
+	‣ '≤ |a
+		`this <= a`
+
+	‣ '≥
+		`this >= a`
+
+	‣ '+ |a
+		`this + a`
+
+	‣ '- |a
+		`this - a`
+
+	‣ '× |a
+		`this * a`
+
+	‣ '÷ |a
+		`this / a`
+
+	‣ '// |divisor
+		(÷ divisor).floor
+
+	‣ 'negate
 		`this`
 
-	+= |a
+	# TODO: ≈
+
+	‣ '= |a
 		`
 		(typeof a === 'number') ?
 			this == a
@@ -31,137 +54,144 @@ N.do
 			this === a
 		`
 
-	+positive?
+	‣ 'positive?
 		> 0
-	+negative?
+	‣ 'negative?
 		< 0
-	+zero?
+	‣ 'zero?
 		= 0
 
-	+round-down
+	‣ 'round-down
 		Math.floor me
 
-	+round-up
+	‣ 'round-up
 		Math.ceil me
 
-	+difference |num
+	‣ 'difference |num
 		(- num).abs
 
-	+remainder |divisor
+	‣ 'remainder |divisor
 		`me % divisor`
 
-	+divisible? |divisor
+	‣ 'divisible? |divisor
 		(remainder divisor).zero?
 
-	+dec
+	‣ 'dec
 		- 1
 
-	+inc
+	‣ 'inc
 		+ 1
 
-	+^ |power
+	‣ '^ |power
 		Math.pow me power
 
-	+log-e
+	‣ 'log-e
 		Math.log me
 
-	+log |base
-		log-e./ base.log-e
+	‣ 'log |base
+		log-e.÷ base.log-e
 
-	+log-10
+	‣ 'log-10
 		log-base 10
 
-	+log-2
+	‣ 'log-2
 		log-base 2
 
-	+inverse
-		1./ me
+	‣ 'inverse
+		1.÷ me
 
-	+half
-		/ 2
+	‣ 'half
+		÷ 2
 
-	+twice
-		* 2
+	‣ 'twice
+		× 2
 
-	+square
-		* me
+	‣ 'square
+		× me
 
-	+cube
-		* square
+	‣ 'cube
+		× square
 
-	+square-root
+	‣ 'square-root
 		`Math.sqrt(this)`
 
-	+cube-root
+	‣ 'cube-root
 		`Math.pow(this, 1/3)`
 
-	+nth-root |n
+	‣ 'nth-root |n
 		^ (n.inverse)
 
-	+int?
+	‣ 'int?
 		= round-down
 
-	+try-divide-evenly
-		(Option.Some (/ divisor)).filter _int?
+	‣ 'try-divide-evenly
+		(Option.Some (÷ divisor)).filter _int?
 
-	+factorial
+	‣ 'factorial
 		TODO
-		#(Range.int 1 inc).fold _*
+		#(Range.int 1 inc).fold _×
 
-	+min |a
+	‣ 'min |a
 		(< a).? { me } { a }
-	+max |a
+	‣ 'max |a
 		(> a).? { me } { a }
 
-	+square-hypoteneuse |a
+	‣ 'square-hypoteneuse |a
 		square.+ a.square
 
-	+hypoteneuse
-		square-hypoteneuse.square
+	‣ 'hypoteneuse |a
+		(square-hypoteneuse a).square-root
 
-	+crop |min max
+	‣ 'crop |min max
 		(min max).max min
 
-	+greatest-common-divisor |a
-		(= 0).? { a }
+	‣ 'greatest-common-divisor |a
+		(= 0).?
+			a
+		|
 			greatest-common-divisor (a.remainder me)
 
-	+least-common-multiple |b
-		(* b)./ (greatest-common-divisor b)
+	‣ 'least-common-multiple |b
+		(× b).÷ (greatest-common-divisor b)
 
-	+binary-or |a
+	‣ 'binary-or |a
 		`this | a`
 
-	+binary-and |a
+	‣ 'binary-and |a
 		`this & a`
 
-	+binary-xor |a
+	‣ 'binary-xor |a
 		`this ^ a`
 
-	+binary-not |a
+	‣ 'binary-not |a
 		`~this`
 
-	+binary-shift-left |n
+	‣ 'binary-shift-left |n
 		`this << n`
 
-	+binary-shift-right-signed |n
+	‣ 'binary-shift-right-signed |n
 		`this >> n`
 
-	+binary-shift-right-unsigned |n
+	‣ 'binary-shift-right-unsigned |n
 		`this >>> n`
 
-	val+ 'Pi'
+	val 'Pi
 		`Math.PI`
 
-	val+ 'Pi2'
+	val 'Pi2
 		Pi.twice
 
-	val+ 'E'
+	val 'E
 		`Math.E`
 
-	val+ 'Golden-Ratio'
+	val 'Golden-Ratio
 		5.square-root.inc.half
 
+	val '∞
+		`global.Infinity`
+
+	val '-∞
+		∞.negate
 
 
 export N

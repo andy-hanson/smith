@@ -3,6 +3,9 @@
 
 ‣ 'val |name make-val
 	∙ val
-		produce-val.of
+		make-val ()
 	‣‣ name
 		val
+
+‣ 'construct |name
+	`this._prop_name = name`

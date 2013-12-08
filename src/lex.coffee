@@ -94,14 +94,21 @@ lexPlain = (stream, inQuote) ->
 			out.pop()
 
 
-	nameChar = /[a-zA-Z!$%^&*\-+=<>?\/0-9‣]/
+
+
+	#nameChar = /[a-zA-Z!$%^&*\-+=<>?\/0-9‣]/
+	# not space, not bracket, not punc, not quote, not comment, not bar, not JS literal, not @, not ∙
+	notNameChar = /[\s\(\[\{\)\]\}\.;,'"#\|`@∙]/
 	digit = /[0-9]/
 	numChar = /[0-9]/
 
 	indent = 0
 
 	takeName = ->
-		stream.takeMatching nameChar
+		name = stream.takeNotMatching notNameChar
+		if name.isEmpty()
+			throw new Error "Expected name at #{pos}, got nothing"
+		name
 
 	while ch = stream.peek()
 		pos = stream.pos
@@ -128,7 +135,7 @@ lexPlain = (stream, inQuote) ->
 				name = takeName()
 				new T.Name pos, name, '_x'
 
-			else if ch.match nameChar
+			else unless ch.match notNameChar
 				name = takeName()
 				if stream.peek() == '_'
 					stream.readChar()

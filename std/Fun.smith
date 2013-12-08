@@ -6,7 +6,7 @@ use ./Bool
 	`global.Function`.toType
 
 F.do
-	‣ 'from-JS
+	‣‣ 'from-JS #|:F
 		`global.Function.apply(null, Array.prototype.slice.call(arguments))`
 
 	‣ 'new-bound-call
@@ -19,13 +19,12 @@ F.do
 		∙ strip-comments
 			`/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg`
 		∙ str
-			un-bound.toString.replace strip-comments ''
+			un-bound.toString.replace strip-comments ""
 		∙ args-part
-			str.slice (str.indexOf '(').inc (str.indexOf ')')
+			str.slice (str.indexOf "(").inc (str.indexOf ")")
 		∙ result
 			args-part.match `/([^\s,]+)/g`
 
 		(`result === null`).? { Bag () } { result }
 
 export F
-

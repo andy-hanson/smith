@@ -2,7 +2,9 @@ use ../Type
 use ../Object
 
 ∙ A
-	Type 'Array' `global.Array.prototype`
+	`global.Array`.toType
 
 A.do
 	alias 'forEach 'each
+
+A

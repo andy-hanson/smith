@@ -1,15 +1,19 @@
 #Option.smith
 
-type+ 'Some'
-	is Option
+‣type 'Some
+	#is Option
 
-	#TODO: change
-	def-private 'construct' |value
+	#TODO
+
+	#data |value
+	#	()
+
+	‣ 'construct |value
 		`this.__value = value`
 
 
 
-object+ 'None'
-	is Option
+#‣object 'None
+	#is Option
 
-	
+

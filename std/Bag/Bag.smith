@@ -1,5 +1,5 @@
-#‣‣ 'of
-#	`global.Array.prototype.slice.call(arguments)`
+‣‣ 'of
+	`global.Array.prototype.slice.call(arguments)`
 
 ‣ 'make-string
 	use ./String

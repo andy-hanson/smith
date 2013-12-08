@@ -26,25 +26,12 @@ use ./Singleton
 	read 'super
 	read 'proto
 
-	#‣ 'proto
-	#	`console.log(this)`
-	#	`this._prop_proto`
-
 	‣ 'self
 		`this`
 
 	‣ 'toString
 		"<Type {name}>"
 
-	# TODO:
-	# does Singleton
-	#`console.log(Singleton._prop_proto)`
-	#`console.log(Singleton._prop_name)`
-	#`console.log(Singleton.self)`
-
-
-	‣ '‣‣ (Singleton.method '‣‣)
-	‣ 'val (Singleton.method 'val)
 
 	‣ 'static |name value
 		`this[name] = value`
@@ -60,21 +47,30 @@ use ./Singleton
 	‣ 'sub-type? |type
 		`true` #`(this === type) || ???`
 
-	‣ 'type+ |name do-to
+
+	# TODO:
+	# does Singleton
+
+	‣ '‣‣ (Singleton.method '‣‣)
+	‣ 'val (Singleton.method 'val)
+
+	‣ '‣type |name do-to
 		∙ type
 			T name
 		∙ doto
 			do-to
-		`(doto != null) ? type.do(doto) : null`
+
+		`(doto == null) ? null : type.do(doto)`
 		type
 
-	‣ 'object+ |name do-to
+	‣ '‣object |name do-to
 		∙ obj
 			Singleton name
 		∙ doto
 			do-to
-		`(doto != null) ? obj.do(doto) : null`
-		#obj.do do-to
+		#`(doto != null) ? obj.do(doto) : null`
+		obj.do do-to
+
 		obj
 
 

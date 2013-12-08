@@ -25,6 +25,9 @@ O.do
 	‣ '= |other
 		identical? other
 
+	‣ '≠ |other
+		(= other).¬
+
 	‣ 'me
 		`this`
 

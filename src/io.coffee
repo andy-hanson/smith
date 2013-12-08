@@ -43,43 +43,44 @@ copyFile = (inFile, outFile) ->
 	fs.writeFileSync outFile, content, 'utf8'
 
 extensionSplit = (name) ->
-	name.split '.'
+	(name.split '.').allButAndLast()
 
 ensureDir = (dir) ->
 	rimraf.sync dir #destroy it
 	unless fs.existsSync dir
 		fs.mkdirSync dir
 
-processDirectory = (inDir, outDir, callBack) ->
+processDirectorySync = (inDir, outDir, filter, callBack) ->
 	ensureDir outDir
 	try
-		processDirectoryRecurse inDir, outDir, callBack
+		processDirectorySyncRecurse inDir, outDir, filter, callBack
 	catch error
 		rimraf.sync outDir # destroy output
 		throw error
 
-processDirectoryRecurse = (inDir, outDir, callBack) ->
+processDirectorySyncRecurse = (inDir, outDir, filter, callBack) ->
 	(fs.readdirSync inDir).forEach (file) ->
 		full = "#{inDir}/#{file}"
 		stats = fs.statSync full
 
 		if stats.isFile()
-			toWrites =
-				callBack file, ->
+			if filter full
+				text =
 					fs.readFileSync full, 'utf8'
-			type toWrites, Array
-			toWrites.forEach (toWrite) ->
-				[ shortName, content ] = toWrite
-				type shortName, String
-				type content, String
-				outFile = "#{outDir}/#{shortName}"
-				#console.log "Writing to #{outFile}"
-				fs.writeFileSync outFile, content, 'utf8'
+				toWrites =
+					callBack file, text
+
+				toWrites.forEach (toWrite) ->
+					[ shortName, content ] = toWrite
+					type shortName, String
+					type content, String
+					outFile = "#{outDir}/#{shortName}"
+					fs.writeFileSync outFile, content, 'utf8'
 
 		else if stats.isDirectory()
 			newOut = "#{outDir}/#{file}"
 			ensureDir newOut
-			processDirectoryRecurse full, "#{outDir}/#{file}", callBack
+			processDirectorySyncRecurse full, "#{outDir}/#{file}", filter, callBack
 
 module.exports =
 	#recurseDirectory: recurseDirectory
@@ -87,5 +88,5 @@ module.exports =
 	relativeName: relativeName
 	#copyFlat: copyFlat
 	#copyFile: copyFile
-	processDirectory: processDirectory
+	processDirectorySync: processDirectorySync
 	extensionSplit: extensionSplit

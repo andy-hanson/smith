@@ -1,7 +1,7 @@
 use ./Type
 
 ∙ B
-	Type 'Bool' `global.Boolean.prototype`
+	`global.Boolean`.toType
 
 B.do
 	‣‣ 'Yes
@@ -10,23 +10,33 @@ B.do
 	‣‣ 'No
 		`false`
 
-	‣ '? |then elze #TODO: mangle else
-		`this.valueOf() ? then() : elze()`
+	‣ '? |then else #:Fun
+		`this.valueOf() ? then() : $else()`
 
-	‣ 'or |fun
-		`this || fun()`
+	‣ '∨ |a #:Fun
+		`this || a()`
 
-	‣ 'and |fun
-		`this && fun()`
+	‣ '∧ |a #:Fun
+		`this && a()`
 
-	‣ 'not
+	‣ '¬
 		`!this`
 
-	‣ 'xor |other
-		(= other).not
+	‣ '→  |a #:Fun
+		`!this || a()`
 
-	‣ 'nor |other
-		(or other).not
+	‣ '⊕ |a #:Bool
+		`this ? !a : a`
+
+	‣ 'nor |a #:Bool
+		`!(this || a)`
+
+	#alias '? 'if-then-else
+	#alias '∨ 'or
+	#alias '∧ 'and
+	#alias '¬ 'not
+	#alias '→ 'implies
+	#alias '⊕ 'xor
 
 
 export B

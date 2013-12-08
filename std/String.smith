@@ -4,7 +4,7 @@ use ./Bag
 use ./Fun
 
 ∙ S
-	Type 'String' `global.String.prototype`
+	`global.String`.toType
 
 S.do
 	‣ '+ |x

@@ -1,6 +1,6 @@
 use ./Type
 #use ./Object
-#use ./Number
+use ./Number
 use ./Console
 use ./String
 use ./Bool
@@ -8,9 +8,16 @@ use ./Bag
 
 #use ./Foo
 
-Console.log! (Bag.type.= Type)
+#Console.log! (Bag.type.= Type)
 
 
+
+
+∙ triple
+	(Bag 1 2 3).map |x
+		x.+ (x.+ x)
+
+Console.log! triple
 
 
 

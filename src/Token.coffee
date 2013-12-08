@@ -13,6 +13,7 @@ class Name extends Token
 	constructor: (@pos, @text, @type) ->
 		check (Name.types.contains @type), =>
 			"Type #{@type} not in #{Name.types}"
+
 	show: ->
 		"<#{@type} #{@text}>"
 

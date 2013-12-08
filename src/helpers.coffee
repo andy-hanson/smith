@@ -20,7 +20,7 @@ Number.prototype.repeat = (x) ->
 Array.prototype.pushAll = (arr) ->
 	@push.apply(@, arr)
 
-Array.prototype.isEmpty = ->
+Array.prototype.isEmpty = String.prototype.isEmpty = ->
 	@length == 0
 
 Array.prototype.last = ->
@@ -46,8 +46,14 @@ Array.prototype.splitBy = (cond) ->
 
 		out
 
+Array.prototype.contains = (obj) ->
+	(@indexOf obj) != -1
+
 Array.prototype.unCons = ->
 	[ @[0], @tail() ]
+
+String.prototype.map =
+	Array.prototype.map
 
 String.prototype.contains = (substr) ->
 	(@indexOf substr) != -1
@@ -138,6 +144,8 @@ global.type = (obj, type) ->
 				type == String
 			when 'number'
 				type == Number
+			when 'boolean'
+				type == Boolean
 			when 'undefined'
 				throw new Error "Does not exist of type #{type.name}"
 			when 'object'
