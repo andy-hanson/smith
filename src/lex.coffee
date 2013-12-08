@@ -19,17 +19,15 @@ checkSpaces = (str) ->
 		if line.endsWith ' '
 			throw new Error "Line #{lineNumber + 1} ends with a space."
 
-escape =
-	't': '\t'
-	'n': '\n'
 
-###
-TODO: \
-###
 lexQuote = (quoteType, stream, oldIndent) ->
 	type quoteType, String
 	type stream, Stream
 	type oldIndent, Number
+
+	escape =
+		't': '\t'
+		'n': '\n'
 
 	read = ''
 	out = []
@@ -120,11 +118,7 @@ lexPlain = (stream, inQuote) ->
 		token =
 			if ch.match /[\(\[\{\)\]\}]/
 				stream.readChar()
-				#return new T.Group startPos, pos, open, ch, out
 				new GroupPre stream.pos, ch
-			#if ch.match /[\(\[\{]/
-			#	stream.readChar()
-			#	lexPlain stream, ch
 
 			else if ch.match digit
 				n = stream.takeMatching numChar
@@ -134,6 +128,11 @@ lexPlain = (stream, inQuote) ->
 				stream.readChar()
 				name = takeName()
 				new T.Name pos, name, '_x'
+
+			else if ch == ':'
+				stream.readChar()
+				name = takeName()
+				new T.Name pos, name, ':x'
 
 			else unless ch.match notNameChar
 				name = takeName()
@@ -355,34 +354,20 @@ joinFunctions = (tokens) ->
 		throw new Error "Unfinished function starts at #{bar}"
 ###
 
-###
-TODO:
-check all blank lines have no spaces
-###
-check_good = (str) ->
-	yes
-
-lex = (str) ->
+module.exports = (str) ->
 	type str, String
-
-	# final newline so indents will close
-	#a = lexPlain stream, 'file-start'
-	#b = remove_some_newlines a
-	#c = join_groups b
-	#d = join_functions c
-
 	checkSpaces str
-
 	str += '\n'
-	stream = new Stream str
-	plain = lexPlain stream
-	tokens = joinGroups plain
 
-	tokens.every (x) ->
+	stream =
+		new Stream str
+	plain =
+		lexPlain stream
+	tokens =
+		joinGroups plain
+
+	tokens.forEach (x) ->
 		check x instanceof T.Token, ->
 			"#{x} not a token"
 
 	tokens
-
-
-module.exports = lex

@@ -57,15 +57,16 @@ class DefLocal extends VoidExpression
 		"<. #{@local.text} {#{@value.toString()}}>"
 
 	compile: (fileName, indent) ->
-		indent += '\t'
+		newIndent = indent + '\t'
 		inner =
 			if @value instanceof Block
-				@value.toValue fileName, indent
+				@value.toValue fileName, newIndent
 			else
-				@value.toNode fileName, indent
+				@value.toNode fileName, newIndent
 
 		[ 'var ', (@local.toNode fileName, indent),
-			' =\n', indent, inner ]
+			' =\n', newIndent, inner,
+			';\n', indent, (@local.typeCheck fileName, indent) ]
 
 
 
@@ -203,8 +204,8 @@ class Literal extends Expression
 
 
 class Local extends Expression
-	constructor: (name) ->
-		type name, T.Name
+	constructor: (name, @tipe) ->
+		type name, T.Name if @tipe
 		{ @text, @pos } = name
 
 	toString: ->
@@ -213,19 +214,17 @@ class Local extends Expression
 	compile: ->
 		mangle @text
 
+	typeCheck: (fileName, indent) ->
+		f =
+			if @tipe?
+				[ (@tipe.toNode fileName, indent), '.check(' ]
+			else
+				'_c('
 
-###
-class Me extends Expression
-	constructor: (@pos) ->
-		type @pos, Pos
+		name =
+			new Literal new T.StringLiteral @pos, @text
 
-	toString: ->
-		'ME'
-
-	compile: ->
-		[ 'this' ]
-###
-
+		[ f, name.compile(), ', ', @compile(), ')' ]
 
 class Quote extends Expression
 	constructor: (@pos, @parts) ->
@@ -305,7 +304,7 @@ module.exports =
 	BoundFunc: BoundFunc
 	Literal: Literal
 	Local: Local
-	me: me#Me: Me
+	me: me
 	Quote: Quote
 	Use: Use
 	Void: Void

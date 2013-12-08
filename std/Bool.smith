@@ -1,4 +1,5 @@
 use ./Type
+use ./Fun
 
 ∙ B
 	`global.Boolean`.toType
@@ -30,6 +31,9 @@ B.do
 
 	‣ 'nor |a #:Bool
 		`!(this || a)`
+
+	‣ 'if |then:Fun
+		`this ? null : then()`
 
 	#alias '? 'if-then-else
 	#alias '∨ 'or

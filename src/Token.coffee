@@ -8,7 +8,7 @@ class Token
 		@toString()
 
 class Name extends Token
-	@types = ['x', '_x', 'x_', '.x', '.x_']
+	@types = ['x', '_x', 'x_', '.x', '.x_', ':x']
 
 	constructor: (@pos, @text, @type) ->
 		check (Name.types.contains @type), =>
@@ -120,5 +120,7 @@ module.exports =
 		token instanceof Name and ['.x', '.x_'].contains token.type
 	normalName: (token) ->
 		token instanceof Name and token.type == 'x'
+	typeName: (token) ->
+		token instanceof Name and token.type == ':x'
 	curlied: (token) ->
 		token instanceof Group and token.type == '{'

@@ -43,6 +43,7 @@ compile = (string, inName, outName) ->
 			var _f = _prelude.fun;
 			var _b = _prelude.bind;
 			var _s = _prelude.string;
+			var _c = _prelude.checkExists;
 			var Globe = global;
 
 			module.exports = _prelude.type('#{typeName}', function() {

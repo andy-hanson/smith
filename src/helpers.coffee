@@ -27,8 +27,9 @@ Array.prototype.last = ->
 	@[@length - 1]
 
 Array.prototype.allButAndLast = ->
-	l = @length - 1
-	[ @slice(0, l), @[l] ]
+	nextToLast =
+		@length - 1
+	[ @slice(0, nextToLast), @[nextToLast] ]
 
 Array.prototype.splitBy = (cond) ->
 	if @isEmpty()

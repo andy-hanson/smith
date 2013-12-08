@@ -18,6 +18,8 @@ O.do
 	‣ 'set-property |name value
 		`this[name] = value`
 
+	‣ 'is-a |type:Type
+		type.subsumes? me
 
 	‣ 'identical? |other
 		`this === other`

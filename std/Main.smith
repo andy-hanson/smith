@@ -8,19 +8,18 @@ use ./Bag
 
 #use ./Foo
 
-#Console.log! (Bag.type.= Type)
+#Console.log! Number.id
+#Console.log! `Number.proto()['__is-a-id-17']`
 
+#Console.log! `3['__is-a-id-17']`
+#Console.log! (Number.subsumes? 3)
+#Console.log! (3.is-a Number)
+#Number.check 3
 
+Number.check 'four 3
 
-
-∙ triple
-	(Bag 1 2 3).map |x
-		x.+ (x.+ x)
-
-Console.log! triple
-
-
-
+∙ three :String
+	3
 
 #Console.log! "runs"
 
