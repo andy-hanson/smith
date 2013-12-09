@@ -51,7 +51,7 @@ class DefLocal extends VoidExpression
 	constructor: (@local, @value) ->
 		type @local, Local
 		type @value, Expression
-		@pos = @local.pos
+		{ @pos } = @local
 
 	toString: ->
 		"<. #{@local.text} {#{@value.toString()}}>"
@@ -125,14 +125,9 @@ class Block extends Expression
 
 		@nodeWrap x
 
-me = (pos) ->
-	new Literal new T.JavascriptLiteral pos, 'this'
-
-
 class Call extends Expression
 	constructor: (@subject, @verb, @args) ->
-		unless @subject == 'me'
-			type @subject, Expression
+		type @subject, Expression
 		type @verb, T.Name
 		check @verb.kind == '.x'
 		type @args, Array
@@ -146,10 +141,7 @@ class Call extends Expression
 
 	compile: (fileName, indent) ->
 		subject =
-			if @subject == 'me'
-				'this'
-			else
-				@subject.toNode fileName, indent
+			@subject.toNode fileName, indent
 		nodes =
 			@args.map (x) -> x.toNode fileName, indent
 		args =
@@ -158,13 +150,27 @@ class Call extends Expression
 		[ subject, "['", @verb.text, "'](", args, ')' ]
 
 	@me = (verb, args) ->
-		verb = new T.Name verb.pos, verb.text, '.x'
-		new Call 'me', verb, args
+		type verb, T.Name
+		verb =
+			new T.Name verb.pos, verb.text, '.x'
+		new Call (new Me verb.pos), verb, args
 
 	@of = (expr, args) ->
 		type expr, Expression
 		verb = new T.Name expr.pos, 'of', '.x'
 		new Call expr, verb, args
+
+class Property extends Expression
+	constructor: (@subject, @prop) ->
+		type @subject, Expression
+		type @prop, T.Name
+		{ @pos } = @prop
+
+	toString: ->
+		"#{@subject},#{@prop.text}"
+
+	compile: (fileName, indent) ->
+		[ (@subject.toNode fileName, indent), '.', @prop.text ]
 
 
 class FunDef extends Expression
@@ -204,7 +210,7 @@ _func
 ###
 class ItFunDef extends Expression
 	constructor: (@name) ->
-		@pos = @name.pos
+		{ @pos } = @name
 
 	compile: (fileName, indent) ->
 		[ "(function(it) { return _c(it, '", @name.text,
@@ -216,19 +222,19 @@ func_
 ###
 class BoundFun extends Expression
 	constructor: (@subject, @name) ->
-		@pos = @name.pos
+		{ @pos } = @name
 
 	compile: (fileName, indent) ->
 		[ '_b(', (@subject.toNode fileName, indent), ", '", @name.text, "')" ]
 
 	@me = (name) ->
-		new BoundFun (me name.pos), name
+		new BoundFun (new Me name.pos), name
 
 
 class Literal extends Expression
 	constructor: (@literal) ->
 		type @literal, T.Literal
-		@pos = @literal.pos
+		{ @pos } = @literal
 
 	toString: ->
 		"<#{@literal}>"
@@ -271,6 +277,17 @@ class Local extends Expression
 		else
 			''
 
+class Me extends Expression
+	constructor: (@pos) ->
+		type @pos, Pos
+
+	toString: ->
+		'me'
+
+	compile: ->
+		'this'
+
+
 class Quote extends Expression
 	constructor: (@pos, @parts) ->
 		type @pos, Pos
@@ -292,7 +309,7 @@ class Use extends VoidExpression
 		type use, T.Use
 		localName = (use.used.split '/').last()
 		@fullName = use.used
-		@pos = use.pos
+		{ @pos } = use
 		@local = new Local new T.Name @pos, localName, 'x'
 
 	toString: ->
@@ -317,7 +334,7 @@ class Void extends VoidExpression
 
 class Parend extends Expression
 	constructor: (@content) ->
-		@pos = @content.pos
+		{ @pos } = @content
 
 	toString: ->
 		'(' + @content + ')'
@@ -349,7 +366,8 @@ module.exports =
 	BoundFun: BoundFun
 	Literal: Literal
 	Local: Local
-	me: me
+	Me: Me
+	Property: Property
 	Quote: Quote
 	Use: Use
 	Void: Void

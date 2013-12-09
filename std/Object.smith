@@ -30,9 +30,6 @@ O.do
 	‣ '≠ |other
 		(= other).¬
 
-	‣ 'me
-		`this`
-
 	‣ 'send |name
 		`this[name](Array.prototype.slice.call(arguments, 1))`
 

@@ -6,7 +6,8 @@ Left to lex:
 1.23
 ###
 
-keywords = ['use', 'arguments']
+keywords =
+	[ 'use', 'arguments', 'me', '∙' ]
 
 class GroupPre extends T.Token
 	constructor: (@pos, @char) ->
@@ -92,13 +93,10 @@ lexPlain = (stream, inQuote) ->
 			# No \n precedes '|' or '.x'
 			out.pop()
 
-
-
-
 	#nameChar = /[a-zA-Z!$%^&*\-+=<>?\/0-9‣]/
 	# not space, not bracket, not punc, not quote,
-	# not comment, not bar, not JS literal, not @, not ∙, not :
-	nameChar = /[^\s\(\[\{\)\]\}\.;,'"#\|`@∙\:]/
+	# not comment, not bar, not JS literal, not @, not :
+	nameChar = /[^\s\(\[\{\)\]\}\.;,'"#\|`@\:]/
 	digit = /[0-9]/
 	numChar = /[0-9]/
 
@@ -162,6 +160,12 @@ lexPlain = (stream, inQuote) ->
 				else
 					new T.Name pos, name, '.x'
 
+			else if ch == ','
+				stream.readChar()
+				name = takeName()
+				removePrecedingNL()
+				new T.Name pos, name, ',x'
+
 			else if ch == "'"
 				stream.readChar()
 				name = takeName()
@@ -171,10 +175,6 @@ lexPlain = (stream, inQuote) ->
 				stream.readChar()
 				removePrecedingNL()
 				new GroupPre pos, ch
-
-			else if ch == '∙'
-				stream.readChar()
-				new T.Special pos, ch
 
 			else if ch == '`'
 				stream.readChar()

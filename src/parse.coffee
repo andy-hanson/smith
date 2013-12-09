@@ -58,7 +58,7 @@ class Parser
 
 
 		b = @block tokens
-		b.subs.unshift new E.DefLocal typeLocal, E.me @pos
+		b.subs.unshift new E.DefLocal typeLocal, new E.Me @pos
 		b
 
 	block: (tokens) ->
@@ -94,17 +94,19 @@ class Parser
 				x =
 					if T.dotLikeName tok0
 						tokens = tokens.tail()
-						switch tok0.kind
-							when '.x'
-								pop = slurped.pop()
-								if pop?
+						pop = slurped.pop()
+						if pop?
+							switch tok0.kind
+								when '.x'
 									new E.Call pop, tok0, []
+								when ',x'
+									new E.Property pop, tok0
+								when '.x_'
+									new E.BoundFunc slurped.pop(), tok0
 								else
-									fail "Unexpected #{tok0}"
-							when '.x_'
-								new E.BoundFunc slurped.pop(), tok0
-							else
-								fail()
+									fail()
+						else
+							fail "Unexpected #{tok0}"
 					else
 						tokens = tokens.tail()
 						z = @soloExpression tok0
@@ -161,8 +163,8 @@ class Parser
 				switch t.kind
 					when '|'
 						@funcAndRest tail
-					#when 'me'
-					#	new E.Me t.pos
+					when 'me'
+						new E.Me t.pos
 					when 'arguments'
 						new E.Arguments t.pos
 					else
