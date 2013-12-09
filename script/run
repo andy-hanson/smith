@@ -1,13 +1,9 @@
 #!/usr/bin/bash
 
-script/compile
+script/compile_smith
 
 if [[ $? -eq 0  ]]
 then
-	script/compile_smith
-
-	if [[ $? -eq 0 ]]
-	then
-		script/run_smith
-	fi
+	script/run_smith
 fi
+

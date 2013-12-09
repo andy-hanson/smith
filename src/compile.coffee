@@ -38,8 +38,6 @@ compile = (string, inName, outName) ->
 			"use strict";
 
 			var _prelude = require('smith-prelude');
-			var _o = _prelude.callPrivate;
-			var _p = _prelude.callPublic;
 			var _f = _prelude.fun;
 			var _b = _prelude.bind;
 			var _s = _prelude.string;

@@ -1,7 +1,7 @@
 use ./Type
 
 ∙ O
-	`global.Object`.toType
+	`global.Object`.to-type
 
 O.‣ 'do |fun
 	fun.unbound.call `this`

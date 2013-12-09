@@ -86,9 +86,11 @@ class Block extends Expression
 			@subs[0].toNode fileName, indent
 		else
 			newIndent = indent + '\t'
-			x = [ '(function() {\n',
-				@compile(fileName, newIndent),
-				'\n', indent, '})()' ]
+			x =
+				[ '_f(this, function() {\n',
+					(@toNode fileName, newIndent),
+					'\n', indent,
+					'})()' ]
 			@nodeWrap x
 
 	compile: (fileName, indent) ->
@@ -105,15 +107,34 @@ class Block extends Expression
 
 		[indent].concat compiled.interleave (';\n' + indent)
 
+
+	toMakeRes: (fileName, indent) ->
+		[ allButLast, last ] =
+			@subs.allButAndLast()
+
+		compiled =
+			allButLast.map (sub) -> sub.toNode fileName, indent
+
+		lastCompiled =
+			[ 'var res = \n', indent + '\t', (last.toNode fileName, indent), ';' ]
+
+		compiled.push lastCompiled
+
+		x =
+			[indent].concat compiled.interleave ";\n#{indent}"
+
+		@nodeWrap x
+
 me = (pos) ->
 	new Literal new T.JavascriptLiteral pos, 'this'
+
 
 class Call extends Expression
 	constructor: (@subject, @verb, @args) ->
 		unless @subject == 'me'
 			type @subject, Expression
 		type @verb, T.Name
-		check @verb.type == '.x'
+		check @verb.kind == '.x'
 		type @args, Array
 
 		@args.forEach (arg) ->
@@ -146,9 +167,10 @@ class Call extends Expression
 		new Call expr, verb, args
 
 
-class FuncDef extends Expression
-	constructor: (@pos, @args, @body) ->
+class FunDef extends Expression
+	constructor: (@pos, @tipe, @args, @body) ->
 		type @pos, Pos
+		type @tipe, Expression if @tipe?
 		type @args, Array
 		type @body, Block
 
@@ -158,16 +180,29 @@ class FuncDef extends Expression
 	compile: (fileName, indent) ->
 		newIndent = indent + '\t'
 
-		args =
+		argNames =
 			(@args.map (arg) -> arg.toNode fileName, newIndent).interleave ', '
+		argChecks =
+			(@args.map (arg) -> arg.typeCheck fileName, newIndent).interleave ";\n#{newIndent}"
 		body =
-			@body.toNode fileName, newIndent
-		[ '_f(this, function(', args, ') {\n', body, '\n', indent, '})' ]
+			@body.toMakeRes fileName, newIndent
+		typeCheck =
+			(new Local (new T.Name @pos, 'res', 'x'), @tipe).typeCheck fileName, indent
+
+		[ '_f(this, function(', argNames, ') {',
+			'\n', newIndent,
+			argChecks, ';\n',
+			body,
+			'\n', newIndent,
+			typeCheck,
+			';\n', newIndent,
+			'return res;\n',
+			indent, '})' ]
 
 ###
 _func
 ###
-class ItFuncDef extends Expression
+class ItFunDef extends Expression
 	constructor: (@name) ->
 		@pos = @name.pos
 
@@ -179,7 +214,7 @@ class ItFuncDef extends Expression
 func_
 .func_
 ###
-class BoundFunc extends Expression
+class BoundFun extends Expression
 	constructor: (@subject, @name) ->
 		@pos = @name.pos
 
@@ -187,7 +222,7 @@ class BoundFunc extends Expression
 		[ '_b(', (@subject.toNode fileName, indent), ", '", @name.text, "')" ]
 
 	@me = (name) ->
-		new BoundFunc (me name.pos), name
+		new BoundFun (me name.pos), name
 
 
 class Literal extends Expression
@@ -205,7 +240,8 @@ class Literal extends Expression
 
 class Local extends Expression
 	constructor: (name, @tipe) ->
-		type name, T.Name if @tipe
+		type name, T.Name
+		type @tipe, Expression if @tipe?
 		{ @text, @pos } = name
 
 	toString: ->
@@ -215,6 +251,7 @@ class Local extends Expression
 		mangle @text
 
 	typeCheck: (fileName, indent) ->
+		###
 		f =
 			if @tipe?
 				[ (@tipe.toNode fileName, indent), '.check(' ]
@@ -225,6 +262,14 @@ class Local extends Expression
 			new Literal new T.StringLiteral @pos, @text
 
 		[ f, name.compile(), ', ', @compile(), ')' ]
+		###
+		if @tipe?
+			name =
+				new Literal new T.StringLiteral @pos, @text
+			[ (@tipe.toNode fileName, indent), '.check(',
+				(name.toNode fileName, indent), ', ', @compile(), ')' ]
+		else
+			''
 
 class Quote extends Expression
 	constructor: (@pos, @parts) ->
@@ -299,9 +344,9 @@ module.exports =
 	Call: Call
 	DefLocal: DefLocal
 	Expression: Expression
-	FuncDef: FuncDef
-	ItFuncDef: ItFuncDef
-	BoundFunc: BoundFunc
+	FunDef: FunDef
+	ItFunDef: ItFunDef
+	BoundFun: BoundFun
 	Literal: Literal
 	Local: Local
 	me: me

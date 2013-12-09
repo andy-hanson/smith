@@ -10,7 +10,8 @@ keywords = ['use', 'arguments']
 
 class GroupPre extends T.Token
 	constructor: (@pos, @char) ->
-	show: -> @char
+	show: ->
+		@char
 
 checkSpaces = (str) ->
 	for line, lineNumber in str.split '\n'
@@ -95,15 +96,17 @@ lexPlain = (stream, inQuote) ->
 
 
 	#nameChar = /[a-zA-Z!$%^&*\-+=<>?\/0-9‣]/
-	# not space, not bracket, not punc, not quote, not comment, not bar, not JS literal, not @, not ∙
-	notNameChar = /[\s\(\[\{\)\]\}\.;,'"#\|`@∙]/
+	# not space, not bracket, not punc, not quote,
+	# not comment, not bar, not JS literal, not @, not ∙, not :
+	nameChar = /[^\s\(\[\{\)\]\}\.;,'"#\|`@∙\:]/
 	digit = /[0-9]/
 	numChar = /[0-9]/
+
 
 	indent = 0
 
 	takeName = ->
-		name = stream.takeNotMatching notNameChar
+		name = stream.takeMatching nameChar
 		if name.isEmpty()
 			throw new Error "Expected name at #{pos}, got nothing"
 		name
@@ -134,7 +137,7 @@ lexPlain = (stream, inQuote) ->
 				name = takeName()
 				new T.Name pos, name, ':x'
 
-			else unless ch.match notNameChar
+			else if ch.match nameChar
 				name = takeName()
 				if stream.peek() == '_'
 					stream.readChar()

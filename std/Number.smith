@@ -5,7 +5,7 @@ use ./Fun
 use ./Option
 
 ∙ N
-	Type 'Number `global.Number.prototype`
+	`global.Number`.to-type
 
 ∙ Math
 	`global.Math`

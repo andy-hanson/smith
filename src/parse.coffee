@@ -85,7 +85,7 @@ class Parser
 
 		if tok0 instanceof T.Use
 			@use tokens
-		else if tok0 instanceof T.Special and tok0.type == '∙'
+		else if tok0 instanceof T.Special and tok0.kind == '∙'
 			@defLocal tokens.tail()
 		else
 			slurped = []
@@ -94,20 +94,20 @@ class Parser
 				x =
 					if T.dotLikeName tok0
 						tokens = tokens.tail()
-						switch tok0.type
+						switch tok0.kind
 							when '.x'
 								pop = slurped.pop()
 								if pop?
 									new E.Call pop, tok0, []
 								else
-									throw new Error "Unexpected #{tok0}"
+									fail "Unexpected #{tok0}"
 							when '.x_'
 								new E.BoundFunc slurped.pop(), tok0
 							else
 								fail()
 					else
 						tokens = tokens.tail()
-						@soloExpression tok0
+						z = @soloExpression tok0
 
 				type x, E.Expression
 				slurped.push x
@@ -133,17 +133,17 @@ class Parser
 
 		switch t.constructor
 			when T.Name
-				switch t.type
+				switch t.kind
 					when 'x'
 						@get t
 					when '_x'
-						new E.ItFuncDef t
+						new E.ItFunDef t
 					when 'x_'
-						new E.BoundFunc.me t
+						new E.BoundFun.me t
 					else
 						unexpected t
 			when T.Group
-				switch t.type
+				switch t.kind
 					when '|'
 						@func t.body
 					when '('
@@ -155,8 +155,10 @@ class Parser
 					when '"'
 						new E.Quote t.pos, t.body.map (part) =>
 							@soloExpression part
+					else
+						unexpected t
 			when T.Special
-				switch t.type
+				switch t.kind
 					when '|'
 						@funcAndRest tail
 					#when 'me'
@@ -183,8 +185,7 @@ class Parser
 	curlied: (curlied) ->
 		body =
 			@block curlied.body
-		new E.FuncDef @pos, [], body
-
+		new E.FunDef @pos, null, [], body
 
 	func: (tokens) ->
 		[ before, last ] =
@@ -192,13 +193,18 @@ class Parser
 
 		check T.curlied last
 
+		[ returnType, argsTokens ] =
+			if T.typeName before[0]
+				[ (@get before[0]), before.tail() ]
+			else
+				[ null, before ]
 		args =
-			@takeNewLocals before
+			@takeNewLocals argsTokens
 		body =
 			@locals.withLocals args, =>
 				@block last.body
 
-		new E.FuncDef @pos, args, body
+		new E.FunDef @pos, returnType, args, body
 
 	takeNewLocals: (tokens) ->
 		out = []
@@ -253,7 +259,7 @@ class Parser
 		type value, T.Group
 
 		val =
-			switch value.type
+			switch value.kind
 				when '|'
 					# A local fun, eg . fun |arg
 					@func value.body

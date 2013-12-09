@@ -1,5 +1,3 @@
-smith
--------------
-
-It's the best, maximally!
-
+This here is my language.
+Is it not nifty?
+Worship the language.

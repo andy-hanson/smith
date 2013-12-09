@@ -16,12 +16,34 @@ use ./Bag
 #Console.log! (3.is-a Number)
 #Number.check 3
 
-Number.check 'four 3
+∙ a
+	∙ b
+		3
+	b
 
-∙ three :String
-	3
 
-#Console.log! "runs"
+∙ sum |:Number x:Number y:Number
+	#{
+	doc
+		the sum
+	in
+		Console.log! 'in
+	out
+		Console.log! 'out
+	eg
+		Console.log! 'eg
+	how
+		does its stuff
+	}#
+
+	Console.log! "Summing {x} and {y}"
+	x.+ y
+
+
+∙ three :Number
+	sum 1 2
+
+Console.log! three
 
 #{
 

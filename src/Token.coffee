@@ -8,11 +8,14 @@ class Token
 		@toString()
 
 class Name extends Token
-	@types = ['x', '_x', 'x_', '.x', '.x_', ':x']
+	@kinds = ['x', '_x', 'x_', '.x', '.x_', ':x']
 
-	constructor: (@pos, @text, @type) ->
-		check (Name.types.contains @type), =>
-			"Type #{@type} not in #{Name.types}"
+	constructor: (@pos, @text, @kind) ->
+		type @pos, Pos
+		type @text, String
+
+		check (Name.kinds.contains @kind), =>
+			"Name kind #{@kind} not in #{Name.kinds}"
 
 	show: ->
 		"<#{@type} #{@text}>"
@@ -32,7 +35,7 @@ class Group extends Token
 		if close != expectedClose
 			throw new Error "#{open}@#{openPos} no match #{close}@#{closePos}"
 
-		@type =
+		@kind =
 			if open == '->'
 				'{'
 			else
@@ -40,7 +43,7 @@ class Group extends Token
 		@pos = openPos
 
 	show: ->
-		"#{@type}#{@body}#{Group.match[@type]}"
+		"#{@kind}#{@body}#{Group.match[@type]}"
 
 	@match =
 		'(': ')'
@@ -84,14 +87,16 @@ class StringLiteral extends Literal
 		"'#{@text.escapeToJS()}'"
 
 class Special extends Token
-	constructor: (@pos, @type) ->
+	constructor: (@pos, @kind) ->
+		type @pos, Pos
+		type @kind, String
 
 	show: ->
 		x =
-			if @type == '\n'
+			if @kind == '\n'
 				'\\n'
 			else
-				@type
+				@kind
 		"!#{x}!"
 
 class Use extends Token
@@ -113,14 +118,14 @@ module.exports =
 	Special: Special
 	Use: Use
 	nl: (token) ->
-		token instanceof Special and token.type == '\n'
+		token instanceof Special and token.kind == '\n'
 	bar: (token) ->
-		token instanceof Special and token.type == '|'
+		token instanceof Special and token.kind == '|'
 	dotLikeName: (token) ->
-		token instanceof Name and ['.x', '.x_'].contains token.type
+		token instanceof Name and ['.x', '.x_'].contains token.kind
 	normalName: (token) ->
-		token instanceof Name and token.type == 'x'
+		token instanceof Name and token.kind == 'x'
 	typeName: (token) ->
-		token instanceof Name and token.type == ':x'
+		token instanceof Name and token.kind == ':x'
 	curlied: (token) ->
-		token instanceof Group and token.type == '{'
+		token instanceof Group and token.kind == '{'

@@ -3,7 +3,7 @@ use ./Object
 use ./Bool
 
 ∙ F
-	`global.Function`.toType
+	`global.Function`.to-type
 
 F.do
 	‣‣ 'from-JS #|:F

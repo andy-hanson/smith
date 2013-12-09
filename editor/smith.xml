@@ -90,7 +90,7 @@ Use replace all when updating this!
 				<RegExpr attribute="Escaped Char" context="#stay" String="\\."/>
 				<HlCStringChar attribute="String Char" context="#stay"/>
 				<DetectChar attribute="String" context="#pop" char="&quot;"/>
-				<RegExpr attribute="Interpolated" context="#stay" String="\{.*\}"/>
+				<RegExpr attribute="Interpolated" context="#stay" String="\{[^\}]*\}"/>
 			</context>
 		</contexts>
 

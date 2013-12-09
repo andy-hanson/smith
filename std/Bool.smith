@@ -2,7 +2,7 @@ use ./Type
 use ./Fun
 
 ∙ B
-	`global.Boolean`.toType
+	`global.Boolean`.to-type
 
 B.do
 	‣‣ 'Yes
