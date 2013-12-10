@@ -7,30 +7,30 @@ O.‣ 'do |fun
 	fun.unbound.call `this`
 
 O.do
-	‣ 'toString
+	‣ toString
 		"<A {type.name}>"
 
 	#alias 'toString 'inspect
 
-	‣ 'property |name
+	‣ property name
 		`this[name]`
 
-	‣ 'set-property |name value
+	‣ set-property name value
 		`this[name] = value`
 
-	‣ 'is-a |type:Type
+	‣ is-a type:Type
 		type.subsumes? me
 
-	‣ 'identical? |other
-		`this === other`
+	‣ identical? a
+		`this === a`
 
-	‣ '= |other
-		identical? other
+	‣ = a
+		identical? a
 
-	‣ '≠ |other
-		(= other).¬
+	‣ ≠ a
+		(= a).¬
 
-	‣ 'send |name
+	‣ send name:String
 		`this[name](Array.prototype.slice.call(arguments, 1))`
 
 export O

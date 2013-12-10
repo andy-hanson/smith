@@ -1,11 +1,11 @@
-‣ '‣‣ |name method
+‣ ‣‣ name#{:String}# method#:Fun
 	`this[name] = method`
 
-‣ 'val |name make-val
+‣ val name#{:String}# make-val#:Fun
 	∙ val
-		make-val ()
-	‣‣ name
+		make-val.of
+	me.‣‣ name
 		val
 
-‣ 'construct |name
+‣ construct name#:String
 	`this._prop_name = name`

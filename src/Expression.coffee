@@ -149,11 +149,13 @@ class Call extends Expression
 
 		[ subject, "['", @verb.text, "'](", args, ')' ]
 
-	@me = (verb, args) ->
-		type verb, T.Name
+	@me = (pos, verb, args) ->
+		type pos, Pos
+		type verb, String
+		type args, Array
 		verb =
-			new T.Name verb.pos, verb.text, '.x'
-		new Call (new Me verb.pos), verb, args
+			new T.Name pos, verb, '.x'
+		new Call (new Me pos), verb, args
 
 	@of = (expr, args) ->
 		type expr, Expression
@@ -172,13 +174,33 @@ class Property extends Expression
 	compile: (fileName, indent) ->
 		[ (@subject.toNode fileName, indent), '.', @prop.text ]
 
+class Meta extends Expression
+	constructor: (@pos) ->
+		type @pos, Pos
+
+	compile: (fileName, indent) ->
+		parts = []
+
+		[ 'doc', 'in', 'out', 'eg', 'how' ].forEach (name) =>
+			ex = @[name]
+			if ex?
+				val =
+					switch name
+						when 'doc', 'how'
+							ex.toNode fileName, indent
+						else
+							fail
+				parts.push [ '_', name, ': ', val ]
+
+		[ '{', (parts.interleave ', '), '}' ]
 
 class FunDef extends Expression
-	constructor: (@pos, @tipe, @args, @body) ->
+	constructor: (@pos, @meta, @tipe, @args, @body) ->
 		type @pos, Pos
+		type @meta, Meta if @meta?
 		type @tipe, Expression if @tipe?
 		type @args, Array
-		type @body, Block
+		type @body, Block if @body?
 
 	toString: ->
 		"{#{@args} ->\n #{@body.toString().indent()}}"
@@ -191,9 +213,14 @@ class FunDef extends Expression
 		argChecks =
 			(@args.map (arg) -> arg.typeCheck fileName, newIndent).interleave ";\n#{newIndent}"
 		body =
-			@body.toMakeRes fileName, newIndent
+			if @body?
+				@body.toMakeRes fileName, newIndent
+			else
+				"var res = null;"
 		typeCheck =
 			(new Local (new T.Name @pos, 'res', 'x'), @tipe).typeCheck fileName, indent
+		meta =
+			@meta.toNode fileName, indent
 
 		[ '_f(this, function(', argNames, ') {',
 			'\n', newIndent,
@@ -203,7 +230,8 @@ class FunDef extends Expression
 			typeCheck,
 			';\n', newIndent,
 			'return res;\n',
-			indent, '})' ]
+			indent, '}, ',
+			meta, ')' ]
 
 ###
 _func
@@ -367,6 +395,7 @@ module.exports =
 	Literal: Literal
 	Local: Local
 	Me: Me
+	Meta: Meta
 	Property: Property
 	Quote: Quote
 	Use: Use

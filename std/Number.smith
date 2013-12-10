@@ -12,185 +12,182 @@ use ./Option
 
 N.do
 	(Bag 'round 'abs 'acos 'asin 'atan 'cos 'sin 'tan).each |name
-		‣ name (Fun.from-JS "return Math.{name}(this)")
+		me.‣ name (Fun.from-JS "return Math.{name}(this)")
 
-	‣ '< |a
+	‣ < a:N
 		`this < a`
 
-	‣ '> |a
+	‣ > a:N
 		`this > a`
 
-	‣ '≤ |a
+	‣ ≤ a:N
 		`this <= a`
 
-	‣ '≥
+	‣ ≥:N
 		`this >= a`
 
-	‣ '+ |a
+	‣ + a:N
 		`this + a`
 
-	‣ '- |a
+	‣ - a:N
 		`this - a`
 
-	‣ '× |a
+	‣ × a:N
 		`this * a`
 
-	‣ '÷ |a
-		`this / a`
+	‣ ÷ divisor:N
+		`this / divisor`
 
-	‣ '// |divisor
+	‣ // divisor:N
 		(÷ divisor).floor
 
-	‣ 'negate
+	‣ negate
 		`this`
 
 	# TODO: ≈
 
-	‣ '= |a
-		`
-		(typeof a === 'number') ?
-			this == a
-		:
-			this === a
-		`
+	‣ = a
+		`(this + 0) === (a + 0)`
 
-	‣ 'positive?
+	‣ positive?
 		> 0
-	‣ 'negative?
+	‣ negative?
 		< 0
-	‣ 'zero?
+	‣ zero?
 		= 0
 
-	‣ 'round-down
+	‣ round-down
 		Math.floor me
 
-	‣ 'round-up
+	‣ round-up
 		Math.ceil me
 
-	‣ 'difference |num
-		(- num).abs
+	‣ difference a:N
+		(- a).abs
 
-	‣ 'remainder |divisor
+	‣ remainder divisor:N
 		`me % divisor`
 
-	‣ 'divisible? |divisor
+	‣ divisible? divisor:N
 		(remainder divisor).zero?
 
-	‣ 'dec
+	‣ dec
 		- 1
 
-	‣ 'inc
+	‣ inc
 		+ 1
 
-	‣ '^ |power
+	‣ ^ power:N
 		Math.pow me power
 
-	‣ 'log-e
+	‣ log-e
 		Math.log me
 
-	‣ 'log |base
+	‣ log base:N
 		log-e.÷ base.log-e
 
-	‣ 'log-10
+	‣ log-10
 		log-base 10
 
-	‣ 'log-2
+	‣ log-2
 		log-base 2
 
-	‣ 'inverse
+	‣ inverse
 		1.÷ me
 
-	‣ 'half
+	‣ half
 		÷ 2
 
-	‣ 'twice
+	‣ twice
 		× 2
 
-	‣ 'square
+	‣ square
 		× me
 
-	‣ 'cube
+	‣ cube
 		× square
 
-	‣ 'square-root
+	‣ square-root
 		`Math.sqrt(this)`
 
-	‣ 'cube-root
+	‣ cube-root
 		`Math.pow(this, 1/3)`
 
-	‣ 'nth-root |n
+	‣ nth-root n:N
 		^ (n.inverse)
 
-	‣ 'int?
+	‣ int?
 		= round-down
 
-	‣ 'try-divide-evenly
+	‣ try-divide-evenly
 		(Option.Some (÷ divisor)).filter _int?
 
-	‣ 'factorial
+	‣ factorial
 		TODO
 		#(Range.int 1 inc).fold _×
 
-	‣ 'min |a
+	‣ min a:N
 		(< a).? { me } { a }
-	‣ 'max |a
+	‣ max a:N
 		(> a).? { me } { a }
 
-	‣ 'square-hypoteneuse |a
+	‣ square-hypoteneuse a:N
 		square.+ a.square
 
-	‣ 'hypoteneuse |a
+	‣ hypoteneuse a:N
 		(square-hypoteneuse a).square-root
 
-	‣ 'crop |min max
-		(min max).max min
+	‣ crop min:N max:N
+		#in
+		# min.< max
+		(me.min max).max min
 
-	‣ 'greatest-common-divisor |a
+	‣ greatest-common-divisor a:N
 		(= 0).?
 			a
 		|
 			greatest-common-divisor (a.remainder me)
 
-	‣ 'least-common-multiple |b
-		(× b).÷ (greatest-common-divisor b)
+	‣ least-common-multiple a:N
+		(× a).÷ (greatest-common-divisor a)
 
-	‣ 'binary-or |a
-		`this | a`
+	‣ binary-or n:N
+		`this | n`
 
-	‣ 'binary-and |a
-		`this & a`
+	‣ binary-and n:N
+		`this & n`
 
-	‣ 'binary-xor |a
-		`this ^ a`
+	‣ binary-xor n:N
+		`this ^ n`
 
-	‣ 'binary-not |a
+	‣ binary-not
 		`~this`
 
-	‣ 'binary-shift-left |n
+	‣ binary-shift-left n:N
 		`this << n`
 
-	‣ 'binary-shift-right-signed |n
+	‣ binary-shift-right-signed n:N
 		`this >> n`
 
-	‣ 'binary-shift-right-unsigned |n
+	‣ binary-shift-right-unsigned n:N
 		`this >>> n`
 
-	val 'Pi
+	‣val Pi
 		`Math.PI`
 
-	val 'Pi2
+	‣val Pi2
 		Pi.twice
 
-	val 'E
+	‣val E
 		`Math.E`
 
-	val 'Golden-Ratio
+	‣val Golden-Ratio
 		5.square-root.inc.half
 
-	val '∞
+	‣val ∞
 		`global.Infinity`
 
-	val '-∞
+	‣val -∞
 		∞.negate
 
 

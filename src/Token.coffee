@@ -8,7 +8,7 @@ class Token
 		@toString()
 
 class Name extends Token
-	@kinds = ['x', '_x', 'x_', '.x', '.x_', ',x', ':x']
+	@kinds = ['x', '_x', 'x_', '.x', '.x_', ',x', ':x', '‣x']
 
 	constructor: (@pos, @text, @kind) ->
 		type @pos, Pos
@@ -18,7 +18,7 @@ class Name extends Token
 			"Name kind #{@kind} not in #{Name.kinds}"
 
 	show: ->
-		"<#{@type} #{@text}>"
+		"<#{@kind} #{@text}>"
 
 
 class Group extends Token
@@ -43,7 +43,7 @@ class Group extends Token
 		@pos = openPos
 
 	show: ->
-		"#{@kind}#{@body}#{Group.match[@type]}"
+		"#{@kind}#{@body}#{Group.match[@kind]}"
 
 	@match =
 		'(': ')'
@@ -106,12 +106,35 @@ class Use extends Token
 	show: ->
 		"<use #{@used}>"
 
+class Meta extends Token
+
+class MetaText extends Meta
+	constructor: (@pos, @kind, @text) ->
+		type @pos, Pos
+		check ['doc', 'how'].contains @kind
+		type @text, Token
+
+	show: ->
+		"<MetaText #{@kind}>"
+
+class Def extends Token
+	constructor: (@pos, @name, @name2) ->
+		type @pos, Pos
+		type @name, String
+		type @name2, String
+		check @name.startsWith "‣"
+
+	show: ->
+		"<Def @def @name>"
 
 module.exports =
+	Def: Def
 	Token: Token
 	Name: Name
 	Group: Group
 	Literal: Literal
+	Meta: Meta
+	MetaText: MetaText
 	NumberLiteral: NumberLiteral
 	JavascriptLiteral: JavascriptLiteral
 	StringLiteral: StringLiteral

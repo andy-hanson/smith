@@ -1,6 +1,6 @@
 #Option.smith
 
-‣type 'Some
+‣type Some
 	#is Option
 
 	#TODO
@@ -8,7 +8,7 @@
 	#data |value
 	#	()
 
-	‣ 'construct |value
+	‣ construct value
 		`this.__value = value`
 
 

@@ -7,10 +7,10 @@ use ./Fun
 	`global.String`.to-type
 
 S.do
-	‣ '+ |x
-		`this + x`
+	‣ + a:String
+		`this + a`
 
-	‣‣ 'of |a
+	‣‣ of a
 		`
 		(function() {
 			switch (typeof a) {
@@ -36,10 +36,10 @@ S.do
 	alias 'toUpperCase 'to-upper-case
 	alias 'toLowerCase 'to-lower-case
 
-	‣ 'split-whitespace
+	‣ split-whitespace
 		`this.split("\\s+")`
 
-	‣ 'size
+	‣ size
 		`this.length`
 
 	#(Bag '<' '>' '<=' '>=').each |name

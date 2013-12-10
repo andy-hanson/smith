@@ -5,34 +5,34 @@ use ./Fun
 	`global.Boolean`.to-type
 
 B.do
-	‣‣ 'Yes
+	‣‣ Yes
 		`true`
 
-	‣‣ 'No
+	‣‣ No
 		`false`
 
-	‣ '? |then else #:Fun
+	‣ ? then:Fun else:Fun
 		`this.valueOf() ? then() : $else()`
 
-	‣ '∨ |a #:Fun
+	‣ ∨ a:Fun
 		`this || a()`
 
-	‣ '∧ |a #:Fun
+	‣ ∧ a:Fun
 		`this && a()`
 
-	‣ '¬
+	‣ ¬
 		`!this`
 
-	‣ '→  |a #:Fun
+	‣ → a:Fun
 		`!this || a()`
 
-	‣ '⊕ |a #:Bool
+	‣ ⊕ a:Bool
 		`this ? !a : a`
 
-	‣ 'nor |a #:Bool
+	‣ nor a:Bool
 		`!(this || a)`
 
-	‣ 'if |then:Fun
+	‣ if then:Fun
 		`this ? null : then()`
 
 	#alias '? 'if-then-else

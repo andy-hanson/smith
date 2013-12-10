@@ -1,31 +1,22 @@
 use ./Type
 #use ./Object
-use ./Number
 use ./Console
 use ./String
 use ./Bool
 use ./Bag
-
-#use ./Foo
-
-#Console.log! Number.id
-#Console.log! `Number.proto()['__is-a-id-17']`
-
-#Console.log! `3['__is-a-id-17']`
-#Console.log! (Number.subsumes? 3)
-#Console.log! (3.is-a Number)
-#Number.check 3
-
-∙ a
-	`{a:{b:{c:3}}}`
-
-Console.log! a,a,b,c
+use ./Fun
+use ./Number
 
 
-∙ sum |:Number x:Number y:Number
-	#{
+#‣
+∙ sum |x:Number y:Number
 	doc
 		the sum
+	#in
+	#	Console.log! x
+	how
+		magic!
+	#{
 	in
 		Console.log! 'in
 	out
@@ -40,78 +31,4 @@ Console.log! a,a,b,c
 	x.+ y
 
 
-∙ three :Number
-	sum 1 2
-
-Console.log! three
-
-#{
-
-'blah \b {} '
-' blah '
-
-Console.log! "
-	I am some text
-	in indented {1.+ 1} block
-	go me!
-
-
-#(1.+ 1)
-
-#Console.log! "1.+ 1 is {1.+ 1}"
-
-#{
-
-type+ 'Test'
-	. x |a b c
-		'd'
-
-	Console.log! x.argument-names
-
-
-
-
-
-#{
-2.do
-	is-a-id-7
-	#Console.log! `this.type().__proto === global.Number.prototype` true
-	#Console.log! `this.hasOwnProperty('is-a-id-7')` false
-	Console.log! `this.type().__proto['_is-a-id-7']`
-	Console.log! `global.Number.prototype['_is-a-id-7']`
-	Console.log! is-a-id-7
-
-
-	#is-a-id-7
-}#
-
-
-
-#Console.log! 2.is-a-id-7
-#Console.log! (2.send 'is-a-id-7')
-
-
-#Console.log! (Number.subsumes? 2)
-#Console.log! (Number.subsumes? String)
-
-#use ./Console
-#use ./Number
-#use ./Foo
-#use ./String
-#use ./Object
-
-#{
-Console.log! Console
-
-Console.log! (2.= 2)
-
-. foo
-	Foo ()
-. two
-	2
-
-#Console.log! 2.type
-#Console.log! `$o(two, 'method')('op')`
-
-Console.log! 3.square.square #2#two.identical? two
-
+Console.log! sum.meta

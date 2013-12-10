@@ -85,6 +85,8 @@ class Parser
 
 		if tok0 instanceof T.Use
 			@use tokens
+		else if tok0 instanceof T.Def
+			@def tok0, tokens
 		else if tok0 instanceof T.Special and tok0.kind == '∙'
 			@defLocal tokens.tail()
 		else
@@ -147,7 +149,7 @@ class Parser
 			when T.Group
 				switch t.kind
 					when '|'
-						@func t.body
+						@fun t.body
 					when '('
 						new E.Parend @expression t.body
 					when '['
@@ -155,14 +157,11 @@ class Parser
 					when '{'
 						@curlied t
 					when '"'
-						new E.Quote t.pos, t.body.map (part) =>
-							@soloExpression part
+						@quote t
 					else
 						unexpected t
 			when T.Special
 				switch t.kind
-					when '|'
-						@funcAndRest tail
 					when 'me'
 						new E.Me t.pos
 					when 'arguments'
@@ -175,25 +174,34 @@ class Parser
 				else
 					unexpected t
 
+	quote: (quote) ->
+		type quote, T.Group
+
+		new E.Quote quote.pos, quote.body.map (part) =>
+			@soloExpression part
+
 	get: (name) ->
+		type name, T.Name
+
 		if @locals.has name
 			new E.Local name
 		else
-			E.Call.me name, []
+			E.Call.me name.pos, name.text, []
 
 	###
 	TODO: 'it'
 	###
 	curlied: (curlied) ->
-		body =
-			@block curlied.body
-		new E.FunDef @pos, null, [], body
+		[ meta, body ] =
+			@funBody curlied.body
+		new E.FunDef @pos, meta, null, [], body
 
-	func: (tokens) ->
+	fun: (tokens) ->
 		[ before, last ] =
-			tokens.allButAndLast()
-
-		check T.curlied last
+			if T.curlied tokens.last()
+				tokens.allButAndLast()
+			else
+				[ tokens, null ]
 
 		[ returnType, argsTokens ] =
 			if T.typeName before[0]
@@ -202,11 +210,65 @@ class Parser
 				[ null, before ]
 		args =
 			@takeNewLocals argsTokens
-		body =
-			@locals.withLocals args, =>
-				@block last.body
+		[ meta, body ] =
+			if last?
+				@locals.withLocals args, =>
+					@funBody last.body
+			else
+				[ (new E.Meta @pos), null ]
 
-		new E.FunDef @pos, returnType, args, body
+		new E.FunDef @pos, meta, returnType, args, body
+
+	###
+	Returns: [Meta, Block]
+	###
+	funBody: (tokens) ->
+		[ metaToks, restToks ] =
+			tokens.takeWhile (x) ->
+				(T.nl x) or x instanceof T.Meta
+
+		meta =
+			new E.Meta @pos
+
+		metaToks.forEach (tok) =>
+			@meta meta, tok
+
+		body =
+			@block restToks
+
+		[ meta, body ]
+
+
+	def: (def, tokens) ->
+		type def, T.Def
+		type tokens, Array
+
+		if tokens.isEmpty()
+			fail "Expected something after #{def}"
+
+		check tokens[0] instanceof T.Def
+
+		fun =
+			@fun tokens.tail()
+		args =
+			[ (new E.Literal new T.StringLiteral @pos, def.name2), fun ]
+
+		E.Call.me @pos, def.name, args
+
+
+	meta: (meta, token) ->
+		return if T.nl token
+
+		type token, T.Meta
+
+		if token instanceof T.MetaText
+			meta[token.kind] =
+				@quote token.text
+		else
+			fail()
+
+
+
 
 	takeNewLocals: (tokens) ->
 		out = []
@@ -264,7 +326,7 @@ class Parser
 			switch value.kind
 				when '|'
 					# A local fun, eg . fun |arg
-					@func value.body
+					@fun value.body
 				when '{'
 					@block value.body
 				else

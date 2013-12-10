@@ -1,0 +1,14 @@
+use ./Type
+
+∙ M
+	`_prelude.Meta`.to-type
+
+M.do
+	‣read doc
+	‣read in
+	‣read out
+	‣read eg
+	‣read how
+
+export M
+

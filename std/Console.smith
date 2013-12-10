@@ -1,6 +1,6 @@
 use ./String
 
-‣‣ 'log!
+‣‣ log!
 	`global.console`.log `arguments[0]`
 	#`global.console`.log arguments.make-string
 

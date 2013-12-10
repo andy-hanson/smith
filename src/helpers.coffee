@@ -80,6 +80,14 @@ Array.prototype.indexOfWhere = (cond) ->
 		i += 1
 	return -1
 
+Array.prototype.takeWhile = (cond) ->
+	afterLastIndex =
+		@indexOfWhere (x) -> not cond(x)
+	if afterLastIndex == -1
+		[ @, [] ]
+	else
+		[ (@slice 0, afterLastIndex), (@slice afterLastIndex, @length) ]
+
 Array.prototype.contains = (em) ->
 	(@indexOf em) != -1
 

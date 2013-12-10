@@ -7,55 +7,50 @@ use ./Singleton
 
 ∙ defs |
 
-	‣ 'method |name
-		∙ p
-			proto
-		`p[name]`
+	‣ method name#:String
+		`this.proto()[name]`
+		#proto.property name
 
-	‣ 'alias |old-name new-name
+	‣ alias old-name new-name#:String
 		∙ old
 			old-name
-		‣ new-name
+		me.‣ new-name
 			`this[old].apply(this, arguments)`
 
-	‣ 'read |name
-		‣ name
-			`this['_prop_' + name]`
+	‣ ‣read name#:String
+		me.‣ name
+			`this['_' + name]`
 
-	read 'name
-	read 'super
-	read 'proto
-	read 'id
+	‣read name
+	‣read super
+	‣read proto
+	‣read id
 
-	‣ 'self
+	‣ self
 		`this`
 
-	‣ 'toString
+	‣ toString
 		"<Type {name}>"
 
+	‣ subsumes? a
+		`a['__is-a-id-' + this._id] == true`
 
-	‣ 'static |name value
-		`this[name] = value`
-
-	‣ 'subsumes? |a
-		`a['__is-a-id-' + this._prop_id] == true`
-
-	‣ 'sub-type-id? |typeid
+	‣ sub-type-id? typeid
 		`this.__id == typeid || this.__parents.some(function(parent) {
 			return parent['sub-type-id?'](typeid)
 		})`
 
-	‣ 'sub-type? |type
+	‣ sub-type? type
 		`true` #`(this === type) || ???`
 
 
 	# TODO:
 	# does Singleton
 
-	‣ '‣‣ (Singleton.method '‣‣)
-	‣ 'val (Singleton.method 'val)
+	me.‣ '‣‣ (Singleton.method '‣‣)
+	me.‣ '‣val (Singleton.method 'val)
 
-	‣ '‣type |name do-to
+	‣ ‣type name do-to
 		∙ type
 			T name
 		∙ doto
@@ -64,7 +59,7 @@ use ./Singleton
 		`(doto == null) ? null : type.do(doto)`
 		type
 
-	‣ '‣object |name do-to
+	‣ ‣object name do-to
 		∙ obj
 			Singleton name
 		∙ doto
