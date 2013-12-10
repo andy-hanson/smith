@@ -4,10 +4,26 @@ use ./Console
 use ./String
 use ./Bool
 use ./Bag
-use ./Fun
-use ./Number
-use ./Meta
+use! ./Fun
+use! ./Number
+use! ./Meta
 use ./✓
+
+
+∙ get |name:String
+
+	Console.log! "getting {name}"
+	name
+
+∘ lazy
+	get "lazy"
+
+∙ eager
+	get "eager"
+
+Console.log! lazy
+Console.log! eager
+
 
 ∙ x |:ReturnType y:Y z w:W
 	doc
@@ -18,14 +34,13 @@ use ./✓
 	out
 		out-condition
 	eg
-		✓ 1 2
+		✓ 234
+			1
 	how
 		how it's done
 
 	value
 
-
-#Console.log! x.meta.eg
 x.meta.eg.of
 
 #{

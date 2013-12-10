@@ -93,8 +93,9 @@ class Special extends Token
 		"!#{x}!"
 
 class Use extends Token
-	constructor: (@pos, @used) ->
+	constructor: (@pos, @used, @lazy) ->
 		type @used, String
+		type @lazy, Boolean
 
 	show: ->
 		"<use #{@used}>"

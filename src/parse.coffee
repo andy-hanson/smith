@@ -38,9 +38,10 @@ class Locals
 
 		res
 
-	has: (name) ->
+	get: (name) ->
 		type name, T.Name
-		@names.hasOwnProperty name.text
+		if @names.hasOwnProperty name.text
+			@names[name.text]
 
 	toString: ->
 		"<locals #{Object.keys @names}>"
@@ -57,9 +58,8 @@ class Parser
 
 	all: (tokens) ->
 		typeLocal =
-			new E.Local new T.Name @pos, @typeName, 'x'
+			E.Local.eager new T.Name @pos, @typeName, 'x'
 		@locals.addLocal typeLocal
-
 
 		b = @block tokens
 		b.subs.unshift new E.DefLocal typeLocal, new E.Me @pos
@@ -91,8 +91,8 @@ class Parser
 			@use tokens
 		else if tok0 instanceof T.Def
 			@def tok0, tokens
-		else if tok0 instanceof T.Special and tok0.kind == '∙'
-			@defLocal tokens.tail()
+		else if tok0 instanceof T.Special and ['∙', '∘'].contains tok0.kind
+			@defLocal tokens.tail(), tok0.kind == '∘'
 		else
 			slurped = []
 			until tokens.isEmpty()
@@ -187,8 +187,9 @@ class Parser
 	get: (name) ->
 		type name, T.Name
 
-		if @locals.has name
-			new E.Local name
+		local = @locals.get name
+		if local?
+			new E.LocalAccess @pos, local
 		else if @_canAccessThis
 			E.Call.me name.pos, name.text, []
 		else
@@ -308,11 +309,11 @@ class Parser
 				else
 					[ null, tokens.tail() ]
 
-			out.push @newLocal name, typeName
+			out.push @newLocal name, typeName, no
 
 		out
 
-
+	# Local from function arg
 	newLocal: (name, typeName) ->
 		check (T.normalName name), ->
 			"Expected local name, not #{name}"
@@ -323,16 +324,19 @@ class Parser
 			else
 				null
 
-		new E.Local name, type
+		E.Local.eager name, type
 
 	use: (tokens) ->
 		check tokens.length == 1, =>
 			"Did not expect anything after use at #{@pos}"
-		u = new E.Use tokens[0]
-		@locals.addLocal u.local
-		u
+		use =
+			new E.Use tokens[0]
+		@locals.addLocal use.local
+		use
 
-	defLocal: (tokens) ->
+	defLocal: (tokens, lazy) ->
+		type tokens, Array
+		type lazy, Boolean
 		##check tokens.length == 2, ->
 		#	"Expected name, curlied after defLocal at #{@pos}"
 
@@ -344,6 +348,7 @@ class Parser
 
 		check locals.length == 1 #TODO: array extraction
 		local = locals[0]
+		local.lazy = lazy
 
 		@pos = value.pos
 
@@ -353,6 +358,8 @@ class Parser
 			switch value.kind
 				when '|'
 					# A local fun, eg . fun |arg
+					check not lazy, =>
+						"[#{@pos}] must use ∙ before local fun, not ∘"
 					@fun value.body
 				when '{'
 					@block value.body

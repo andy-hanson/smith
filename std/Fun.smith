@@ -1,6 +1,5 @@
-use ./Type
-use ./Object
-use ./Bool
+use! ./Type
+use! ./Object
 
 ∙ F
 	`global.Function`.to-type
@@ -8,14 +7,14 @@ use ./Bool
 F.do
 	‣read meta
 
-	‣‣ from-JS
-		`global.Function.apply(null, Array.prototype.slice.call(arguments))`
+	‣‣ from-JS #...rest
+		`global.Function`.apply () arguments
 
-	‣ new-bound-call
-		`unBound.apply(arguments[0], Array.prototype.slice.call(arguments, 1))`
+	#‣ new-bound-call new-bound-to ...rest
+	#	unbound.apply new-bound-to rest
 
 	‣ of
-		`this.apply(null, Array.prototype.slice.call(arguments))`
+		apply () arguments
 
 	#{
 	‣ argument-names

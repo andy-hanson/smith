@@ -1,5 +1,5 @@
 fs = require 'fs'
-rimraf = require 'rimraf'
+#rimraf = require 'rimraf'
 ###
 recurseDirectory = (dir, rel_path, call_back) ->
 	##
@@ -46,7 +46,7 @@ extensionSplit = (name) ->
 	(name.split '.').allButAndLast()
 
 ensureDir = (dir) ->
-	rimraf.sync dir #destroy it
+	#rimraf.sync dir #destroy it
 	unless fs.existsSync dir
 		fs.mkdirSync dir
 

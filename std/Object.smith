@@ -12,6 +12,12 @@ O.do
 
 	#alias 'toString 'inspect
 
+	#{
+	‣ own-property~ name
+		(hasOwnProperty name).if
+			property nam
+	}#
+
 	‣ property name
 		`this[name]`
 

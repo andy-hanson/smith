@@ -1,13 +1,16 @@
 use ./Type
 use ./Bool
 use ./Object
+use ./Fun
 
-‣‣ of x y
+‣‣ of x y:Fun
 	`
 	function()
 	{
-		if (!x['='](y))
-			throw new Error(x + " ≠ " + y);
+		var yv =
+			y()
+		if (!x['='](yv))
+			throw new Error(x + " ≠ " + yv);
 	}()
 	`
 

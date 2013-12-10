@@ -12,7 +12,6 @@
 		"mocha": ">=1.13.0",
 		"optimist": ">=0.6.0",
 		"requirejs": ">=2.1.0",
-		"rimraf": ">=2.2.2",
 		"source-map": ">=0.1.31",
 		"source-map-support": ">=0.1.31",
 		"watch": ">=0.8.0"

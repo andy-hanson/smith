@@ -68,13 +68,21 @@ class DefLocal extends VoidExpression
 				@value.toValue fileName, newIndent
 			else
 				@value.toNode fileName, newIndent
+		val =
+			if @local.lazy
+				[ '_l(this, function() { return ', inner, '; })' ]
+
+				#[ '_l(', '_f(this, function() { return ', inner, '; }))' ]
+			else
+				inner
 		check =
-			@local.typeCheck fileName, indent
+			if @local.tipe?
+				[ ';\n', indent, @local.typeCheck fileName, indent ]
+			else
+				''
 
 		[ 'var ', name, '=\n',
-			newIndent, inner,
-			';\n', indent, check ]
-
+			newIndent, val, check ]
 
 
 class Block extends Expression
@@ -95,16 +103,17 @@ class Block extends Expression
 			newIndent = indent + '\t'
 			x =
 				[ '_f(this, function() {\n',
+					newIndent,
 					(@toNode fileName, newIndent),
 					'\n', indent,
 					'})()' ]
-			@nodeWrap x
+			@nodeWrap x, fileName
 
 	noReturn: (fileName, indent) ->
 		parts =
 			@subs.map (sub) ->
 				sub.toNode fileName, indent
-		[indent].concat parts.interleave ";\n#{indent}"
+		parts.interleave ";\n#{indent}"
 
 	compile: (fileName, indent) ->
 		[ allButLast, last ] =
@@ -118,7 +127,7 @@ class Block extends Expression
 
 		compiled.push lastCompiled
 
-		[indent].concat compiled.interleave (';\n' + indent)
+		compiled.interleave (';\n' + indent)
 
 
 	toMakeRes: (fileName, indent) ->
@@ -214,9 +223,10 @@ class Meta extends Expression
 								val.toNode fileName, indent
 							when 'eg'
 								#(FunDef.plain val).toNode fileName, newIndent
-								[ 'function() {\n',
-									(val.noReturn fileName, newIndent + '\t'),
-									'\n', newIndent, '}' ]
+								newNewIndent = newIndent + '\t'
+								body =
+									val.noReturn fileName, newNewIndent
+								[ 'function() {\n', newNewIndent, body, 	'\n', newIndent, '}' ]
 							else
 								fail()
 
@@ -324,11 +334,26 @@ class Literal extends Expression
 		[ @literal.toJS() ]
 
 
+class LocalAccess extends Expression
+	constructor: (@pos, @local) ->
+		type @pos, Pos
+		type @local, Local
+
+	toString: ->
+		@local.toString()
+
+	compile: ->
+		m = mangle @local.text
+		if @local.lazy
+			"#{m}()"
+		else
+			m
 
 class Local extends Expression
-	constructor: (name, @tipe) ->
+	constructor: (name, @tipe, @lazy) ->
 		type name, T.Name
 		type @tipe, Expression if @tipe?
+		type @lazy, Boolean
 		{ @text, @pos } = name
 
 	toString: ->
@@ -336,7 +361,6 @@ class Local extends Expression
 
 	compile: ->
 		mangle @text
-
 
 	typeCheck: (fileName, indent) ->
 		if @tipe?
@@ -350,8 +374,11 @@ class Local extends Expression
 		else
 			''
 
-	@res = (pos, tipe) ->
-		new Local (new T.Name pos, 'res', 'x'), tipe
+	@eager = (name, tipe) ->
+		new Local name, tipe, no
+
+	@res = (pos, tipe) =>
+		@eager (new T.Name pos, 'res', 'x'), tipe
 
 class Me extends Expression
 	constructor: (@pos) ->
@@ -386,7 +413,8 @@ class Use extends VoidExpression
 		localName = (use.used.split '/').last()
 		@fullName = use.used
 		{ @pos } = use
-		@local = new Local new T.Name @pos, localName, 'x'
+		@local =
+			new Local (new T.Name @pos, localName, 'x'), null, use.lazy
 
 	toString: ->
 		"<use #{@local.text}>"
@@ -442,6 +470,7 @@ module.exports =
 	BoundFun: BoundFun
 	Literal: Literal
 	Local: Local
+	LocalAccess: LocalAccess
 	Me: Me
 	Meta: Meta
 	Property: Property

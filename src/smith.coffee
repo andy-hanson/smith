@@ -35,6 +35,8 @@ class Smith
 		type @watch, Boolean
 		type @quiet, Boolean
 		type @just, String if @just
+		@isStd = argv['is-std']
+		type @isStd, Boolean
 
 	log: (text) ->
 		unless @quiet
@@ -59,7 +61,7 @@ class Smith
 				out =
 					"#{name}.js"
 				{ code, map } =
-					smithCompile text, inFile, out
+					smithCompile text, inFile, out, @isStd
 
 				[	[ out, code ],
 					[ "#{out}.map", map.toString() ],
@@ -183,6 +185,10 @@ main = ->
 				alias: 'just'
 				describe: 'rururu'
 				default: null
+			s:
+				alias: 'is-std'
+				describe: 'sususu'
+				default: no
 		.argv
 
 	unless argv.help

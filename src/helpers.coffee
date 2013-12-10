@@ -91,6 +91,15 @@ Array.prototype.contains = (em) ->
 Array.prototype.containsWhere = (em) ->
 	(@indexOfWhere em) != -1
 
+String.prototype.forEach = Array.prototype.forEach
+
+String.prototype.count = Array.prototype.count = (em) ->
+	count = 0
+	@forEach (othEm) ->
+		if em == othEm
+			count += 1
+	count
+
 String.prototype.endsWith = (str) ->
 	(@slice @length - str.length) == str
 

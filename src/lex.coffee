@@ -7,7 +7,7 @@ Left to lex:
 ###
 
 keywords =
-	[ 'use', 'arguments', 'me', '∙', 'doc', 'in', 'out', 'eg', 'how' ]
+	[ 'use', 'use!', 'arguments', 'me', '∙', '∘', 'doc', 'in', 'out', 'eg', 'how' ]
 
 class GroupPre extends T.Token
 	constructor: (@pos, @kind) ->
@@ -152,10 +152,10 @@ lexPlain = (stream, inQuote) ->
 					new T.Name pos, name, 'x_'
 				else if name in keywords
 					switch name
-						when 'use'
+						when 'use', 'use!'
 							stream.takeMatching /\s/
 							used = stream.takeNotMatching /\n/
-							new T.Use pos, used
+							new T.Use pos, used, name == 'use'
 						when 'doc', 'how'
 							text =
 								lexQuote name, stream, indent
