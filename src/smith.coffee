@@ -29,15 +29,15 @@ class Smith
 	constructor: (argv) ->
 		@inDir = argv.in
 		@outDir = argv.out
-		{ @watch, @quiet } = argv
+		{ @watch, @quiet, @just } = argv
 		type @inDir, String
 		type @outDir, String
 		type @watch, Boolean
 		type @quiet, Boolean
+		type @just, String if @just
 
 	log: (text) ->
 		unless @quiet
-			console.log "QUIET: #{@quiet}"
 			console.log text
 
 	###
@@ -61,13 +61,21 @@ class Smith
 				{ code, map } =
 					smithCompile text, inFile, out
 
-				[ [ out, code ], [ "#{out}.map", map.toString() ] ]
+				[	[ out, code ],
+					[ "#{out}.map", map.toString() ],
+					[ inFile, text ] ]
 
 			when 'js'
 				[ [ inFile, text ] ]
 
 			when 'coffee'
-				[ [ "#{name}.js", coffee.compile text ] ]
+				{ js, v3SourceMap } =
+					coffee.compile text,
+						filename: inFile
+						sourceMap: yes
+
+				[	[ "#{name}.js", js ],
+					[ "#{name}.js.map", v3SourceMap ] ]
 
 			else
 				throw ext
@@ -78,7 +86,7 @@ class Smith
 
 		switch ext
 			when 'smith'
-				[ "#{name}.js", "#{name}.js.map" ]
+				[ "#{name}.js", "#{name}.js.map", "#{name}.smith" ]
 			when 'js'
 				[ name ]
 			when 'coffee'
@@ -90,14 +98,17 @@ class Smith
 				[ ]
 
 	compilable: (inName) ->
-		not (@outNames inName).isEmpty()
+		if @just?
+			inName == @just
+		else
+			not (@outNames inName).isEmpty()
 
 	compileAll: ->
 		#Also copy 'prelude' there.
 		#io.copyFlat 'prelude', outDir
 
-		filter = ((x) => @compilable x)
-		io.processDirectorySync @inDir, @outDir, filter, ((file, text) => @compile file, text)
+		filter = @compilable.bind @
+		io.processDirectorySync @inDir, @outDir, filter, @compile.bind @
 
 
 	watch: ->
@@ -113,14 +124,9 @@ class Smith
 				fs.readFile inFile, 'utf8', (err, text) =>
 					throw err if err?
 					compiles =
-						compile (toShortName inFile), text, log
+						compile (toShortName inFile), text
 
-					compiles.forEach (compiled) =>
-						[ shortOut, text ] = compiled
-						outFile = "#{@outDir}/#{shortOut}"
-						fs.writeFile outFile, text, (err) =>
-							throw err if err?
-							@log "Wrote to #{outFile}"
+					@compileAndWrite (toShortName inFile), text
 
 		options =
 			interval: 1000
@@ -138,7 +144,18 @@ class Smith
 					fs.unlink outFile, (err) ->
 						throw err if err?
 
+	compileAndWrite: (inFile, text) ->
+		(@compile inFile, text).forEach (compiled) =>
+			[ shortOut, text ] = compiled
+			outFile = "#{@outDir}/#{shortOut}"
+			fs.writeFile outFile, text, (err) =>
+				throw err if err?
+				@log "Wrote to #{outFile}"
+
 	main: ->
+		#if @file?
+		#	@compileAndWrite @file, (fs.readFileSync @file, 'utf8'), 'test'
+		#else
 		@compileAll()
 		if @watch
 			@log "Watching #{argv.in}..."
@@ -151,11 +168,9 @@ main = ->
 			i:
 				alias: 'in'
 				describe: 'ay ay ay!'
-				default: '.'
 			o:
 				alias: 'out'
 				describe: 'waaa'
-				default: './smith-js'
 			w:
 				alias: 'watch'
 				describe: 'hohoho'
@@ -164,6 +179,10 @@ main = ->
 				alias: 'quiet'
 				describe:' yoyoyo'
 				default: no
+			j:
+				alias: 'just'
+				describe: 'rururu'
+				default: null
 		.argv
 
 	unless argv.help

@@ -1,0 +1,13 @@
+use ./Type
+use ./Bool
+use ./Object
+
+‣‣ of x y
+	`
+	function()
+	{
+		if (!x['='](y))
+			throw new Error(x + " ≠ " + y);
+	}()
+	`
+

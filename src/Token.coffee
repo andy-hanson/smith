@@ -22,28 +22,22 @@ class Name extends Token
 
 
 class Group extends Token
-	constructor: (openPos, closePos, open, close, @body) ->
+	constructor: (openPos, closePos, open, @body) ->
 		type openPos, Pos
 		type closePos, Pos
 		type open, String
-		type close, String
 		type body, Array
-
-		expectedClose =
-			Group.match[open]
-
-		if close != expectedClose
-			throw new Error "#{open}@#{openPos} no match #{close}@#{closePos}"
 
 		@kind =
 			if open == '->'
 				'{'
 			else
 				open
-		@pos = openPos
+		@pos =
+			openPos
 
 	show: ->
-		"#{@kind}#{@body}#{Group.match[@kind]}"
+		"'#{@kind}'<#{@body}>"
 
 	@match =
 		'(': ')'
@@ -51,7 +45,6 @@ class Group extends Token
 		'{': '}'
 		'->': '<-'
 		'"': '"'
-		'|': '|'
 
 class Literal extends Token
 
@@ -106,9 +99,7 @@ class Use extends Token
 	show: ->
 		"<use #{@used}>"
 
-class Meta extends Token
-
-class MetaText extends Meta
+class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
 		type @pos, Pos
 		check ['doc', 'how'].contains @kind
@@ -133,7 +124,6 @@ module.exports =
 	Name: Name
 	Group: Group
 	Literal: Literal
-	Meta: Meta
 	MetaText: MetaText
 	NumberLiteral: NumberLiteral
 	JavascriptLiteral: JavascriptLiteral
@@ -152,3 +142,5 @@ module.exports =
 		token instanceof Name and token.kind == ':x'
 	curlied: (token) ->
 		token instanceof Group and token.kind == '{'
+	metaGroup: (token) ->
+		token instanceof Group and [ 'in', 'out', 'eg' ].contains token.kind

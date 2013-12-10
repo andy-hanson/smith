@@ -1,4 +1,4 @@
-SourceNode = (require 'source-map').SourceNode
+{ SourceNode } = require 'source-map'
 T = require './Token'
 Pos = require './Pos'
 mangle = require './mangle'
@@ -12,6 +12,8 @@ class Expression
 		@toString()
 
 	nodeWrap: (chunk, fileName) ->
+		type fileName, String
+
 		new SourceNode \
 			@pos.line,
 			@pos.column,
@@ -26,7 +28,7 @@ class Expression
 		chunk =
 			@compile fileName, indent
 
-		@nodeWrap chunk
+		@nodeWrap chunk, fileName
 
 	eachSub: (f) ->
 		f @
@@ -57,16 +59,21 @@ class DefLocal extends VoidExpression
 		"<. #{@local.text} {#{@value.toString()}}>"
 
 	compile: (fileName, indent) ->
-		newIndent = indent + '\t'
+		newIndent =
+			indent + '\t'
+		name =
+			@local.toNode fileName, indent
 		inner =
 			if @value instanceof Block
 				@value.toValue fileName, newIndent
 			else
 				@value.toNode fileName, newIndent
+		check =
+			@local.typeCheck fileName, indent
 
-		[ 'var ', (@local.toNode fileName, indent),
-			' =\n', newIndent, inner,
-			';\n', indent, (@local.typeCheck fileName, indent) ]
+		[ 'var ', name, '=\n',
+			newIndent, inner,
+			';\n', indent, check ]
 
 
 
@@ -93,6 +100,12 @@ class Block extends Expression
 					'})()' ]
 			@nodeWrap x
 
+	noReturn: (fileName, indent) ->
+		parts =
+			@subs.map (sub) ->
+				sub.toNode fileName, indent
+		[indent].concat parts.interleave ";\n#{indent}"
+
 	compile: (fileName, indent) ->
 		[ allButLast, last ] =
 			@subs.allButAndLast()
@@ -116,14 +129,14 @@ class Block extends Expression
 			allButLast.map (sub) -> sub.toNode fileName, indent
 
 		lastCompiled =
-			[ 'var res = \n', indent + '\t', (last.toNode fileName, indent), ';' ]
+			[ 'var res = \n', indent + '\t', (last.toNode fileName, indent) ]
 
 		compiled.push lastCompiled
 
 		x =
-			[indent].concat compiled.interleave ";\n#{indent}"
+			compiled.interleave ";\n#{indent}"
 
-		@nodeWrap x
+		@nodeWrap x, fileName
 
 class Call extends Expression
 	constructor: (@subject, @verb, @args) ->
@@ -178,26 +191,48 @@ class Meta extends Expression
 	constructor: (@pos) ->
 		type @pos, Pos
 
+	@all =
+		[ 'doc', 'eg', 'how' ]
+
 	compile: (fileName, indent) ->
-		parts = []
+		newIndent = indent + '\t'
 
-		[ 'doc', 'in', 'out', 'eg', 'how' ].forEach (name) =>
-			ex = @[name]
-			if ex?
+		exist =
+			Meta.all.containsWhere (name) =>
+				@[name]?
+
+		if exist
+			parts = []
+
+			Meta.all.forEach (name) =>
 				val =
-					switch name
-						when 'doc', 'how'
-							ex.toNode fileName, indent
-						else
-							fail
-				parts.push [ '_', name, ': ', val ]
+					@[name]
+				if val?
+					part =
+						switch name
+							when 'doc', 'how'
+								val.toNode fileName, indent
+							when 'eg'
+								#(FunDef.plain val).toNode fileName, newIndent
+								[ 'function() {\n',
+									(val.noReturn fileName, newIndent + '\t'),
+									'\n', newIndent, '}' ]
+							else
+								fail()
 
-		[ '{', (parts.interleave ', '), '}' ]
+					parts.push [ '_', name, ': ', part ]
+
+			body =
+				parts.interleave ",\n#{newIndent}"
+
+			[ '{\n', newIndent, body, '\n', indent, '}' ]
+		else
+			'{}'
 
 class FunDef extends Expression
 	constructor: (@pos, @meta, @tipe, @args, @body) ->
 		type @pos, Pos
-		type @meta, Meta if @meta?
+		type @meta, Meta
 		type @tipe, Expression if @tipe?
 		type @args, Array
 		type @body, Block if @body?
@@ -206,32 +241,50 @@ class FunDef extends Expression
 		"{#{@args} ->\n #{@body.toString().indent()}}"
 
 	compile: (fileName, indent) ->
+		maybeMeta = (kind) =>
+			if @meta?[kind]?
+				[ (@meta[kind].noReturn fileName, newIndent), ';\n', newIndent ]
+			else
+				''
+
 		newIndent = indent + '\t'
 
 		argNames =
 			(@args.map (arg) -> arg.toNode fileName, newIndent).interleave ', '
 		argChecks =
-			(@args.map (arg) -> arg.typeCheck fileName, newIndent).interleave ";\n#{newIndent}"
+			@args.map (arg) -> arg.typeCheck fileName, newIndent
+		inCond =
+			maybeMeta 'in'
 		body =
 			if @body?
 				@body.toMakeRes fileName, newIndent
 			else
 				"var res = null;"
-		typeCheck =
-			(new Local (new T.Name @pos, 'res', 'x'), @tipe).typeCheck fileName, indent
+		outCond =
+			maybeMeta 'out'
+		typeCheck = do =>
+			loc =
+				Local.res @pos, @tipe
+			loc.typeCheck fileName, newIndent
 		meta =
 			@meta.toNode fileName, indent
 
 		[ '_f(this, function(', argNames, ') {',
 			'\n', newIndent,
-			argChecks, ';\n',
+			argChecks,
+			inCond,
 			body,
-			'\n', newIndent,
-			typeCheck,
 			';\n', newIndent,
+			typeCheck,
+			outCond,
 			'return res;\n',
 			indent, '}, ',
 			meta, ')' ]
+
+	@plain = (body) ->
+		type body, Block
+
+		new FunDef body.pos, (new Meta body.pos), null, [], body
 
 ###
 _func
@@ -284,26 +337,21 @@ class Local extends Expression
 	compile: ->
 		mangle @text
 
+
 	typeCheck: (fileName, indent) ->
-		###
-		f =
-			if @tipe?
-				[ (@tipe.toNode fileName, indent), '.check(' ]
-			else
-				'_c('
-
-		name =
-			new Literal new T.StringLiteral @pos, @text
-
-		[ f, name.compile(), ', ', @compile(), ')' ]
-		###
 		if @tipe?
-			name =
+			tipe =
+				@tipe.toNode fileName, indent
+			nameLit =
 				new Literal new T.StringLiteral @pos, @text
-			[ (@tipe.toNode fileName, indent), '.check(',
-				(name.toNode fileName, indent), ', ', @compile(), ')' ]
+			name =
+				nameLit.toNode fileName, indent
+			[ tipe, '.check(', name, ', ', @compile(), ');\n', indent ]
 		else
 			''
+
+	@res = (pos, tipe) ->
+		new Local (new T.Name pos, 'res', 'x'), tipe
 
 class Me extends Expression
 	constructor: (@pos) ->

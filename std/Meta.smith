@@ -1,4 +1,5 @@
 use ./Type
+use ./Object
 
 ∙ M
 	`_prelude.Meta`.to-type

@@ -1,21 +1,42 @@
 use ./Type
-#use ./Object
+use ./Object
 use ./Console
 use ./String
 use ./Bool
 use ./Bag
 use ./Fun
 use ./Number
+use ./Meta
+use ./✓
+
+∙ x |:ReturnType y:Y z w:W
+	doc
+		one
+		two
+	in
+		in-condition
+	out
+		out-condition
+	eg
+		✓ 1 2
+	how
+		how it's done
+
+	value
 
 
+#Console.log! x.meta.eg
+x.meta.eg.of
+
+#{
 #‣
 ∙ sum |x:Number y:Number
 	doc
 		the sum
-	#in
-	#	Console.log! x
-	how
-		magic!
+	in
+		Console.log! x
+	#how
+	#	magic!
 	#{
 	in
 		Console.log! 'in
@@ -25,10 +46,9 @@ use ./Number
 		Console.log! 'eg
 	how
 		does its stuff
-	}#
 
 	Console.log! "Summing {x} and {y}"
 	x.+ y
 
 
-Console.log! sum.meta
+Console.log! (sum 3 4)

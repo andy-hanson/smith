@@ -23,6 +23,9 @@ class Locals
 		last.forEach (local) =>
 			delete @names[local.text]
 
+	withLocal: (loc, fun) ->
+		@withLocals [loc], fun
+
 	withLocals: (locals, fun) ->
 		@addFrame()
 
@@ -50,6 +53,7 @@ class Parser
 			new Locals
 		@pos =
 			Pos.start
+		@_canAccessThis = yes
 
 	all: (tokens) ->
 		typeLocal =
@@ -185,8 +189,10 @@ class Parser
 
 		if @locals.has name
 			new E.Local name
-		else
+		else if @_canAccessThis
 			E.Call.me name.pos, name.text, []
+		else
+			throw new Error "Cannot access 'this' inside eg at #{@pos}"
 
 	###
 	TODO: 'it'
@@ -225,7 +231,9 @@ class Parser
 	funBody: (tokens) ->
 		[ metaToks, restToks ] =
 			tokens.takeWhile (x) ->
-				(T.nl x) or x instanceof T.Meta
+				(T.nl x) or \
+					x instanceof T.MetaText or \
+					T.metaGroup x
 
 		meta =
 			new E.Meta @pos
@@ -255,17 +263,36 @@ class Parser
 
 		E.Call.me @pos, def.name, args
 
+	withoutThisAccess: (fun) ->
+		@_canAccessThis = no
+		val = fun()
+		@_canAccessThis = yes
+		val
 
 	meta: (meta, token) ->
 		return if T.nl token
 
-		type token, T.Meta
-
-		if token instanceof T.MetaText
-			meta[token.kind] =
+		meta[token.kind] =
+			if token instanceof T.MetaText
 				@quote token.text
-		else
-			fail()
+			else if T.metaGroup token
+				check token.body.length == 1
+				curlied = token.body[0]
+				check T.curlied curlied
+
+				getBlock = =>
+					@block curlied.body
+
+				switch token.kind
+					when 'in'
+						getBlock()
+					when 'out'
+						@locals.withLocal (E.Local.res @pos), getBlock
+					when 'eg'
+						@withoutThisAccess getBlock
+
+			else
+				fail()
 
 
 
@@ -299,7 +326,7 @@ class Parser
 		new E.Local name, type
 
 	use: (tokens) ->
-		check tokens.length == 1, ->
+		check tokens.length == 1, =>
 			"Did not expect anything after use at #{@pos}"
 		u = new E.Use tokens[0]
 		@locals.addLocal u.local

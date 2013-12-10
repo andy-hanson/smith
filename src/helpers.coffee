@@ -47,9 +47,6 @@ Array.prototype.splitBy = (cond) ->
 
 		out
 
-Array.prototype.contains = (obj) ->
-	(@indexOf obj) != -1
-
 Array.prototype.unCons = ->
 	[ @[0], @tail() ]
 
@@ -59,7 +56,7 @@ String.prototype.map =
 String.prototype.contains = (substr) ->
 	(@indexOf substr) != -1
 
-Array.prototype.tail = ->
+Array.prototype.tail = String.prototype.tail = ->
 	@slice 1
 
 Array.prototype.interleave = (leaf) ->
@@ -90,6 +87,9 @@ Array.prototype.takeWhile = (cond) ->
 
 Array.prototype.contains = (em) ->
 	(@indexOf em) != -1
+
+Array.prototype.containsWhere = (em) ->
+	(@indexOfWhere em) != -1
 
 String.prototype.endsWith = (str) ->
 	(@slice @length - str.length) == str

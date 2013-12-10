@@ -31,7 +31,7 @@ allRecursiveFiles = (path) ->
 
 relativeName = (dir, name) ->
 	check name.startsWith dir
-	name.slice dir.length + 1 # also remove '/'
+	name.withoutStart "#{dir}/" # also remove '/'
 
 copyFlat = (inDir, outDir) ->
 	(fs.readdirSync inDir).forEach (file) ->
@@ -53,22 +53,25 @@ ensureDir = (dir) ->
 processDirectorySync = (inDir, outDir, filter, callBack) ->
 	ensureDir outDir
 	try
-		processDirectorySyncRecurse inDir, outDir, filter, callBack
+		processDirectorySyncRecurse inDir, inDir, outDir, filter, callBack
 	catch error
 		rimraf.sync outDir # destroy output
 		throw error
 
-processDirectorySyncRecurse = (inDir, outDir, filter, callBack) ->
+processDirectorySyncRecurse = (origInDir, inDir, outDir, filter, callBack) ->
 	(fs.readdirSync inDir).forEach (file) ->
 		full = "#{inDir}/#{file}"
 		stats = fs.statSync full
 
 		if stats.isFile()
-			if filter full
+			rel =
+				relativeName origInDir, full
+
+			if filter rel
 				text =
 					fs.readFileSync full, 'utf8'
 				toWrites =
-					callBack file, text
+					callBack rel, text
 
 				toWrites.forEach (toWrite) ->
 					[ shortName, content ] = toWrite
@@ -80,7 +83,7 @@ processDirectorySyncRecurse = (inDir, outDir, filter, callBack) ->
 		else if stats.isDirectory()
 			newOut = "#{outDir}/#{file}"
 			ensureDir newOut
-			processDirectorySyncRecurse full, "#{outDir}/#{file}", filter, callBack
+			processDirectorySyncRecurse origInDir, full, outDir, filter, callBack
 
 module.exports =
 	#recurseDirectory: recurseDirectory
