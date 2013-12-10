@@ -1,9 +1,0 @@
-#!/usr/bin/sh
-
-script/compile
-
-if [[ $? -eq 0 ]]
-then
-	node --harmony js/test.js
-fi
-#jasmine-node --coffee src

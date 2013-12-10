@@ -117,7 +117,7 @@ class Smith
 		toShortName = (inName) =>
 			inName.withoutStart "#{@inDir}/"
 		toOutName = (inName) =>
-			"#{outDir}/#{toShortName inName}"
+			"#{@outDir}/#{toShortName inName}"
 
 		compileAndWrite = (inFile) =>
 			type inFile, String
@@ -138,7 +138,7 @@ class Smith
 		watch.createMonitor @inDir, options, (monitor) =>
 			monitor.on 'created', compileAndWrite
 			monitor.on 'changed', compileAndWrite
-			monitor.on 'removed', (inFile) ->
+			monitor.on 'removed', (inFile) =>
 				@log "#{inFile} was deleted."
 				for outShort in outNames (toShortName inFile)
 					outFile = "#{outDir}/#{outShort}"

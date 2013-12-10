@@ -1,4 +1,0 @@
-#!/usr/bin/sh
-node --harmony js-std/run.js
-
-

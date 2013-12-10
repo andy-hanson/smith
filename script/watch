@@ -1,5 +1,0 @@
-#!/usr/bin/bash
-
-script/compile
-
-bin/smith --in std --out js-std --watch

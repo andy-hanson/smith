@@ -1,5 +1,5 @@
-use ./Type
-use ./Object
+use! ./Type
+use! ./Object
 use ./Console
 use ./String
 use ./Bool
@@ -34,8 +34,8 @@ Console.log! eager
 	out
 		out-condition
 	eg
-		✓ 234
-			1
+		✓ 2
+			1.+ 1
 	how
 		how it's done
 

@@ -1,7 +1,0 @@
-#!/usr/bin/sh
-script/compile
-
-if [[ $? -eq 0 ]]
-then
-	bin/smith --in std --out js-std --quiet --is-std
-fi

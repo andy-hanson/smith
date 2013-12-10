@@ -30,16 +30,6 @@ class Expression
 
 		@nodeWrap chunk, fileName
 
-	eachSub: (f) ->
-		f @
-		(Object.keys @).forEach (key) =>
-			value = @[key]
-			#if value instanceof Expression
-			#	value.eachSub f
-			if value instanceof Array
-				value.forEach (sub) =>
-					sub.eachSub f
-
 class Arguments extends Expression
 	constructor: (@pos) ->
 
@@ -70,14 +60,12 @@ class DefLocal extends VoidExpression
 				@value.toNode fileName, newIndent
 		val =
 			if @local.lazy
-				[ '_l(this, function() { return ', inner, '; })' ]
-
-				#[ '_l(', '_f(this, function() { return ', inner, '; }))' ]
+				[ '_l(this, function() { return ', inner, ' })' ]
 			else
 				inner
 		check =
 			if @local.tipe?
-				[ ';\n', indent, @local.typeCheck fileName, indent ]
+				[ '\n', indent, @local.typeCheck fileName, indent ]
 			else
 				''
 
@@ -94,7 +82,7 @@ class Block extends Expression
 			@subs.push new Void @pos
 
 	toString: ->
-		'<BLOCK ' + (@subs.join ';\n').indent() + '>\n'
+		'<BLOCK ' + (@subs.join '\n').indent() + '>\n'
 
 	toValue: (fileName, indent) ->
 		if @subs.length == 1
@@ -113,7 +101,7 @@ class Block extends Expression
 		parts =
 			@subs.map (sub) ->
 				sub.toNode fileName, indent
-		parts.interleave ";\n#{indent}"
+		parts.interleave "\n#{indent}"
 
 	compile: (fileName, indent) ->
 		[ allButLast, last ] =
@@ -123,11 +111,11 @@ class Block extends Expression
 			allButLast.map (sub) -> sub.toNode fileName, indent
 
 		lastCompiled =
-			[ 'return ', (last.toNode fileName, indent), ';' ]
+			[ 'return ', (last.toNode fileName, indent) ]
 
 		compiled.push lastCompiled
 
-		compiled.interleave (';\n' + indent)
+		compiled.interleave "\n#{indent}"
 
 
 	toMakeRes: (fileName, indent) ->
@@ -143,7 +131,7 @@ class Block extends Expression
 		compiled.push lastCompiled
 
 		x =
-			compiled.interleave ";\n#{indent}"
+			compiled.interleave "\n#{indent}"
 
 		@nodeWrap x, fileName
 
@@ -253,7 +241,7 @@ class FunDef extends Expression
 	compile: (fileName, indent) ->
 		maybeMeta = (kind) =>
 			if @meta?[kind]?
-				[ (@meta[kind].noReturn fileName, newIndent), ';\n', newIndent ]
+				[ (@meta[kind].noReturn fileName, newIndent), '\n', newIndent ]
 			else
 				''
 
@@ -269,7 +257,7 @@ class FunDef extends Expression
 			if @body?
 				@body.toMakeRes fileName, newIndent
 			else
-				"var res = null;"
+				"var res = null"
 		outCond =
 			maybeMeta 'out'
 		typeCheck = do =>
@@ -284,10 +272,10 @@ class FunDef extends Expression
 			argChecks,
 			inCond,
 			body,
-			';\n', newIndent,
+			'\n', newIndent,
 			typeCheck,
 			outCond,
-			'return res;\n',
+			'return res\n',
 			indent, '}, ',
 			meta, ')' ]
 
@@ -305,7 +293,7 @@ class ItFunDef extends Expression
 
 	compile: (fileName, indent) ->
 		[ "(function(it) { return _c(it, '", @name.text,
-		"', Array.prototype.slice.call(arguments, 1)); })" ]
+		"', Array.prototype.slice.call(arguments, 1)) })" ]
 
 ###
 func_
@@ -370,7 +358,7 @@ class Local extends Expression
 				new Literal new T.StringLiteral @pos, @text
 			name =
 				nameLit.toNode fileName, indent
-			[ tipe, '.check(', name, ', ', @compile(), ');\n', indent ]
+			[ tipe, '.check(', name, ', ', @compile(), ')\n', indent ]
 		else
 			''
 

@@ -1,9 +1,0 @@
-#!/usr/bin/bash
-
-script/compile_smith
-
-if [[ $? -eq 0  ]]
-then
-	script/run_smith
-fi
-
