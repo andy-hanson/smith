@@ -1,4 +1,4 @@
-use ./Bag
+use! ./Bag
 use! ./Array
 
 export Bag

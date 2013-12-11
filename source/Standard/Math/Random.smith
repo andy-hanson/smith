@@ -2,7 +2,7 @@
 	`global.Math`
 
 +in-0-1
-	`Math.random()`
+	Math.random
 
 +in-range |min max
 	∙ size

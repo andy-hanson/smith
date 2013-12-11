@@ -1,8 +1,9 @@
-#!/usr/local/bin/node --harmony
+#!/usr/local/bin/node
 
 "use strict";
 var path = require('path');
 var fs = require('fs');
-var js = path.join(path.dirname(fs.realpathSync(__filename)), '../js');
+var compilerJS =
+	path.join(path.dirname(fs.realpathSync(__filename)), '../compiler-js');
 
-require(js+'/run.js');
+require(compilerJS+'/run.js');

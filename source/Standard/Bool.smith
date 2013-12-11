@@ -1,5 +1,6 @@
-use ./Type
-use ./Fun
+use! Type
+use Fun
+use Option
 
 ∙ B
 	`global.Boolean`.to-type
@@ -33,7 +34,7 @@ B.do
 		`!(this || a)`
 
 	‣ if then:Fun
-		`this ? null : then()`
+		`this ? Option.None() : Option.Some(then())`
 
 	#alias '? 'if-then-else
 	#alias '∨ 'or

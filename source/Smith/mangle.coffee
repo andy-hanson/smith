@@ -65,7 +65,7 @@ jsWords =
 
 module.exports = (text) ->
 	if jsWords.contains text
-		"$#{text}"
+		"_#{text}"
 	else
 		parts =
 			text.map (ch) ->

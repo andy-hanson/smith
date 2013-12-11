@@ -1,6 +1,7 @@
 T = require './Token'
 E = require './Expression'
 Pos = require './Pos'
+AllModules = require './AllModules'
 
 class Locals
 	constructor: ->
@@ -48,8 +49,11 @@ class Locals
 
 
 class Parser
-	constructor: (@typeName) ->
+	constructor: (@typeName, @fileName, @allModules) ->
 		type @typeName, String
+		type @fileName, String
+		type @allModules, AllModules
+
 		@locals =
 			new Locals
 		@pos =
@@ -330,7 +334,7 @@ class Parser
 		check tokens.length == 1, =>
 			"Did not expect anything after use at #{@pos}"
 		use =
-			new E.Use tokens[0]
+			new E.Use tokens[0], @fileName, @allModules
 		@locals.addLocal use.local
 		use
 
@@ -372,10 +376,12 @@ class Parser
 
 
 
-parse = (tokens, typeName) ->
+parse = (tokens, typeName, fileName, allModules) ->
 	type tokens, Array
 	type typeName, String
-	(new Parser typeName).all tokens
+	type fileName, String
+	type allModules, AllModules
+	(new Parser typeName, fileName, allModules).all tokens
 
 module.exports = parse
 

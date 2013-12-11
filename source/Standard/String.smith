@@ -1,7 +1,7 @@
-use ./Type
-use ./Object
-use ./Bag
-use ./Fun
+use Type
+use Object
+use Bag
+use Fun
 
 ∙ S
 	`global.String`.to-type

@@ -2,49 +2,52 @@
 
 execHandle = (after) ->
 	(err, stdout, stderr) ->
-		console.log stdout + stderr
+		out = stdout + stderr
+		if out != ''
+			console.log out
 		throw err if err?
 		after()
 
 run = (command) ->
 	(after) ->
-		#console.log "RUNNING #{command}"
 		exec command, execHandle after
 
 clean =
-	run 'rm -r js js-std'
+	run 'rm -rf js js-std'
 
 lint =
-	run 'coffeelint -f src/lintConfig.json src/*.coffee'
-
+	run 'coffeelint -f source/lintConfig.json source/*.coffee source/*/*.coffee'
 
 compile_compiler =
-	run 'coffee  --compile --bare --map --output js src'
+	run 'coffee --compile --bare --map --output compiler-js source/Smith'
 
 compile_main =
 	# compile_compiler
-	run 'bin/smith --in std --out js-std --just Main.smith --is-std'
+	run 'bin/smith --just Main.smith --is-std'
 
 compile_smith =
 	# compile_compiler
-	run 'bin/smith --in std --out js-std --quiet --is-std'
+	run 'bin/smith --quiet'
 
 run_smith =
 	# compile_smith
-	run 'node --harmony js-std/run.js'
+	run 'node js/run.js'
 
 test =
-	'node --harmony js/test.js'
+	'node compiler-js/test.js'
 
 watch =
 	# compile_compiler
-	'bin/smith --in std --out js-std --watch'
+	'bin/smith --in source --out js-smith --watch'
 
 done = ->
-	console.log 'Done!'
+	null
 
 task 'lint', 'Description', ->
 	lint done
+
+task 'clean', 'Description', ->
+	clean done
 
 task 'all', 'Description', ->
 	clean -> compile_compiler -> compile_smith -> run_smith done

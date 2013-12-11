@@ -1,3 +1,5 @@
+Object.prototype.bound = (name) ->
+	@[name].bind @
 
 Object.prototype.clone = ->
 	x = { }
@@ -26,10 +28,11 @@ Array.prototype.isEmpty = String.prototype.isEmpty = ->
 Array.prototype.last = ->
 	@[@length - 1]
 
+Array.prototype.allButLast = ->
+	@slice 0, @length - 1
+
 Array.prototype.allButAndLast = ->
-	nextToLast =
-		@length - 1
-	[ @slice(0, nextToLast), @[nextToLast] ]
+	[ @allButLast(), @last() ]
 
 Array.prototype.splitBy = (cond) ->
 	if @isEmpty()

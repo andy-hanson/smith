@@ -1,8 +1,7 @@
-unless typeof define == 'function'
-	define =
-		(require 'amdefine') module
+#unless typeof define == 'function'
+#	define = require('amdefine') module
 
-define (require) ->
+define ->
 	Function.prototype.unbound = ->
 		if @_unbound?
 			@_unbound._meta = @_meta
@@ -76,7 +75,7 @@ define (require) ->
 	Type['‣'] 'check', (name, a) ->
 		checkExists name, a
 		unless @['subsumes?'](a)
-			throw new Error "#{name} is not a #{@}; is #{name}"
+			throw new Error "#{name} is not a #{@}; is #{a}"
 
 	bind = (object, name) ->
 		fun = object[name]
@@ -106,10 +105,13 @@ define (require) ->
 			{ @_doc, @_in, @_out, @_eg, @_how } = meta
 
 	fun = (delegate, unbound, meta) ->
-		bound = unbound.bind delegate
-		bound._unbound = unbound
-		bound._meta = Meta.of meta
-		bound
+		f =
+			unbound.bind delegate
+		f._unbound =
+			unbound
+		f._meta =
+			Meta.of meta
+		f
 
 	lazy = (delegate, make) ->
 		get = ->
@@ -122,7 +124,6 @@ define (require) ->
 
 	fun: fun
 	bind: bind
-	module: module
 	string: string
 	type: type
 	lazy: lazy

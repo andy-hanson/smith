@@ -1,8 +1,8 @@
-use ./Type
-use ./Object
-use ./Bag
-use ./Fun
-use ./Option
+use Type
+use Object
+use Bag
+use Fun
+use Option
 
 ∙ N
 	`global.Number`.to-type

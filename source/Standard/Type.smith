@@ -1,6 +1,6 @@
 #TODO: init
 
-use ./Singleton
+use Singleton
 
 ∙ T
 	`_prelude.Type`

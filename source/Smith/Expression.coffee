@@ -2,6 +2,7 @@
 T = require './Token'
 Pos = require './Pos'
 mangle = require './mangle'
+AllModules = require './AllModules'
 
 ###
 All must have @pos
@@ -70,7 +71,7 @@ class DefLocal extends VoidExpression
 				''
 
 		[ 'var ', name, '=\n',
-			newIndent, val, check ]
+			newIndent, val, ';', check ]
 
 
 class Block extends Expression
@@ -101,7 +102,7 @@ class Block extends Expression
 		parts =
 			@subs.map (sub) ->
 				sub.toNode fileName, indent
-		parts.interleave "\n#{indent}"
+		parts.interleave ";\n#{indent}"
 
 	compile: (fileName, indent) ->
 		[ allButLast, last ] =
@@ -115,7 +116,7 @@ class Block extends Expression
 
 		compiled.push lastCompiled
 
-		compiled.interleave "\n#{indent}"
+		compiled.interleave ";\n#{indent}"
 
 
 	toMakeRes: (fileName, indent) ->
@@ -126,7 +127,7 @@ class Block extends Expression
 			allButLast.map (sub) -> sub.toNode fileName, indent
 
 		lastCompiled =
-			[ 'var res = \n', indent + '\t', (last.toNode fileName, indent) ]
+			[ 'var res = \n', indent + '\t', (last.toNode fileName, indent), ';' ]
 
 		compiled.push lastCompiled
 
@@ -257,7 +258,7 @@ class FunDef extends Expression
 			if @body?
 				@body.toMakeRes fileName, newIndent
 			else
-				"var res = null"
+				"var res = null;"
 		outCond =
 			maybeMeta 'out'
 		typeCheck = do =>
@@ -396,10 +397,15 @@ class Quote extends Expression
 
 
 class Use extends VoidExpression
-	constructor: (use) ->
+	constructor: (use, fileName, allModules) ->
 		type use, T.Use
-		localName = (use.used.split '/').last()
-		@fullName = use.used
+		type fileName, String
+		type allModules, AllModules
+
+		localName =
+			(use.used.split '/').last()
+		@fullName =
+			allModules.get use.used, fileName
 		{ @pos } = use
 		@local =
 			new Local (new T.Name @pos, localName, 'x'), null, use.lazy
@@ -409,7 +415,7 @@ class Use extends VoidExpression
 
 	compile: (fileName, indent) ->
 		val =
-			new Literal new T.JavascriptLiteral @pos, "require('#{@fullName}')"
+			new Literal new T.JavascriptLiteral @pos, "_require('#{@fullName}')"
 
 		(new DefLocal @local, val).compile fileName, indent
 

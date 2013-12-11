@@ -6,24 +6,7 @@ optimist = require 'optimist'
 smithCompile = require './compile'
 coffee = require 'coffee-script'
 watch = require 'watch'
-
-###
-compileAndWrite = (inFile, outFile) ->
-	#Compile a single file to a single output.
-	console.log "Compiling #{inFile} to #{outFile}"
-
-	source =
-		fs.readFileSync inFile, 'utf8'
-	compiled =
-		smithCompile source, inFile, outFile
-
-	fs.writeFileSync \
-		outFile,
-		compiled.code
-	fs.writeFileSync \
-		"#{outFile}.map",
-		compiled.map
-###
+AllModules = require './AllModules'
 
 class Smith
 	constructor: (argv) ->
@@ -35,8 +18,6 @@ class Smith
 		type @watch, Boolean
 		type @quiet, Boolean
 		type @just, String if @just
-		@isStd = argv['is-std']
-		type @isStd, Boolean
 
 	log: (text) ->
 		unless @quiet
@@ -56,31 +37,37 @@ class Smith
 		[ name, ext ] =
 			io.extensionSplit inFile
 
-		switch ext
-			when 'smith'
-				out =
-					"#{name}.js"
-				{ code, map } =
-					smithCompile text, inFile, out, @isStd
+		try
+			switch ext
+				when 'smith'
+					out =
+						"#{name}.js"
+					{ code, map } =
+						smithCompile text, inFile, out, @allModules
 
-				[	[ out, code ],
-					[ "#{out}.map", map.toString() ],
-					[ inFile, text ] ]
+					[	[ out, code ],
+						[ "#{out}.map", map.toString() ],
+						[ inFile, text ] ]
 
-			when 'js'
-				[ [ inFile, text ] ]
+				when 'js'
+					[ [ inFile, text ] ]
 
-			when 'coffee'
-				{ js, v3SourceMap } =
-					coffee.compile text,
-						filename: inFile
-						sourceMap: yes
+				when 'coffee'
+					{ js, v3SourceMap } =
+						coffee.compile text,
+							filename: inFile
+							sourceMap: yes
 
-				[	[ "#{name}.js", js ],
-					[ "#{name}.js.map", v3SourceMap ] ]
+					[	[ "#{name}.js", js ],
+						[ "#{name}.js.map", v3SourceMap ] ]
 
-			else
-				throw ext
+				else
+					fail()
+
+		catch error
+			error.message =
+				"Error compiling #{inFile}: #{error.message}"
+			throw error
 
 	outNames: (inFile) ->
 		[ name, ext ] =
@@ -106,11 +93,9 @@ class Smith
 			not (@outNames inName).isEmpty()
 
 	compileAll: ->
-		#Also copy 'prelude' there.
-		#io.copyFlat 'prelude', outDir
-
-		filter = @compilable.bind @
-		io.processDirectorySync @inDir, @outDir, filter, @compile.bind @
+		filter =
+			@bound 'compilable'
+		io.processDirectorySync @inDir, @outDir, filter, @bound 'compile'
 
 
 	watch: ->
@@ -154,10 +139,16 @@ class Smith
 				throw err if err?
 				@log "Wrote to #{outFile}"
 
+	loadModules: ->
+		@allModules =
+			AllModules.load @inDir
+		console.log "loaded modules"
+
 	main: ->
 		#if @file?
 		#	@compileAndWrite @file, (fs.readFileSync @file, 'utf8'), 'test'
 		#else
+		@loadModules()
 		@compileAll()
 		if @watch
 			@log "Watching #{argv.in}..."
@@ -170,9 +161,11 @@ main = ->
 			i:
 				alias: 'in'
 				describe: 'ay ay ay!'
+				default: 'source'
 			o:
 				alias: 'out'
 				describe: 'waaa'
+				default: 'js'
 			w:
 				alias: 'watch'
 				describe: 'hohoho'
@@ -197,19 +190,10 @@ main = ->
 
 		(new Smith argv).main()
 
-test = ->
-	(require './lexSpec')()
-
-	#console.log argv
-	#console.log commandline.in
-	#(require './compile').test()
-
 module.exports =
 	parse: require './parse'
 	lex: require './lex'
 	compile: smithCompile
-	#compileDir: compileDir
 	main: main
-	test: test
 
 

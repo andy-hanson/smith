@@ -1,0 +1,33 @@
+use Fun
+
+‣‣ of message
+	`function() { throw new Error(message) }()`
+
+‣‣ try-catch try:Fun catch:Fun
+	try-catch-finally try catch { }
+
+‣‣ try-catch-finally try:Fun catch:Fun finally:Fun
+	`
+	(function() {
+		var res;
+		try {
+			res = _try();
+		}
+		catch (error) {
+			res = _catch(error);
+		}
+		finally {
+			_finally();
+		}
+		return res;
+	})()
+	`
+
+
+
+
+	
+
+
+
+

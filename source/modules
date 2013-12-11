@@ -1,0 +1,20 @@
+Prelude Standard/Prelude
+
+# Far future: these should be default
+✔ Standard/✔
+✘ Standard/✘
+Bool Standard/Bool
+Console Standard/Console
+String Standard/String
+Fun Standard/Fun
+Bag Standard/Bag/index
+
+Math Standard/Math/index
+
+
+Singleton Standard/Singleton
+Type Standard/Type
+Meta Standard/Meta
+Object Standard/Object
+Option Standard/Option
+Random Standard/Math/Random

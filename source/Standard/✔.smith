@@ -1,5 +1,5 @@
-use ./Type
-use ./Bool
+use! Type
+use Bool
 use ./Object
 use ./Fun
 
