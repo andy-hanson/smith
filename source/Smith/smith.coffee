@@ -139,17 +139,12 @@ class Smith
 				throw err if err?
 				@log "Wrote to #{outFile}"
 
-	loadModules: ->
+	main: ->
 		@allModules =
 			AllModules.load @inDir
-		console.log "loaded modules"
 
-	main: ->
-		#if @file?
-		#	@compileAndWrite @file, (fs.readFileSync @file, 'utf8'), 'test'
-		#else
-		@loadModules()
 		@compileAll()
+
 		if @watch
 			@log "Watching #{argv.in}..."
 			@watch()

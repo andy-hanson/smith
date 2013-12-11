@@ -1,4 +1,5 @@
 io = require './io'
+fs = require 'fs'
 
 module.exports = class AllModules
 	constructor: (@baseDir) ->
@@ -6,6 +7,10 @@ module.exports = class AllModules
 		# Maps dir name to Modules
 		@moduleses = {}
 
+	###
+	dir - directory of the modules file
+	text - its contents
+	###
 	parse: (dir, text) ->
 		type dir, String
 		type text, String
@@ -26,12 +31,37 @@ module.exports = class AllModules
 			[ name, path ] =
 				split
 			modules[name] =
-				path
+				@findModule dir, path
 
 		@moduleses[dir] = modules
 
+
+	findModule: (dir, name) ->
+		if name.startsWith './'
+			name = io.join dir, name.withoutStart './'
+		else if name.startsWith '../'
+			name = io.join dir, io.dirOf name.withoutStart '../'
+
+		full = io.join @baseDir, name
+		if fs.existsSync full
+			check (io.statKindSync full) == 'directory'
+			name = io.join name, 'index'
+
+		extensions =
+			[ '.smith', '.coffee', '.js', '/index.smith', '/index.coffee', '/index.js' ]
+		mayBeModules =
+			extensions.map (extension) =>
+				"#{name}#{extension}"
+
+		for mayBeModule in mayBeModules
+			if fs.existsSync io.join @baseDir, mayBeModule
+				return name
+
+		fail "There is no module #{name}; tried #{mayBeModules}"
+
 	###
-	accessFile relative to @baseDor
+	name - What follows 'use'
+	accessFile: file accessing it
 	###
 	get: (name, accessFile) ->
 		type name, String
@@ -41,7 +71,7 @@ module.exports = class AllModules
 			io.dirOf accessFile
 
 		if (name.startsWith './') or name.startsWith '../'
-			name
+			@findModule accessDir, name
 		else
 			loop
 				# TODO: hasownproperty

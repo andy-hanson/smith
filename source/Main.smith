@@ -6,17 +6,22 @@ use Console
 use ✔
 use ✘
 
+use ./Standard/Vec
+
 ✔ 8
 	2.twice.square-root.cube
 
-
+#{
 ✘.try-catch-finally
 	✘ "Nope, failed"
 |error
 	✘ "not again!"
 |
 	Console.log! 'Finally!
+}#
 
+use X
+Console.log! X
 
 #{
 

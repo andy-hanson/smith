@@ -1,6 +1,10 @@
 fs = require 'fs'
 
-
+join = (parent, sub) ->
+	if parent == ''
+		sub
+	else
+		"#{parent}/#{sub}"
 
 #allRecursiveFiles = (path) ->
 #	files = []
@@ -19,6 +23,16 @@ relativeName = (dir, name) ->
 #copyFile = (inFile, outFile) ->
 #	content = fs.readFileSync inFile, 'utf8'
 #	fs.writeFileSync outFile, content, 'utf8'
+
+statKindSync = (name) ->
+	stat =
+		fs.statSync name
+	if stat.isFile()
+		'file'
+	else if stat.isDirectory()
+		'directory'
+	else
+		'other'
 
 extensionSplit = (name) ->
 	(name.split '.').allButAndLast()
@@ -42,11 +56,13 @@ readTextSync = (fileName) ->
 recurseDirectorySync = (dir, callBack) ->
 	(fs.readdirSync dir).forEach (file) ->
 		full = "#{dir}/#{file}"
-		stats = fs.statSync full
-		if stats.isFile()
-			callBack full
-		else if stats.isDirectory()
-			recurseDirectorySync full, callBack
+		switch statKindSync full
+			when 'file'
+				callBack full
+			when 'directory'
+				recurseDirectorySync full, callBack
+			else
+				null
 
 
 ###
@@ -124,3 +140,5 @@ module.exports =
 	processDirectorySync: processDirectorySync
 	extensionSplit: extensionSplit
 	readFilesNamedSync: readFilesNamedSync
+	statKindSync: statKindSync
+	join: join
