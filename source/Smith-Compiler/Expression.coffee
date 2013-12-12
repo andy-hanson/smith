@@ -66,12 +66,12 @@ class DefLocal extends VoidExpression
 				inner
 		check =
 			if @local.tipe?
-				[ '\n', indent, @local.typeCheck fileName, indent ]
+				[ ';\n', indent, @local.typeCheck fileName, indent ]
 			else
 				''
 
 		[ 'var ', name, '=\n',
-			newIndent, val, ';', check ]
+			newIndent, val, check ]
 
 
 class Block extends Expression
@@ -112,11 +112,29 @@ class Block extends Expression
 			allButLast.map (sub) -> sub.toNode fileName, indent
 
 		lastCompiled =
-			[ 'return ', (last.toNode fileName, indent) ]
+			@compileLast fileName, indent, (x) ->
+				[ 'return ', x ]
 
 		compiled.push lastCompiled
 
 		compiled.interleave ";\n#{indent}"
+
+	compileLast: (fileName, indent, doIfNotSpecial) ->
+		last =
+			@subs.last()
+		special =
+			if last instanceof Literal
+				lit = last.literal
+				(lit instanceof T.JavascriptLiteral) and lit.kind == 'indented'
+			else no
+
+		node = last.toNode fileName, indent
+
+		if special
+			node
+		else
+			doIfNotSpecial node
+
 
 
 	toMakeRes: (fileName, indent) ->
@@ -127,7 +145,8 @@ class Block extends Expression
 			allButLast.map (sub) -> sub.toNode fileName, indent
 
 		lastCompiled =
-			[ 'var res = \n', indent + '\t', (last.toNode fileName, indent), ';' ]
+			@compileLast fileName, indent, (x) ->
+				[ 'var res =\n', indent + '\t', x, ';' ]
 
 		compiled.push lastCompiled
 
@@ -234,7 +253,11 @@ class FunDef extends Expression
 		type @meta, Meta
 		type @tipe, Expression if @tipe?
 		type @args, Array
-		type @body, Block if @body?
+		if @body?
+			if @body instanceof T.JavascriptLiteral
+				check @body.kind == 'indented'
+			else
+				type @body, Block
 
 	toString: ->
 		"{#{@args} ->\n #{@body.toString().indent()}}"
@@ -319,8 +342,8 @@ class Literal extends Expression
 	toString: ->
 		"<#{@literal}>"
 
-	compile: ->
-		[ @literal.toJS() ]
+	compile: (fileName, indent) ->
+		[ (@literal.toJS fileName, indent) ]
 
 
 class LocalAccess extends Expression
@@ -415,7 +438,7 @@ class Use extends VoidExpression
 
 	compile: (fileName, indent) ->
 		val =
-			new Literal new T.JavascriptLiteral @pos, "_require('#{@fullName}')"
+			new Literal new T.JavascriptLiteral @pos, "_require('#{@fullName}')", 'special'
 
 		(new DefLocal @local, val).compile fileName, indent
 

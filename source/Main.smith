@@ -23,6 +23,17 @@ use ./Standard/Vec
 use X
 Console.log! X
 
+∙ str
+	「
+		a
+			{ not interpolated }
+		c
+
+∙ str-2
+	「a { b } c 」
+
+Console.log! str-2
+
 #{
 
 use! ./Type

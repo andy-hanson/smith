@@ -54,6 +54,8 @@ Use replace all when updating this!
 				<DetectChar attribute="Quote" context="Quote" char="&quot;"/>
 				<RegExpr attribute="String Literal" context="#stay" String="'([^{}\[\]()\s\|\:\,\.])*"/>
 				<RegExpr attribute="String Literal" context="#stay" String="'$"/>
+				<RegExpr attribute="String Literal" context="#stay" String="「.*」"/>
+				<RegExpr attribute="String Literal" context="#stay" String="「$"/>
 
 				<RegExpr attribute="At Name" context="#stay" String="@[^{}\[\]()\s\|\:\,\.]+"/>
 
@@ -64,7 +66,7 @@ Use replace all when updating this!
 				<RegExpr attribute="Method Call" context="#stay" String="\.[^{}\[\]()\s\|\:\,\.]+"/>
 			</context>
 
-			<context name="Javascript Literal" attribute="Javascript Literal" lineEndContext="#stay">
+			<context name="Javascript Literal" attribute="Javascript Literal" lineEndContext="#pop">
 				<DetectChar attribute="JavascriptLiteral" context="#pop" char="`"/>
 			</context>
 

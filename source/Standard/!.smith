@@ -1,16 +1,15 @@
-‣‣ TODO
-	`throw new Error("TODO")`
+use ✘
+
+#‣‣ TODO
+#	✘ 'TODO
 
 ‣‣ loop fun
 	`
-	function() {
 		while (true) {
 			var result = body();
 			if (Option.Some['subsumes?'](body))
 				return body.value;
 		}
-	}();
-	`
 
 ‣‣ while condition do
 	loop
@@ -18,7 +17,7 @@
 			do.of
 			None
 		|
-			Some do.of
+			Some 0
 
 ‣‣ do-while do condition
 	loop

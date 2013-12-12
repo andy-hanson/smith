@@ -1,28 +1,8 @@
 fs = require 'fs'
-
-join = (parent, sub) ->
-	if parent == ''
-		sub
-	else
-		"#{parent}/#{sub}"
-
-#allRecursiveFiles = (path) ->
-#	files = []
-#	recurseDirectory path, (fileName) ->
-#		files.push fileName
-#	files
+path = require 'path'
 
 relativeName = (dir, name) ->
-	check name.startsWith dir
 	name.withoutStart "#{dir}/" # also remove '/'
-
-#copyFlat = (inDir, outDir) ->
-#	(fs.readdirSync inDir).forEach (file) ->
-#	copyFile "#{inDir}/#{file}", "#{outDir}/#{file}"
-
-#copyFile = (inFile, outFile) ->
-#	content = fs.readFileSync inFile, 'utf8'
-#	fs.writeFileSync outFile, content, 'utf8'
 
 statKindSync = (name) ->
 	stat =
@@ -34,28 +14,16 @@ statKindSync = (name) ->
 	else
 		'other'
 
-extensionSplit = (name) ->
-	(name.split '.').allButAndLast()
-
 ensureDir = (dir) ->
 	unless fs.existsSync dir
 		fs.mkdirSync dir
 
-dirOf = (fullName) ->
-	(fullName.split '/').allButLast().join '/'
-
-plainName = (fullName) ->
-	(fullName.split '/').last()
-
 readTextSync = (fileName) ->
 	fs.readFileSync fileName, 'utf8'
 
-
-
-
 recurseDirectorySync = (dir, callBack) ->
 	(fs.readdirSync dir).forEach (file) ->
-		full = "#{dir}/#{file}"
+		full = path.join dir, file
 		switch statKindSync full
 			when 'file'
 				callBack full
@@ -64,6 +32,16 @@ recurseDirectorySync = (dir, callBack) ->
 			else
 				null
 
+
+extensionSplit = (name) ->
+	ext =
+		path.extname name
+	if ext == ''
+		[ name, '' ]
+	else
+		extNoDot =
+			ext.withoutStart '.'
+		[ (name.withoutEnd ext), extNoDot ]
 
 ###
 Callback takes dir and text.
@@ -74,10 +52,10 @@ readFilesNamedSync = (inDir, name, callBack) ->
 	type callBack, Function
 
 	filter = (fileName) ->
-		(plainName fileName) == name
+		(path.basename fileName) == name
 
 	recurseDirectoryFilesSync inDir, filter, (fileName, text) ->
-		callBack (dirOf fileName), text
+		callBack (path.dirname fileName), text
 
 
 
@@ -126,19 +104,17 @@ processDirectorySyncRecurse = (origInDir, inDir, outDir, filter, callBack) ->
 					[ shortName, content ] = toWrite
 					type shortName, String
 					type content, String
-					outFile = "#{outDir}/#{shortName}"
+					outFile = path.join outDir, shortName
 					fs.writeFileSync outFile, content, 'utf8'
 
 		else if stats.isDirectory()
-			ensureDir "#{outDir}/#{rel}"
+			ensureDir path.join outDir, rel
 			processDirectorySyncRecurse origInDir, full, outDir, filter, callBack
 
 module.exports =
+	extensionSplit: extensionSplit
 	relativeName: relativeName
-	dirOf: dirOf
 	recurseDirectorySync: recurseDirectorySync
 	processDirectorySync: processDirectorySync
-	extensionSplit: extensionSplit
 	readFilesNamedSync: readFilesNamedSync
 	statKindSync: statKindSync
-	join: join

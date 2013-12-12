@@ -1,5 +1,6 @@
 io = require './io'
 fs = require 'fs'
+path = require 'path'
 
 module.exports = class AllModules
 	constructor: (@baseDir) ->
@@ -28,33 +29,33 @@ module.exports = class AllModules
 				part.split ' '
 			check split.length == 2, ->
 				"Unexpected module def at line #{index}: #{part}"
-			[ name, path ] =
+			[ name, modulePath ] =
 				split
 			modules[name] =
-				@findModule dir, path
+				@findModule dir, modulePath
 
 		@moduleses[dir] = modules
 
 
 	findModule: (dir, name) ->
 		if name.startsWith './'
-			name = io.join dir, name.withoutStart './'
+			name = path.join dir, name.withoutStart './'
 		else if name.startsWith '../'
-			name = io.join dir, io.dirOf name.withoutStart '../'
+			name = path.join dir, path.dirname name.withoutStart '../'
 
-		full = io.join @baseDir, name
+		full = path.join @baseDir, name
 		if fs.existsSync full
 			check (io.statKindSync full) == 'directory'
-			name = io.join name, 'index'
+			name = path.join name, 'index'
 
 		extensions =
 			[ '.smith', '.coffee', '.js', '/index.smith', '/index.coffee', '/index.js' ]
 		mayBeModules =
-			extensions.map (extension) =>
+			extensions.map (extension) ->
 				"#{name}#{extension}"
 
 		for mayBeModule in mayBeModules
-			if fs.existsSync io.join @baseDir, mayBeModule
+			if fs.existsSync path.join @baseDir, mayBeModule
 				return name
 
 		fail "There is no module #{name}; tried #{mayBeModules}"
@@ -68,7 +69,7 @@ module.exports = class AllModules
 		type accessFile, String
 
 		accessDir =
-			io.dirOf accessFile
+			path.dirname accessFile
 
 		if (name.startsWith './') or name.startsWith '../'
 			@findModule accessDir, name
@@ -82,7 +83,7 @@ module.exports = class AllModules
 						# Search is over
 						throw new Error "Could not find module of name #{name}"
 					else
-						accessDir = io.dirOf accessDir
+						accessDir = path.dirname accessDir
 
 	@load = (dir) ->
 		type dir, String

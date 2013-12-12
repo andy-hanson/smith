@@ -6,7 +6,7 @@
 	"description":
 		"smith language",
 	"main":
-		"./js/run",
+		"./compiler-js/index",
 	"scripts": {
 		"test": "nada"
 	},
@@ -17,9 +17,12 @@
 		"optimist": ">=0.6.0",
 		"requirejs": ">=2.1.0",
 		"source-map": ">=0.1.31",
-		"source-map-support": ">=0.1.31",
-		"watch": ">=0.8.0"
+		"source-map-support": ">=0.2.5",
+		"watch": ">=0.8.0",
+		"just-the-job": ">=0.0.0"
 	},
+	"repository":
+		"https://github.com/andy-hanson/smith/",
 	"author":
 		"andy-hanson",
 	"license":

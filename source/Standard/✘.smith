@@ -1,14 +1,14 @@
 use Fun
 
 ‣‣ of message
-	`function() { throw new Error(message) }()`
+	`
+		throw new Error(message)
 
 ‣‣ try-catch try:Fun catch:Fun
 	try-catch-finally try catch { }
 
 ‣‣ try-catch-finally try:Fun catch:Fun finally:Fun
 	`
-	(function() {
 		var res;
 		try {
 			res = _try();
@@ -20,13 +20,11 @@ use Fun
 			_finally();
 		}
 		return res;
-	})()
-	`
 
 
 
 
-	
+
 
 
 

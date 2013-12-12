@@ -5,12 +5,9 @@ use ./Fun
 
 ‣‣ of x y:Fun
 	`
-	function()
-	{
 		var yv =
 			y()
 		if (!x['='](yv))
 			throw new Error(x + " ≠ " + yv);
-	}()
-	`
+	()
 

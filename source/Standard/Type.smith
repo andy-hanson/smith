@@ -26,19 +26,11 @@ use Singleton
 	‣read proto
 	‣read id
 
-	‣ self
-		`this`
-
 	‣ toString
 		"<Type {name}>"
 
 	‣ subsumes? a
 		`a['__is-a-id-' + this._id] == true`
-
-	‣ sub-type-id? typeid
-		`this.__id == typeid || this.__parents.some(function(parent) {
-			return parent['sub-type-id?'](typeid)
-		})`
 
 	‣ sub-type? type
 		`true` #`(this === type) || ???`

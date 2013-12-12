@@ -27,6 +27,15 @@ lexQuote = (quoteType, stream, oldIndent) ->
 	type stream, Stream
 	type oldIndent, Number
 
+	closeQuote =
+		switch quoteType
+			when '`', '"'
+				quoteType
+			when '「'
+				'」'
+			else
+				fail()
+
 	escape =
 		't': '\t'
 		'n': '\n'
@@ -46,14 +55,24 @@ lexQuote = (quoteType, stream, oldIndent) ->
 				read.tail() # skip initial newline
 			else
 				read
-		lit =
-			new T.StringLiteral stream.pos, text
 
-		if quoteType == "'"
-			lit
+		x =
+			switch quoteType
+				when '"'
+					lit = new T.StringLiteral stream.pos, text
+					out.push lit
+					new T.Group startPos, stream.pos, '"', out
+				when '`'
+					kind =
+						if indented then 'indented' else 'plain'
+					new T.JavascriptLiteral stream.pos, text, kind
+				when '「'
+					new T.StringLiteral stream.pos, text
+
+		if indented
+			[ x, (new T.Special stream.pos, '\n') ]
 		else
-			out.push lit
-			new T.Group startPos, stream.pos, '"', out
+			x
 
 	loop
 		ch = stream.readChar()
@@ -61,7 +80,7 @@ lexQuote = (quoteType, stream, oldIndent) ->
 		if ch == undefined
 			throw new Error "Unclosed quote starting at #{startPos}"
 
-		else if ch == '\\'
+		else if ch == '\\' and quoteType != '`'
 			next = stream.readChar()
 			read += (escape[next] or next)
 
@@ -83,9 +102,9 @@ lexQuote = (quoteType, stream, oldIndent) ->
 			if nowIndent < quoteIndent
 				return finish()
 			else
-				read += '\n' + (nowIndent - quoteIndent).repeat '\t'
+				read += '\n' + '\t'.repeated nowIndent - quoteIndent
 
-		else if ch == quoteType and not indented
+		else if ch == closeQuote and not indented
 			return finish()
 
 		else
@@ -103,10 +122,9 @@ lexPlain = (stream, inQuote) ->
 			# No \n precedes '|' or '.x'
 			out.pop()
 
-	#nameChar = /[a-zA-Z!$%^&*\-+=<>?\/0-9‣]/
 	# not space, not bracket, not punc, not quote,
-	# not comment, not bar, not JS literal, not @, not :
-	nameChar = /[^\s\(\[\{\)\]\}\.;,'"#\|`@\:]/
+	# not comment, not bar, not @, not :,
+	nameChar = /[^\s\(\[\{\)\]\}\.;,'"`「」#\|@\:]/
 	digit = /[0-9]/
 	numChar = /[0-9]/
 
@@ -118,6 +136,14 @@ lexPlain = (stream, inQuote) ->
 		if name.isEmpty()
 			throw new Error "Expected name at #{pos}, got nothing"
 		name
+
+	maybeTake2More = (ch) ->
+		isMore = stream.peek() == ch
+		if isMore
+			stream.readChar()
+			check stream.readChar() == ch, ->
+				"Expected #{ch} at #{pos}"
+		isMore
 
 	while ch = stream.peek()
 		pos = stream.pos
@@ -198,12 +224,6 @@ lexPlain = (stream, inQuote) ->
 				removePrecedingNL()
 				new GroupPre pos, ch
 
-			else if ch == '`'
-				stream.readChar()
-				js = stream.takeNotMatching /`/
-				stream.readChar()
-				new T.JavascriptLiteral pos, js
-
 			else if ch == ' '
 				stream.takeMatching /\s/
 				[]
@@ -250,7 +270,7 @@ lexPlain = (stream, inQuote) ->
 					throw new Error \
 						"#{pos} too indented! Was #{old}, now #{now}"
 
-			else if ch == '"'
+			else if ['`', '「', '"'].contains ch
 				stream.readChar()
 				lexQuote ch, stream, indent
 

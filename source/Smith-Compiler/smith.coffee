@@ -2,6 +2,7 @@ require './helpers'
 #[ './helpers', './parse', './lex', './compile', 'fs', 'optimist']
 io = require './io'
 fs = require 'fs'
+path = require 'path'
 optimist = require 'optimist'
 smithCompile = require './compile'
 coffee = require 'coffee-script'
@@ -100,9 +101,9 @@ class Smith
 
 	watch: ->
 		toShortName = (inName) =>
-			inName.withoutStart "#{@inDir}/"
-		toOutName = (inName) =>
-			"#{@outDir}/#{toShortName inName}"
+			io.relativeName @inDir, inName
+		toOutName = (inName) ->
+			path.join outDir, toShortName inName
 
 		compileAndWrite = (inFile) =>
 			type inFile, String
@@ -125,8 +126,8 @@ class Smith
 			monitor.on 'changed', compileAndWrite
 			monitor.on 'removed', (inFile) =>
 				@log "#{inFile} was deleted."
-				for outShort in outNames (toShortName inFile)
-					outFile = "#{outDir}/#{outShort}"
+				for shortOut in outNames (toShortName inFile)
+					outFile = path.join @outDir, shortOut
 					@log "Removing #{outFile}"
 					fs.unlink outFile, (err) ->
 						throw err if err?
@@ -134,7 +135,7 @@ class Smith
 	compileAndWrite: (inFile, text) ->
 		(@compile inFile, text).forEach (compiled) =>
 			[ shortOut, text ] = compiled
-			outFile = "#{@outDir}/#{shortOut}"
+			outFile = path.join @outDir, shortOut
 			fs.writeFile outFile, text, (err) =>
 				throw err if err?
 				@log "Wrote to #{outFile}"
@@ -152,31 +153,29 @@ class Smith
 
 main = ->
 	argv =
-		optimist.options
+		optimist
+		.usage('I am usage string')
+		.options
 			i:
 				alias: 'in'
-				describe: 'ay ay ay!'
+				describe: 'Source files top-level directory'
 				default: 'source'
 			o:
 				alias: 'out'
-				describe: 'waaa'
+				describe: 'Compiled output directory'
 				default: 'js'
 			w:
 				alias: 'watch'
-				describe: 'hohoho'
+				describe: 'Wait to respond to changes in source directory'
 				default: no
 			q:
 				alias: 'quiet'
-				describe:' yoyoyo'
+				describe:' Disables logging'
 				default: no
 			j:
 				alias: 'just'
-				describe: 'rururu'
+				describe: 'Only compile this file'
 				default: null
-			s:
-				alias: 'is-std'
-				describe: 'sususu'
-				default: no
 		.argv
 
 	unless argv.help

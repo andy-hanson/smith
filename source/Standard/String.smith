@@ -12,7 +12,6 @@ S.do
 
 	‣‣ of a
 		`
-		(function() {
 			switch (typeof a) {
 				case 'undefined':
 					return 'Undefined';
@@ -23,8 +22,6 @@ S.do
 				default:
 					return a.toString();
 			}
-		})()
-		`
 
 	#{
 	+index-of-substring~ |needle

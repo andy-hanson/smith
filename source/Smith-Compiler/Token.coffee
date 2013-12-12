@@ -58,13 +58,24 @@ class NumberLiteral extends Literal
 		@value.toString()
 
 class JavascriptLiteral extends Literal
-	constructor: (@pos, @text) ->
+	constructor: (@pos, @text, @kind) ->
+		type @pos, Pos
+		type @text, String
+		type @kind, String
 
 	show: ->
 		"`#{@text}`"
 
-	toJS: ->
-		"(#{@text})"
+	toJS: (fileName, indent) ->
+		switch @kind
+			when 'indented'
+				@text.indented indent
+			when 'plain'
+				"(#{@text})"
+			when 'special'
+				@text
+			else
+				fail
 
 class StringLiteral extends Literal
 	constructor: (@pos, @text) ->

@@ -103,6 +103,9 @@ String.prototype.count = Array.prototype.count = (em) ->
 			count += 1
 	count
 
+String.prototype.indented = (indent) ->
+	@replace /\n/g, "\n#{indent}"
+
 String.prototype.endsWith = (str) ->
 	(@slice @length - str.length) == str
 
@@ -156,22 +159,10 @@ global.fail = (err) ->
 global.todo = ->
 	throw new Error 'not implemented'
 
-global.type = (obj, type) ->
-	cond =
-		switch typeof obj
-			when 'function'
-				type == Function
-			when 'string'
-				type == String
-			when 'number'
-				type == Number
-			when 'boolean'
-				type == Boolean
-			when 'undefined'
-				throw new Error "Does not exist of type #{type.name}"
-			when 'object'
-				obj instanceof type
-
-	unless cond
+global.type = (val, type) ->
+	if val == null
+		throw new Error "Does not exist of type #{type.name}"
+	asObject = (-> @).call val
+	unless asObject instanceof type
 		throw new Error \
 			"Expected #{obj} (a #{obj.constructor.name}) to be a #{type.name}"

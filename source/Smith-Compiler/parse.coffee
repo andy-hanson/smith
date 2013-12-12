@@ -208,8 +208,10 @@ class Parser
 		new E.FunDef @pos, meta, null, [], body
 
 	fun: (tokens) ->
+		lastToken = tokens.last()
+
 		[ before, last ] =
-			if T.curlied tokens.last()
+			if T.curlied lastToken
 				tokens.allButAndLast()
 			else
 				[ tokens, null ]
@@ -222,7 +224,7 @@ class Parser
 		args =
 			@takeNewLocals argsTokens
 		[ meta, body ] =
-			if last?
+			if T.curlied last
 				@locals.withLocals args, =>
 					@funBody last.body
 			else
@@ -234,6 +236,8 @@ class Parser
 	Returns: [Meta, Block]
 	###
 	funBody: (tokens) ->
+		type tokens, Array
+
 		[ metaToks, restToks ] =
 			tokens.takeWhile (x) ->
 				(T.nl x) or \
