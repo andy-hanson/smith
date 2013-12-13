@@ -1,18 +1,74 @@
-use Type
-use Object
-use Bag
-use Fun
-use Option
+use Opt
 
 ∙ N
-	`global.Number`.to-type
+	`global.Number`.to-type 'Num
 
-∙ Math
+∙ JS-Math
 	`global.Math`
 
 N.do
-	(Bag 'round 'abs 'acos 'asin 'atan 'cos 'sin 'tan).each |name
-		me.‣ name (Fun.from-JS "return Math.{name}(this)")
+	‣ round
+		doc
+			Nearest integer to this number.
+			Rounds up when halfway between two integers.
+		eg
+			✔ 1
+				round 0.5
+			✔ 0
+				-1
+				round -0
+				round -0.5
+
+		JS-Math.round me
+
+	‣ round-down
+		eg
+			✔ -1
+				round-down -0.5
+			✔ 0
+				round-down 0.5
+		JS-Math.floor me
+
+	‣ round-up
+		eg
+			✔ 0
+				round-up -0.5
+			✔ 1
+				round-up 0.5
+		JS-Math.ceil me
+
+	‣ abs
+		JS-Math.abs me
+
+	‣ acos
+		JS-Math.acos me
+
+	‣ cos
+		eg
+			✔ 1
+				0.cos
+			✔ 0
+				π/2.cos
+			✔ -1
+				π.sin
+			✔ 0
+				π3/2.sin
+		JS-Math.cos me
+
+	‣ sin
+		eg
+			✔ 0
+				0.sin
+			✔ 1
+				π/2.sin
+			✔ 0
+				π.sin
+			✔ -1
+				π3/2.sin
+		JS-Math.sin me
+
+	‣ tan
+		JS-Math.tan me
 
 	‣ < a:N
 		`this < a`
@@ -38,7 +94,7 @@ N.do
 	‣ ÷ divisor:N
 		`this / divisor`
 
-	‣ // divisor:N
+	‣ whole-÷ divisor:N
 		(÷ divisor).floor
 
 	‣ negate
@@ -57,10 +113,10 @@ N.do
 		= 0
 
 	‣ round-down
-		Math.floor me
+		JS-Math.floor me
 
 	‣ round-up
-		Math.ceil me
+		JS-Math.ceil me
 
 	‣ difference a:N
 		(- a).abs
@@ -78,10 +134,10 @@ N.do
 		+ 1
 
 	‣ ^ power:N
-		Math.pow me power
+		JS-Math.pow me power
 
 	‣ log-e
-		Math.log me
+		JS-Math.log me
 
 	‣ log base:N
 		log-e.÷ base.log-e
@@ -108,10 +164,10 @@ N.do
 		× square
 
 	‣ square-root
-		`Math.sqrt(this)`
+		JS-Math.sqrt me
 
 	‣ cube-root
-		`Math.pow(this, 1/3)`
+		JS-Math.pow me (1./ 3)
 
 	‣ nth-root n:N
 		^ (n.inverse)
@@ -119,8 +175,8 @@ N.do
 	‣ int?
 		= round-down
 
-	‣ try-divide-evenly
-		(Option.Some (÷ divisor)).filter _int?
+	#‣ try-divide-evenly
+	#	(Option.Some (÷ divisor)).filter _int?
 
 	‣ factorial
 		TODO
@@ -172,14 +228,20 @@ N.do
 	‣ binary-shift-right-unsigned n:N
 		`this >>> n`
 
-	‣val Pi
-		`Math.PI`
+	‣val π/2
+		π.÷ 2
 
-	‣val Pi2
-		Pi.twice
+	‣val π
+		JS-Math,PI
+
+	‣val π3/2
+		π.+ π/2
+
+	‣val π2
+		π.twice
 
 	‣val E
-		`Math.E`
+		JS-Math,E
 
 	‣val Golden-Ratio
 		5.square-root.inc.half

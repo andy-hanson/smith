@@ -1,12 +1,15 @@
 io = require './io'
 fs = require 'fs'
 path = require 'path'
+Pos = require './Pos'
+{ cCheck } = require './CompileError'
+StringMap = require './StringMap'
 
 module.exports = class AllModules
 	constructor: (@baseDir) ->
 		type @baseDir, String
 		# Maps dir name to Modules
-		@moduleses = {}
+		@moduleses = new StringMap
 
 	###
 	dir - directory of the modules file
@@ -16,25 +19,30 @@ module.exports = class AllModules
 		type dir, String
 		type text, String
 
-		modules =
-			{}
+		try
+			modules =
+				new StringMap
 
-		parts =
-			text.split '\n'
+			parts =
+				text.split '\n'
 
-		for part, index in parts
-			if part == '' or part.startsWith '#'
-				continue
-			split =
-				part.split ' '
-			check split.length == 2, ->
-				"Unexpected module def at line #{index}: #{part}"
-			[ name, modulePath ] =
-				split
-			modules[name] =
-				@findModule dir, modulePath
+			for part, index in parts
+				if part == '' or part.startsWith '#'
+					continue
+				split =
+					part.split ' '
+				check split.length == 2, ->
+					"Unexpected module def at line #{index}: #{part}"
+				[ name, modulePath ] =
+					split
+				modules.add name, @findModule dir, modulePath
 
-		@moduleses[dir] = modules
+			@moduleses.add dir, modules
+
+		catch error
+			error.message =
+				"In module file #{dir}/modules: #{error.message}"
+			throw error
 
 
 	findModule: (dir, name) ->
@@ -61,29 +69,45 @@ module.exports = class AllModules
 		fail "There is no module #{name}; tried #{mayBeModules}"
 
 	###
-	name - What follows 'use'
-	accessFile: file accessing it
+	name: What follows 'use'
+	accessFile: file accessing it (relative to top)
 	###
-	get: (name, accessFile) ->
+	get: (name, pos, accessFile) ->
 		type name, String
+		type pos, Pos
 		type accessFile, String
 
 		accessDir =
 			path.dirname accessFile
 
-		if (name.startsWith './') or name.startsWith '../'
-			@findModule accessDir, name
-		else
-			loop
-				# TODO: hasownproperty
-				if @moduleses[accessDir]?[name]?
-					return @moduleses[accessDir]?[name]
-				else
-					if accessDir == ''
-						# Search is over
-						throw new Error "Could not find module of name #{name}"
+
+		relToTop = do =>
+			if (name.startsWith './') or name.startsWith '../'
+				@findModule accessDir, name
+			else
+				lookupDir =
+					accessDir
+				loop
+					# TODO: hasownproperty
+					maybe =
+						(@moduleses.maybeGet lookupDir)?.maybeGet name
+					if maybe?
+						return maybe
 					else
-						accessDir = path.dirname accessDir
+						cCheck (not ['', '.'].contains lookupDir), pos, ->
+							# Search is over
+							"Could not find module #{name}"
+
+						lookupDir = path.dirname lookupDir
+
+		full =
+			path.join @baseDir, relToTop
+
+		fullAccess =
+			path.join @baseDir, accessDir
+
+		'./' + path.relative fullAccess, full
+
 
 	@load = (dir) ->
 		type dir, String

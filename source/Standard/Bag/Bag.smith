@@ -1,4 +1,4 @@
-use String
+use Str
 
 ‣‣ of
 	`global.Array.prototype.slice.call(arguments)`

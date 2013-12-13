@@ -1,13 +1,7 @@
-use Type
-use Object
-use Bag
-use Fun
+use ./Str
 
-∙ S
-	`global.String`.to-type
-
-S.do
-	‣ + a:String
+Str.do
+	‣ ++ a:Str
 		`this + a`
 
 	‣‣ of a
@@ -39,9 +33,4 @@ S.do
 	‣ size
 		`this.length`
 
-	#(Bag '<' '>' '<=' '>=').each |name
-	#	‣ name (Fun.fromJS 'a' "return this {name} a")
-
 	# Iterator?
-
-export S

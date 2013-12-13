@@ -13,12 +13,14 @@ class Smith
 	constructor: (argv) ->
 		@inDir = argv.in
 		@outDir = argv.out
+		@printModuleDefines = argv['print-module-defines']
 		{ @watch, @quiet, @just } = argv
 		type @inDir, String
 		type @outDir, String
 		type @watch, Boolean
 		type @quiet, Boolean
 		type @just, String if @just
+		type @printModuleDefines, Boolean
 
 	log: (text) ->
 		unless @quiet
@@ -44,7 +46,7 @@ class Smith
 					out =
 						"#{name}.js"
 					{ code, map } =
-						smithCompile text, inFile, out, @allModules
+						smithCompile text, inFile, out, @
 
 					[	[ out, code ],
 						[ "#{out}.map", map.toString() ],
@@ -67,7 +69,7 @@ class Smith
 
 		catch error
 			error.message =
-				"Error compiling #{inFile}: #{error.message}"
+				"Error compiling #{inFile}:#{error.message}"
 			throw error
 
 	outNames: (inFile) ->
@@ -176,6 +178,10 @@ main = ->
 				alias: 'just'
 				describe: 'Only compile this file'
 				default: null
+			p:
+				alias: 'print-module-defines'
+				describe: 'Print whenever a module starts/finishes being defined'
+				default: no
 		.argv
 
 	unless argv.help

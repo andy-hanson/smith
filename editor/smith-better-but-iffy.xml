@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE language SYSTEM "language.dtd">
 
-<!-- kate -->
-
 <!--
+To highlight in Kate, put this file at:
+/usr/share/apps/katepart/syntax/smith.xml
+
 This regex detects word characters:
 ([^{}\[\]()\s\|\:\,\.])
 Use replace all when updating this!
 -->
-
+kate 
 <language name="Smith" section="Sources" extensions="*.smith" mimetype="">
 <highlighting>
 		<list name="special values">
@@ -16,9 +17,19 @@ Use replace all when updating this!
 			<item> it </item>
 		</list>
 
+		<list name="keywords">
+			<item> arguments </item>
+			<item> doc </item>
+			<item> in </item>
+			<item> out </item>
+			<item> eg </item>
+			<item> how </item>
+		</list>
+
 		<contexts>
 			<context name="Normal" attribute="Normal" lineEndContext="#stay">
 				<keyword attribute="Special Value" context="#stay" String="special values"/>
+				<keyword attribute="Keyword" context="#stay" String="keywords"/>
 
 				<DetectChar attribute="Javascript Literal" context="Javascript Literal" char="`"/>
 
@@ -42,19 +53,21 @@ Use replace all when updating this!
 				<keyword attribute="Lambda" context="#stay" String="lambdas"/>
 
 				<DetectChar attribute="Quote" context="Quote" char="&quot;"/>
-				<RegExpr attribute="String Literal" context="#stay" String="'[^']*'"/>
+				<RegExpr attribute="String Literal" context="#stay" String="'([^{}\[\]()\s\|\:\,\.])*"/>
+				<RegExpr attribute="String Literal" context="#stay" String="'$"/>
+				<RegExpr attribute="String Literal" context="#stay" String="「.*」"/>
+				<RegExpr attribute="String Literal" context="#stay" String="「$"/>
 
 				<RegExpr attribute="At Name" context="#stay" String="@[^{}\[\]()\s\|\:\,\.]+"/>
 
 				<RegExpr attribute="Capitalized" context="#stay" String="(^|\s)[A-Z][^{}\[\]()\s\|\:\,\.]*"/>
-
 
 				<RegExpr attribute="Action" context="#stay" String="[^{}\[\]()\s\|\:\,\.]*!"/>
 				<RegExpr attribute="Method Action" context="#stay" String="\.[^{}\[\]()\s\|\:\,\.]*!"/>
 				<RegExpr attribute="Method Call" context="#stay" String="\.[^{}\[\]()\s\|\:\,\.]+"/>
 			</context>
 
-			<context name="Javascript Literal" attribute="Javascript Literal" lineEndContext="#stay">
+			<context name="Javascript Literal" attribute="Javascript Literal" lineEndContext="#pop">
 				<DetectChar attribute="JavascriptLiteral" context="#pop" char="`"/>
 			</context>
 
@@ -80,7 +93,7 @@ Use replace all when updating this!
 				<RegExpr attribute="Escaped Char" context="#stay" String="\\."/>
 				<HlCStringChar attribute="String Char" context="#stay"/>
 				<DetectChar attribute="String" context="#pop" char="&quot;"/>
-				<RegExpr attribute="Interpolated" context="#stay" String="\{.*\}"/>
+				<RegExpr attribute="Interpolated" context="#stay" String="\{[^\}]*\}"/>
 			</context>
 		</contexts>
 
@@ -101,6 +114,7 @@ Use replace all when updating this!
 			<itemData name="Javascript Literal"		defStyleNum="dsOthers" color="#ff0080" bold="1"/>
 
 			<itemData name="Special Value"	defStyleNum="dsKeyword" color="#008000"/>
+			<itemData name="Keyword"	defStyleNum="dsKeyword" color="#000080"/>
 
 			<itemData name="Local Start"	defStyleNum="dsKeyword" color="#0000f0"/>
 			<itemData name="Local Defd"		defStyleNum="dsKeyword" color="#0080f0"/>

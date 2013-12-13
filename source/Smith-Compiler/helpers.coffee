@@ -160,9 +160,10 @@ global.todo = ->
 	throw new Error 'not implemented'
 
 global.type = (val, type) ->
-	if val == null
+	unless val?
 		throw new Error "Does not exist of type #{type.name}"
-	asObject = (-> @).call val
+	asObject = Object val
 	unless asObject instanceof type
 		throw new Error \
-			"Expected #{obj} (a #{obj.constructor.name}) to be a #{type.name}"
+			"Expected #{asObject} (a #{asObject.constructor.name}) " +
+			"to be a #{type.name}"

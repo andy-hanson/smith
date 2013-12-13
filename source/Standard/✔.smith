@@ -1,7 +1,5 @@
-use! Type
 use Bool
-use ./Object
-use ./Fun
+use Fun
 
 ‣‣ of x y:Fun
 	`

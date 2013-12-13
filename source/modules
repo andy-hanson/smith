@@ -1,11 +1,12 @@
 Prelude Standard/Prelude
+Standard Standard/index
 
 # Far future: these should be default
 ✔ Standard/✔
 ✘ Standard/✘
 Bool Standard/Bool
 Console Standard/Console
-String Standard/String
+Str Standard/Str
 Fun Standard/Fun
 Bag Standard/Bag/index
 
@@ -13,10 +14,10 @@ Math Standard/Math/index
 
 
 Singleton Standard/Singleton
-Type Standard/Type
+Any Standard/Any
+Any-Type Standard/Any-Type
 Meta Standard/Meta
-Object Standard/Object
-Option Standard/Option
+Opt Standard/Opt
 Random Standard/Math/Random
 
 X X

@@ -1,0 +1,11 @@
+`_prelude.Any`.‣ 'do |fun
+	fun.unbound.call `this`
+
+use! Any-Type
+use! Any
+use! ./Fun-Methods
+
+use! ./Str-Methods
+use! Math
+
+

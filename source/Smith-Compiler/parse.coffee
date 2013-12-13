@@ -2,51 +2,8 @@ T = require './Token'
 E = require './Expression'
 Pos = require './Pos'
 AllModules = require './AllModules'
-
-class Locals
-	constructor: ->
-		@names = { } # maps strings to Locals
-		@frames = [] # each frame is a list of Locals
-		@addFrame()
-
-	addFrame: ->
-		@frames.push []
-
-	addLocal: (local) ->
-		type local, E.Local
-		@frames.last().push local
-		check not @names[local.text]?, =>
-			"Already have local #{local}, it's #{@names[local.text]}"
-		@names[local.text] = local
-
-	popFrame: ->
-		last = @frames.pop()
-		last.forEach (local) =>
-			delete @names[local.text]
-
-	withLocal: (loc, fun) ->
-		@withLocals [loc], fun
-
-	withLocals: (locals, fun) ->
-		@addFrame()
-
-		locals.forEach (local) =>
-			@addLocal local
-
-		res = fun()
-
-		@popFrame()
-
-		res
-
-	get: (name) ->
-		type name, T.Name
-		if @names.hasOwnProperty name.text
-			@names[name.text]
-
-	toString: ->
-		"<locals #{Object.keys @names}>"
-
+Locals = require './Locals'
+{ cFail } = require './CompileError'
 
 class Parser
 	constructor: (@typeName, @fileName, @allModules) ->
@@ -58,7 +15,6 @@ class Parser
 			new Locals
 		@pos =
 			Pos.start
-		@_canAccessThis = yes
 
 	all: (tokens) ->
 		typeLocal =
@@ -87,7 +43,7 @@ class Parser
 		type tokens, Array
 
 		if tokens.isEmpty()
-			return new E.Void @pos
+			return new E.Null @pos
 
 		tok0 = tokens[0]
 
@@ -172,8 +128,6 @@ class Parser
 				switch t.kind
 					when 'me'
 						new E.Me t.pos
-					when 'arguments'
-						new E.Arguments t.pos
 					else
 						unexpected t
 			else
@@ -188,16 +142,20 @@ class Parser
 		new E.Quote quote.pos, quote.body.map (part) =>
 			@soloExpression part
 
-	get: (name) ->
-		type name, T.Name
-
+	_accessLocalOr: (name, orElse) ->
 		local = @locals.get name
 		if local?
 			new E.LocalAccess @pos, local
-		else if @_canAccessThis
-			E.Call.me name.pos, name.text, []
 		else
-			throw new Error "Cannot access 'this' inside eg at #{@pos}"
+			orElse()
+
+	get: (name) ->
+		@_accessLocalOr name, ->
+			E.Call.me name.pos, name.text, []
+
+	getLocalOnly: (name) ->
+		@_accessLocalOr name, =>
+			cFail @pos, "Type #{name.text} must be a local"
 
 	###
 	TODO: 'it'
@@ -215,12 +173,12 @@ class Parser
 				tokens.allButAndLast()
 			else
 				[ tokens, null ]
-
 		[ returnType, argsTokens ] =
 			if T.typeName before[0]
 				[ (@get before[0]), before.tail() ]
 			else
 				[ null, before ]
+
 		args =
 			@takeNewLocals argsTokens
 		[ meta, body ] =
@@ -255,7 +213,9 @@ class Parser
 
 		[ meta, body ]
 
-
+	###
+	Eg: ‣deffer def-name arg1 arg2
+	###
 	def: (def, tokens) ->
 		type def, T.Def
 		type tokens, Array
@@ -272,12 +232,6 @@ class Parser
 
 		E.Call.me @pos, def.name, args
 
-	withoutThisAccess: (fun) ->
-		@_canAccessThis = no
-		val = fun()
-		@_canAccessThis = yes
-		val
-
 	meta: (meta, token) ->
 		return if T.nl token
 
@@ -293,18 +247,13 @@ class Parser
 					@block curlied.body
 
 				switch token.kind
-					when 'in'
+					when 'in', 'out'
 						getBlock()
 					when 'out'
 						@locals.withLocal (E.Local.res @pos), getBlock
-					when 'eg'
-						@withoutThisAccess getBlock
 
 			else
 				fail()
-
-
-
 
 	takeNewLocals: (tokens) ->
 		out = []
@@ -328,7 +277,7 @@ class Parser
 
 		type =
 			if typeName?
-				@get typeName
+				@getLocalOnly typeName
 			else
 				null
 
@@ -337,10 +286,11 @@ class Parser
 	use: (tokens) ->
 		check tokens.length == 1, =>
 			"Did not expect anything after use at #{@pos}"
+
 		use =
 			new E.Use tokens[0], @fileName, @allModules
 		@locals.addLocal use.local
-		use
+		new E.DefLocal use.local, use
 
 	defLocal: (tokens, lazy) ->
 		type tokens, Array

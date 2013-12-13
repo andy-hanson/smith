@@ -1,134 +1,154 @@
-#unless typeof define == 'function'
-#	define = require('amdefine') module
-
-define ->
-	Function.prototype.unbound = ->
-		if @_unbound?
-			@_unbound._meta = @_meta
-			@_unbound
-		else
-			@
-
-	Function.prototype['to-type'] = ->
-		@['_to-type'] ?= new constructType @name, @prototype
-		@['_to-type']
-
-	next_type_id = 0
-
-	constructType = (name, proto) ->
-		if typeof name != 'string'
-			throw new Error '?'
-
-		@_id = next_type_id
-		next_type_id += 1
-
-		@_name = name
-
-		[ @_super, @_proto ] =
-			if proto == Object.prototype
-				[ null, proto ]
-			else
-				[ Object['to-type'](),
-					proto ? {} ]
-
-		@_proto.type = =>
-			@
-		@_proto["__is-a-id-#{@_id}"] = yes
-		@_any_defines = no
-
-	constructType.prototype = {}
-
-	Type = new constructType 'Type', constructType.prototype
-
-	Type._proto['‣'] = (name, method) ->
-		@_proto[name] = method.unbound()
-		@_any_defines = yes
-
-	# TODO: move
-	Type['‣'] 'is', (superType) ->
-		if Object.keys @_proto > 1
-			throw new Error "is must be first, already have #{Object.keys @_proto}"
-
-		@_super = superType['to-type']()
-
-		newProto = Object.create @_super.proto()
-		newProto.type = @_proto.type
-		@_proto = newProto
-
-	Type['‣'] 'of', ->
-		obj = Object.create @_proto
-		@_proto.construct.apply obj, Array.prototype.slice.call arguments
-		obj
-
-	Type['‣'] 'to-type', ->
+Function.prototype.unbound = ->
+	if @_unbound?
+		@_unbound._meta = @_meta
+		@_unbound
+	else
 		@
 
-	Type['‣'] 'construct', constructType
+Function.prototype['to-type'] = (name, maybeSuper) ->
+	name ?= @name
+	@['_to-type'] ?=
+		makeAnyType name, maybeSuper, @prototype
+	@['_to-type']
 
-	Type['‣'] 'export', (exported) ->
-		@__exported = exported
+next_type_id = 0
 
-	checkExists = (name, a) ->
-		unless a?
-			throw new Error "#{name} does not exist."
+AnyType = null
+Any = null
 
-	Type['‣'] 'check', (name, a) ->
-		checkExists name, a
-		unless @['subsumes?'](a)
-			throw new Error "#{name} is not a #{@}; is #{a}"
+makeAnyType = (name, maybeSuper, maybeProto) ->
+	unless (Object name) instanceof String
+		throw new Error "name is not a String; is #{name}"
 
-	bind = (object, name) ->
-		fun = object[name]
+	superType = superMetaType = metaType = null
 
-		if fun instanceof Function
-			x.unbound().bind object
+	if maybeProto == Object.prototype
+		superType = null
+		superMetaType = null
+		metaType = AnyType
+		# metaType._proto is made when constructing AnyType
+	else
+		superType =
+			maybeSuperType ? Any
+		superMetaType = superType.type()
+
+		metaType = Object.create superMetaType._proto
+		metaType._proto = Object.create superMetaType._proto
+
+	type = Object.create metaType._proto
+
+	metaType._name = "#{name}-Type"
+	type._name = name
+
+	metaType._super = superMetaType
+	type._super = superType
+
+	metaType._id = next_type_id
+	type._id = next_type_id + 1
+	next_type_id += 2
+
+	type._proto =
+		maybeProto ? Object.create superType._proto
+
+	metaType._super = superMetaType
+	type._super = superType
+
+	metaType._proto.type = -> metaType
+	metaType._proto["__is-a-id-#{metaType._id}"] = yes
+
+	type._proto.type = -> type
+	type._proto["__is-a-id-#{type._id}"] = yes
+
+	type
+
+anyTypeProto = { }
+
+AnyType = { _proto: anyTypeProto }
+#fake_super =
+	# Takes the role of Any before it exists.
+#	{ type: -> AnyType }
+
+Any = Object['to-type'] 'Any', null
+
+AnyType = makeAnyType 'Any-Type', null, anyTypeProto
+
+AnyType._proto['‣'] = (name, method) ->
+	@_proto[name] = method.unbound()
+
+AnyType['‣'] 'construct', makeAnyType
+
+###
+AnyType's of is special
+###
+AnyType.of = (name, maybeSuperType) ->
+	if @['_is_meta']
+		throw up
+
+	makeAnyType name, maybeSuperType
+
+###
+Instances of AnyType (except AnyType itself) are not as special.
+###
+AnyType['‣'] 'of', ->
+	obj = Object.create @_proto
+	@_proto.construct.apply obj, Array.prototype.slice.call arguments
+	obj
+
+Meta =
+	AnyType.of 'Meta'
+
+Meta['‣'] 'construct', (meta) ->
+	if meta?
+		{ @_doc, @_in, @_out, @_eg, @_how } = meta
+
+
+bind = (object, name) ->
+	fun = object[name]
+
+	if fun instanceof Function
+		x.unbound().bind object
+	else
+		if fun?
+			throw new Error "Member #{name} of #{object} is not a Fun."
 		else
-			if fun?
-				throw new Error "Member #{name} of #{object} is not a Fun."
-			else
-				throw new Error "Object #{object} has no method #{name}."
+			throw new Error "Object #{object} has no method #{name}."
 
-	type = (name, fun) ->
-		tipe = Type.of name
+type = (name, maybeSuperType, fun) ->
+	tipe =
+		AnyType.of name, maybeSuperType
 
-		fun.call tipe
+	fun.call tipe
 
-		tipe.__exported ? tipe
+	tipe.__exported ? tipe
 
-	string = ->
-		Array.prototype.join.call arguments, ''
+string = ->
+	Array.prototype.join.call arguments, ''
 
-	Meta = Type.of 'Meta'
+fun = (delegate, unbound, meta) ->
+	f =
+		unbound.bind delegate
+	f._unbound =
+		unbound
+	f._meta =
+		Meta.of meta
+	f
 
-	Meta['‣'] 'construct', (meta) ->
-		if meta?
-			{ @_doc, @_in, @_out, @_eg, @_how } = meta
-
-	fun = (delegate, unbound, meta) ->
-		f =
-			unbound.bind delegate
-		f._unbound =
-			unbound
-		f._meta =
-			Meta.of meta
-		f
-
-	lazy = (delegate, make) ->
+lazy = (delegate, make) ->
+	get = ->
+		made =
+			make.call delegate
 		get = ->
-			made =
-				make.call delegate
-			get = ->
-				made
 			made
-		get
+		made
+	get
 
+module.exports =
 	fun: fun
 	bind: bind
 	string: string
 	type: type
 	lazy: lazy
-	checkExists: checkExists
-	Type: Type
+	Any: Any
+	'Any-Type': AnyType
 	Meta: Meta
-
 

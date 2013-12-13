@@ -1,4 +1,4 @@
-use String
+use Str
 
 ‣‣ log!
 	`global.console`.log `arguments[0]`

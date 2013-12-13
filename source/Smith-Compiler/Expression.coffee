@@ -31,23 +31,15 @@ class Expression
 
 		@nodeWrap chunk, fileName
 
-class Arguments extends Expression
-	constructor: (@pos) ->
 
-	compile: (fileName, indent) ->
-		'Array.prototype.slice.call(arguments)'
-
-class VoidExpression extends Expression
-
-
-class DefLocal extends VoidExpression
+class DefLocal extends Expression
 	constructor: (@local, @value) ->
 		type @local, Local
 		type @value, Expression
 		{ @pos } = @local
 
 	toString: ->
-		"<. #{@local.text} {#{@value.toString()}}>"
+		"<DefLocal #{@local.text} {#{@value.toString()}}>"
 
 	compile: (fileName, indent) ->
 		newIndent =
@@ -79,14 +71,14 @@ class Block extends Expression
 		type @pos, Pos
 		type @subs, Array
 
-		if subs.isEmpty() or subs.last() instanceof VoidExpression
-			@subs.push new Void @pos
+		if @subs.isEmpty()
+			@subs.push new Null @pos
 
 	toString: ->
 		'<BLOCK ' + (@subs.join '\n').indent() + '>\n'
 
 	toValue: (fileName, indent) ->
-		if @subs.length == 1
+		if @subs.length == 1 and not @subs[0] instanceof DefLocal
 			@subs[0].toNode fileName, indent
 		else
 			newIndent = indent + '\t'
@@ -98,12 +90,18 @@ class Block extends Expression
 					'})()' ]
 			@nodeWrap x, fileName
 
+	###
+	When nothing is returned.
+	###
 	noReturn: (fileName, indent) ->
 		parts =
 			@subs.map (sub) ->
 				sub.toNode fileName, indent
 		parts.interleave ";\n#{indent}"
 
+	###
+	Usual compile, where the last line returns.
+	###
 	compile: (fileName, indent) ->
 		[ allButLast, last ] =
 			@subs.allButAndLast()
@@ -119,24 +117,6 @@ class Block extends Expression
 
 		compiled.interleave ";\n#{indent}"
 
-	compileLast: (fileName, indent, doIfNotSpecial) ->
-		last =
-			@subs.last()
-		special =
-			if last instanceof Literal
-				lit = last.literal
-				(lit instanceof T.JavascriptLiteral) and lit.kind == 'indented'
-			else no
-
-		node = last.toNode fileName, indent
-
-		if special
-			node
-		else
-			doIfNotSpecial node
-
-
-
 	toMakeRes: (fileName, indent) ->
 		[ allButLast, last ] =
 			@subs.allButAndLast()
@@ -151,9 +131,25 @@ class Block extends Expression
 		compiled.push lastCompiled
 
 		x =
-			compiled.interleave "\n#{indent}"
+			compiled.interleave ";\n#{indent}"
 
 		@nodeWrap x, fileName
+
+	compileLast: (fileName, indent, doIfNotSpecial) ->
+		last = @subs.last()
+
+		node = last.toNode fileName, indent
+
+		if last instanceof Literal and T.indentedJS last.literal
+			node
+		else if last instanceof DefLocal
+			access =
+				new LocalAccess @pos, last.local
+			accessNode =
+				doIfNotSpecial access.toNode fileName, indent
+			[ node, ';\n', indent, accessNode ]
+		else
+			doIfNotSpecial node
 
 class Call extends Expression
 	constructor: (@subject, @verb, @args) ->
@@ -234,7 +230,7 @@ class Meta extends Expression
 								newNewIndent = newIndent + '\t'
 								body =
 									val.noReturn fileName, newNewIndent
-								[ 'function() {\n', newNewIndent, body, 	'\n', newIndent, '}' ]
+								[ '_f(this, function() {\n', newNewIndent, body, '\n', newIndent, '})' ]
 							else
 								fail()
 
@@ -419,17 +415,17 @@ class Quote extends Expression
 		[ '_s(', (nodes.join ', '), ')' ]
 
 
-class Use extends VoidExpression
+class Use extends Expression
 	constructor: (use, fileName, allModules) ->
 		type use, T.Use
 		type fileName, String
 		type allModules, AllModules
 
+		{ @pos } = use
 		localName =
 			(use.used.split '/').last()
 		@fullName =
-			allModules.get use.used, fileName
-		{ @pos } = use
+			allModules.get use.used, @pos, fileName
 		@local =
 			new Local (new T.Name @pos, localName, 'x'), null, use.lazy
 
@@ -438,16 +434,17 @@ class Use extends VoidExpression
 
 	compile: (fileName, indent) ->
 		val =
-			new Literal new T.JavascriptLiteral @pos, "_require('#{@fullName}')", 'special'
+			new Literal new T.JavascriptLiteral @pos,
+				"require('#{@fullName}')", 'special'
 
-		(new DefLocal @local, val).compile fileName, indent
+		val.compile fileName, indent
 
 
-class Void extends VoidExpression
+class Null extends Expression
 	constructor: (@pos) ->
 
 	toString: ->
-		"<VOID>"
+		"null"
 
 	compile: ->
 		[ 'null' ]
@@ -477,7 +474,6 @@ class QuoteExpression extends Expression
 ###
 
 module.exports =
-	Arguments: Arguments
 	Block: Block
 	Call: Call
 	DefLocal: DefLocal
@@ -493,5 +489,5 @@ module.exports =
 	Property: Property
 	Quote: Quote
 	Use: Use
-	Void: Void
+	Null: Null
 	Parend: Parend

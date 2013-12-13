@@ -44,6 +44,7 @@ jsWords =
 	protected
 	public
 	return
+	require
 	short
 	static
 	super

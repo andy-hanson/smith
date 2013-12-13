@@ -1,0 +1,35 @@
+use Any-Type
+use Str
+
+∙ A
+	`_prelude.Any`
+
+A.do
+	#{
+	‣ own-property~ name
+		(hasOwnProperty name).if
+			property nam
+	}#
+
+	#‣ property name
+	#	own-property.force
+
+	‣ set-property name:Str value
+		`this[name] = value`
+
+	‣ is-a type:Any-Type
+		type.subsumes? me
+
+	‣ identical? a
+		`this === a`
+
+	‣ = a
+		identical? a
+
+	‣ ≠ a
+		(= a).¬
+
+	‣ send name:Str
+		`this[name](Array.prototype.slice.call(arguments, 1))`
+
+export A

@@ -1,0 +1,97 @@
+use Singleton
+use Str
+use Fun
+
+∙ T
+	`_prelude['Any-Type']`
+
+T.do
+	‣ toString
+		"<Type {name}>"
+
+	‣ subsumes? a
+		`a['__is-a-id-' + this._id] == true`
+
+	‣ export exported
+		`
+			this.__exported = exported;
+
+	‣ check name a
+		`
+			if (!(Object(name) instanceof String))
+				throw new Error("First argument of 'check' must be a string");
+			if (a == null)
+				throw new Error("Undefined "+name+":"+this);
+			if (!this['subsumes?'](a))
+				throw new Error(name+"is not a "+this+"; is "+a);
+
+	‣ to-type
+		me
+
+	‣ method name:Str
+		`this.proto()[name]`
+		#proto.property name
+
+	‣ alias old-name:Str new-name:Str
+		∙ old
+			old-name
+		me.‣ new-name
+			`this[old].apply(this, arguments)`
+
+	# TODO: move to Singleton, does singleton
+	‣ ‣‣ name:Str method:Fun
+		`this[name] = method`
+
+	‣ ‣val name:Str make-val:Fun
+		me.‣‣ name make-val.cached
+
+	‣ ‣read name:Str
+		me.‣ name
+			`this['_' + name]`
+
+	‣read name
+	‣read super
+	‣read proto
+	‣read id
+
+	‣ toString
+		"<Type {name}>"
+
+	‣ sub-type? type
+		`true` #`(this === type) || ???`
+
+
+	‣ ‣type name do-to
+		∙ type
+			T name
+		∙ doto
+			do-to
+
+		`(doto == null) ? null : type.do(doto)`
+		type
+
+	‣ ‣object name do-to
+		∙ obj
+			Singleton name
+		∙ doto
+			do-to
+		#`(doto != null) ? obj.do(doto) : null`
+		obj.do do-to
+
+		obj
+
+#{
+Singleton.do
+	‣‣ of name:String
+		∙ type
+			Type name
+		type.do
+			is Singleton
+			+name
+				name
+		∙ single
+			type.of
+		single
+}#
+
+export T

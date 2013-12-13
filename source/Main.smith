@@ -1,6 +1,5 @@
-use! Type
-use! Object
-use! Math
+use! Standard
+
 use Bag
 use Console
 use ✔
@@ -8,100 +7,10 @@ use ✘
 
 use ./Standard/Vec
 
-✔ 8
-	2.twice.square-root.cube
 
-#{
-✘.try-catch-finally
-	✘ "Nope, failed"
-|error
-	✘ "not again!"
-|
-	Console.log! 'Finally!
-}#
+Console.log! (1.23.+ 4.56)
 
-use X
-Console.log! X
+#∙ f |x y ...z
+#	Console.log! z
 
-∙ str
-	「
-		a
-			{ not interpolated }
-		c
-
-∙ str-2
-	「a { b } c 」
-
-Console.log! str-2
-
-#{
-
-use! ./Type
-use! ./Object
-use ./Console
-use ./String
-use ./Bool
-use ./Bag
-use! ./Fun
-use! ./Number
-use! ./Meta
-use ./✓
-
-
-∙ get |name:String
-
-	Console.log! "getting {name}"
-	name
-
-∘ lazy
-	get "lazy"
-
-∙ eager
-	get "eager"
-
-Console.log! lazy
-Console.log! eager
-
-
-∙ x |:ReturnType y:Y z w:W
-	doc
-		one
-		two
-	in
-		in-condition
-	out
-		out-condition
-	eg
-		✓ 2
-			1.+ 3
-	how
-		how it's done
-
-	value
-
-x.meta.eg.of
-
-#{
-#‣
-∙ sum |x:Number y:Number
-	doc
-		the sum
-	in
-		Console.log! x
-	#how
-	#	magic!
-	#{
-	in
-		Console.log! 'in
-	out
-		Console.log! 'out
-	eg
-		Console.log! 'eg
-	how
-		does its stuff
-
-	Console.log! "Summing {x} and {y}"
-	x.+ y
-
-
-Console.log! (sum 3 4)
+#f 1 2 3 4 5

@@ -1,9 +1,8 @@
-use! Type
 use Fun
-use Option
+use Opt
 
 ∙ B
-	`global.Boolean`.to-type
+	`global.Boolean`.to-type 'Bool
 
 B.do
 	‣‣ Yes

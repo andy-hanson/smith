@@ -1,0 +1,13 @@
+#‣type Some Opt
+
+	#TODO
+
+	#data |value
+	#	()
+
+#	‣ construct value
+#		`this.__value = value`
+
+#‣object None Opt
+
+

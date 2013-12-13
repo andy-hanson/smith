@@ -8,7 +8,7 @@ class Token
 		@toString()
 
 class Name extends Token
-	@kinds = ['x', '_x', 'x_', '.x', '.x_', ',x', ':x', '‣x']
+	@kinds = ['x', '_x', 'x_', '.x', '.x_', ',x', ':x', '‣x', '...x']
 
 	constructor: (@pos, @text, @kind) ->
 		type @pos, Pos
@@ -115,7 +115,7 @@ class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
 		type @pos, Pos
 		check ['doc', 'how'].contains @kind
-		type @text, Token
+		type @text, Group
 
 	show: ->
 		"<MetaText #{@kind}>"
@@ -156,3 +156,5 @@ module.exports =
 		token instanceof Group and token.kind == '{'
 	metaGroup: (token) ->
 		token instanceof Group and [ 'in', 'out', 'eg' ].contains token.kind
+	indentedJS: (token) ->
+		token instanceof JavascriptLiteral and token.kind == 'indented'
