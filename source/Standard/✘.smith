@@ -4,6 +4,9 @@ use Fun
 	`
 		throw new Error(message)
 
+‣‣ try tried:Fun
+	try-catch try { }
+
 ‣‣ try-catch try:Fun catch:Fun
 	try-catch-finally try catch { }
 

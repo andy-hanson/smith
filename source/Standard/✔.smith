@@ -1,11 +1,21 @@
 use Bool
 use Fun
 
-‣‣ of x y:Fun
-	`
-		var yv =
-			y()
-		if (!x['='](yv))
-			throw new Error(x + " ≠ " + yv);
-	()
+‣‣ of condition:Bool message:Fun
+	condition.if
+		✘ message.of
+
+‣‣ fails fun:Fun
+	eg
+		fails
+			✘ 「whoops」
+
+		fails
+			fails
+				# doesn't fail
+
+	✘.try
+		fun.of
+		✘ 「did not fail」
+
 

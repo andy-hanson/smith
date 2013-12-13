@@ -1,4 +1,5 @@
 Pos = require './Pos'
+{ cCheck } = require './CompileError'
 
 class Token
 	toString: ->
@@ -104,12 +105,23 @@ class Special extends Token
 		"!#{x}!"
 
 class Use extends Token
-	constructor: (@pos, @used, @lazy) ->
+	constructor: (@pos, @used, @kind) ->
+		type @pos, Pos
 		type @used, String
-		type @lazy, Boolean
+		type @kind, String
+
+	lazy: ->
+		@kind == 'use'
 
 	show: ->
 		"<use #{@used}>"
+
+	shortName: ->
+		name =
+			(@used.split '/').last()
+		cCheck (not name.contains '.'), @pos,
+			'Local used should not have extension'
+		name
 
 class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
@@ -158,3 +170,7 @@ module.exports =
 		token instanceof Group and [ 'in', 'out', 'eg' ].contains token.kind
 	indentedJS: (token) ->
 		token instanceof JavascriptLiteral and token.kind == 'indented'
+	defLocal: (token) ->
+		token instanceof Special and ['∙', '∘'].contains token.kind
+	is: (token) ->
+		token instanceof Use and ['is', 'does'].contains token.kind

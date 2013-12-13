@@ -1,0 +1,6 @@
+is ./Super
+
+‣ construct
+	(use Console).log! "Constructing..."
+
+#does ./Trait

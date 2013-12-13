@@ -7,63 +7,69 @@ use Opt
 	`global.Math`
 
 N.do
+	‣ round-towards-0
+		doc
+			Rounds down if positive, rounds up if negative.
+		eg
+			✔ 0
+				0.5.round-towards-0
+			✔ 0
+				-0.5.round-towards-0
+
+		binary-or 0
+
 	‣ round
 		doc
 			Nearest integer to this number.
 			Rounds up when halfway between two integers.
 		eg
-			✔ 1
-				round 0.5
-			✔ 0
-				-1
-				round -0
-				round -0.5
+			✔= 1
+				0.5.round
+			✔= 0
+				-0.5.round
 
 		JS-Math.round me
 
 	‣ round-down
 		eg
-			✔ -1
+			✔= -1
 				round-down -0.5
-			✔ 0
+			✔= 0
 				round-down 0.5
 		JS-Math.floor me
 
 	‣ round-up
 		eg
-			✔ 0
+			✔= 0
 				round-up -0.5
-			✔ 1
+			✔= 1
 				round-up 0.5
 		JS-Math.ceil me
-
-	‣ abs
-		JS-Math.abs me
 
 	‣ acos
 		JS-Math.acos me
 
 	‣ cos
 		eg
-			✔ 1
+			✔= 1
 				0.cos
-			✔ 0
+			✔= 0
 				π/2.cos
-			✔ -1
+			✔= -1
 				π.sin
-			✔ 0
+			✔= 0
 				π3/2.sin
 		JS-Math.cos me
 
 	‣ sin
 		eg
-			✔ 0
+			✔= 0
 				0.sin
-			✔ 1
+			✔= 1
 				π/2.sin
-			✔ 0
+			✔= 0
 				π.sin
-			✔ -1
+			✔= -1
 				π3/2.sin
 		JS-Math.sin me
 
@@ -105,80 +111,177 @@ N.do
 	‣ = a
 		`(this + 0) === (a + 0)`
 
+	‣ abs
+		eg
+			✔= 1
+				1.abs
+			✔= 1
+				-1.abs
+
+		JS-Math.abs me
+
 	‣ positive?
+		eg
+			✔= 1.positive?
+			✔= 0.positive?.¬
+			✔= -1.positive?.¬
 		> 0
+
 	‣ negative?
+		eg
+			✔= 1.negative?.¬
+			✔= 0.negative?.¬
+			✔= -1.negative?
 		< 0
+
 	‣ zero?
 		= 0
 
-	‣ round-down
-		JS-Math.floor me
-
-	‣ round-up
-		JS-Math.ceil me
-
 	‣ difference a:N
+		eg
+			✔= 2
+				4.difference 6
+			✔= 2
+				6.difference 4
+
 		(- a).abs
 
 	‣ remainder divisor:N
+		doc
+			Remainder after division.
+		eg
+			✔= 1
+				3.remainder 2
 		`me % divisor`
 
 	‣ divisible? divisor:N
 		(remainder divisor).zero?
 
 	‣ dec
+		eg
+			✔= 1.5
+				2.5.dec
 		- 1
 
 	‣ inc
+		eg
+			✔= 2.5
+				1.5.inc
 		+ 1
 
 	‣ ^ power:N
+		eg
+			✔= 8
+				2.^ 3
+
 		JS-Math.pow me power
 
 	‣ log-e
 		JS-Math.log me
 
 	‣ log base:N
+		eg
+			✔= 3
+				8.log 2
+
 		log-e.÷ base.log-e
 
 	‣ log-10
+		eg
+			✔= 2
+				100.log-10
+
 		log-base 10
 
 	‣ log-2
+		eg
+			✔= 3
+				8.log-2
+
 		log-base 2
 
 	‣ inverse
+		eg
+			✔= 0.5
+				2.inverse
+
 		1.÷ me
 
 	‣ half
+		eg
+			✔= 2
+				4.half
+
 		÷ 2
 
 	‣ twice
+		eg
+			✔= 4
+				2.twice
+
 		× 2
 
 	‣ square
+		eg
+			✔= 4
+				2.square
+
 		× me
 
 	‣ cube
+		eg
+			✔= 8
+				2.cube
+
 		× square
 
 	‣ square-root
+		eg
+			✔= 2
+				4.square-root
+			✔=.fails
+				-1.square-root
+
 		JS-Math.sqrt me
 
 	‣ cube-root
+		eg
+			✔= 2
+				cube-root 8
+			✔= -1
+				cube-root -1
+
 		JS-Math.pow me (1./ 3)
 
 	‣ nth-root n:N
-		^ (n.inverse)
+		eg
+			✔= 2
+				8.nth-root 3
+		^ n.inverse
 
 	‣ int?
+		doc
+			Whether this number is an integer.
+		eg
+			✔= 42.int?
+				"42 is an integer!"
+			✔= 0.5.int?.not
+		how
+			Rounding a number down removes the non-integer part;
+			if this does nothing then it was an integer.
 		= round-down
 
 	#‣ try-divide-evenly
 	#	(Option.Some (÷ divisor)).filter _int?
 
 	‣ factorial
+		eg
+			✔.fails
+				-1.factorial
+			✔= 1
+				0.factorial
+			✔= 6
+				3.factorial
 		TODO
 		#(Range.int 1 inc).fold _×
 

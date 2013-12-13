@@ -16,20 +16,20 @@ next_type_id = 0
 AnyType = null
 Any = null
 
-makeAnyType = (name, maybeSuper, maybeProto) ->
+makeAnyType = (name, maybeIs, maybeProto) ->
 	unless (Object name) instanceof String
 		throw new Error "name is not a String; is #{name}"
 
 	superType = superMetaType = metaType = null
 
 	if maybeProto == Object.prototype
-		superType = null
-		superMetaType = null
+		#superType = null
+		#superMetaType = null
 		metaType = AnyType
 		# metaType._proto is made when constructing AnyType
 	else
 		superType =
-			maybeSuperType ? Any
+			maybeIs ? Any
 		superMetaType = superType.type()
 
 		metaType = Object.create superMetaType._proto
@@ -64,9 +64,6 @@ makeAnyType = (name, maybeSuper, maybeProto) ->
 anyTypeProto = { }
 
 AnyType = { _proto: anyTypeProto }
-#fake_super =
-	# Takes the role of Any before it exists.
-#	{ type: -> AnyType }
 
 Any = Object['to-type'] 'Any', null
 
@@ -80,11 +77,11 @@ AnyType['‣'] 'construct', makeAnyType
 ###
 AnyType's of is special
 ###
-AnyType.of = (name, maybeSuperType) ->
+AnyType.of = (name, maybeIs) ->
 	if @['_is_meta']
 		throw up
 
-	makeAnyType name, maybeSuperType
+	makeAnyType name, maybeIs
 
 ###
 Instances of AnyType (except AnyType itself) are not as special.
@@ -113,9 +110,9 @@ bind = (object, name) ->
 		else
 			throw new Error "Object #{object} has no method #{name}."
 
-type = (name, maybeSuperType, fun) ->
+type = (name, maybeIs, fun) ->
 	tipe =
-		AnyType.of name, maybeSuperType
+		AnyType.of name, maybeIs
 
 	fun.call tipe
 

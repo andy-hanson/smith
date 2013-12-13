@@ -7,6 +7,10 @@ use ✘
 
 use ./Standard/Vec
 
+∙ sub
+	(use ./Sub).of
+
+Console.log! sub.three
 
 Console.log! (1.23.+ 4.56)
 

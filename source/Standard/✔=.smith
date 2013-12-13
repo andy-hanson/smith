@@ -1,0 +1,7 @@
+use Fun
+
+export |x y:Fun
+	`
+		var yVal = y();
+		if (!(x['='](yVal)))
+			throw new Error(x + ' ≠ ' + yVal);

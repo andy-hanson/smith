@@ -1,6 +1,4 @@
-use Fun
-
-Fun.do
+(use Fun).do
 	‣read meta
 
 	‣‣ from-JS #...rest

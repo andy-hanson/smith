@@ -3,6 +3,7 @@ Standard Standard/index
 
 # Far future: these should be default
 ✔ Standard/✔
+✔= Standard/✔=
 ✘ Standard/✘
 Bool Standard/Bool
 Console Standard/Console

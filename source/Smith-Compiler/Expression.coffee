@@ -31,6 +31,18 @@ class Expression
 
 		@nodeWrap chunk, fileName
 
+###
+class Does extends Expression
+	constructor: (@local, @use) ->
+		type @local, Local
+		type @value, Expression
+###
+does = (use) ->
+	type use, Use
+	{ local, pos } = use
+	verb = new T.Name pos, 'does'
+	value = Call.me pos, verb, [ use ]
+	new DefLocal local, value
 
 class DefLocal extends Expression
 	constructor: (@local, @value) ->
@@ -53,7 +65,11 @@ class DefLocal extends Expression
 				@value.toNode fileName, newIndent
 		val =
 			if @local.lazy
-				[ '_l(this, function() { return ', inner, ' })' ]
+				if inner instanceof Use
+					# require is cached anyway
+					[ 'function() { return ', inner, '})' ]
+				else
+					[ '_l(this, function() { return ', inner, ' })' ]
 			else
 				inner
 		check =
@@ -256,7 +272,7 @@ class FunDef extends Expression
 				type @body, Block
 
 	toString: ->
-		"{#{@args} ->\n #{@body.toString().indent()}}"
+		"{#{@args} ->\n #{@body?.toString().indent()}}"
 
 	compile: (fileName, indent) ->
 		maybeMeta = (kind) =>
@@ -414,23 +430,21 @@ class Quote extends Expression
 
 		[ '_s(', (nodes.join ', '), ')' ]
 
-
 class Use extends Expression
 	constructor: (use, fileName, allModules) ->
 		type use, T.Use
 		type fileName, String
 		type allModules, AllModules
-
-		{ @pos } = use
-		localName =
-			(use.used.split '/').last()
+		{ @pos, @kind } = use
+		name =
+			new T.Name @pos, use.shortName(), 'x'
+		@local =
+			new Local name, null, use.lazy()
 		@fullName =
 			allModules.get use.used, @pos, fileName
-		@local =
-			new Local (new T.Name @pos, localName, 'x'), null, use.lazy
 
 	toString: ->
-		"<use #{@local.text}>"
+		"<#{@kind} #{@fullname}>"
 
 	compile: (fileName, indent) ->
 		val =
@@ -452,6 +466,7 @@ class Null extends Expression
 
 class Parend extends Expression
 	constructor: (@content) ->
+		type @content, Expression
 		{ @pos } = @content
 
 	toString: ->
@@ -460,18 +475,7 @@ class Parend extends Expression
 	compile: (fileName, indent) ->
 		@content.compile fileName, indent
 
-###
-class QuoteExpression extends Expression
-	constructor: (quote) ->
-		#type quote, Quote
-		{ @pos, @text } = quote
 
-	toString: ->
-		@compile()
-
-	compile: ->
-		'"' + @text + '"'
-###
 
 module.exports =
 	Block: Block
@@ -491,3 +495,4 @@ module.exports =
 	Use: Use
 	Null: Null
 	Parend: Parend
+	does: does

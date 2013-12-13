@@ -3,7 +3,7 @@ E = require './Expression'
 Pos = require './Pos'
 AllModules = require './AllModules'
 Locals = require './Locals'
-{ cFail } = require './CompileError'
+{ cCheck, cFail } = require './CompileError'
 
 class Parser
 	constructor: (@typeName, @fileName, @allModules) ->
@@ -16,14 +16,52 @@ class Parser
 		@pos =
 			Pos.start
 
+	###
+	Returns: [ iz, body ]
+	###
 	all: (tokens) ->
 		typeLocal =
 			E.Local.eager new T.Name @pos, @typeName, 'x'
 		@locals.addLocal typeLocal
 
-		b = @block tokens
-		b.subs.unshift new E.DefLocal typeLocal, new E.Me @pos
-		b
+		[ iz, bodyTokens ] = @readIs tokens
+		if iz?
+			type iz, E.Use
+			@locals.addLocal iz.local
+
+		body = @block bodyTokens
+		body.subs.unshift new E.DefLocal typeLocal, new E.Me @pos
+		body
+
+		[ iz, body ]
+
+	###
+	Returns: [ iz, restOfTokens ]
+	###
+	readIs: (tokens) ->
+		if T.is tokens[0]
+			[ (new E.Use tokens[0], @fileName, @allModules), tokens.tail() ]
+		else
+			[ null, tokens ]
+
+		###
+		iz = null
+		doesses = []
+
+		for token, index in tokens
+			continue if T.nl token
+			if T.isOrDoes token
+				if token.kind == 'is'
+					use = new E.Use token, @fileName, @allModules
+					iss = E.IsDoes use, 'is'
+				else
+					doesses.push E.IsDoes token, 'does'
+			else
+				break
+
+		return [ iz, doesses, tokens.slice index ]
+		###
+
 
 	block: (tokens) ->
 		type tokens, Array
@@ -33,14 +71,17 @@ class Parser
 				not toks.isEmpty()
 
 		parsed =
-			exprs.map (toks) =>
-				@expression toks
+			exprs.map (tokens) =>
+				@expression tokens
 
 		new E.Block @pos, parsed
 
+	valueExpression: (tokens) ->
+		@expression tokens, yes
 
-	expression: (tokens) ->
+	expression: (tokens, isValue = no) ->
 		type tokens, Array
+		type isValue, Boolean
 
 		if tokens.isEmpty()
 			return new E.Null @pos
@@ -48,10 +89,12 @@ class Parser
 		tok0 = tokens[0]
 
 		if tok0 instanceof T.Use
-			@use tokens
+			@use tokens, isValue
 		else if tok0 instanceof T.Def
+			cCheck not isValue, @pos,
+				'Can not have local def in inner expression.'
 			@def tok0, tokens
-		else if tok0 instanceof T.Special and ['∙', '∘'].contains tok0.kind
+		else if T.defLocal tok0
 			@defLocal tokens.tail(), tok0.kind == '∘'
 		else
 			slurped = []
@@ -81,60 +124,63 @@ class Parser
 				slurped.push x
 
 			[ e0, tail ] = slurped.unCons()
+
 			if e0 instanceof E.Call
 				check e0.args.isEmpty()
 				e0.args = tail
 				e0
+			else if tail.isEmpty()
+				e0
 			else
-				if tail.isEmpty()
-					e0
-				else
-					new E.Call.of e0, tail
+				new E.Call.of e0, tail
 
-	soloExpression: (t) ->
-		type t, T.Token
+	###
+	Expression of a single token
+	###
+	soloExpression: (token) ->
+		type token, T.Token
 
-		unexpected = ->
-			throw new Error "Unexpected #{t}"
+		@pos = token.pos
 
-		@pos = t.pos
+		unexpected = =>
+			cFail @pos, "Unexpected #{token}"
 
-		switch t.constructor
+		switch token.constructor
 			when T.Name
-				switch t.kind
+				switch token.kind
 					when 'x'
-						@get t
+						@get token
 					when '_x'
-						new E.ItFunDef t
+						new E.ItFunDef token
 					when 'x_'
-						new E.BoundFun.me t
+						new E.BoundFun.me token
 					else
-						unexpected t
+						unexpected token
 			when T.Group
-				switch t.kind
+				switch token.kind
 					when '|'
-						@fun t.body
+						@fun token.body
 					when '('
-						new E.Parend @expression t.body
+						new E.Parend @valueExpression token.body
 					when '['
-						unexpected t
+						unexpected token
 					when '{'
-						@curlied t
+						@curlied token
 					when '"'
-						@quote t
+						@quote token
 					else
-						unexpected t
+						unexpected token
 			when T.Special
-				switch t.kind
+				switch token.kind
 					when 'me'
-						new E.Me t.pos
+						new E.Me token.pos
 					else
-						unexpected t
+						unexpected token
 			else
-				if t instanceof T.Literal
-					new E.Literal t
+				if token instanceof T.Literal
+					new E.Literal token
 				else
-					unexpected t
+					unexpected token
 
 	quote: (quote) ->
 		type quote, T.Group
@@ -283,14 +329,24 @@ class Parser
 
 		E.Local.eager name, type
 
-	use: (tokens) ->
+	use: (tokens, isValue) ->
 		check tokens.length == 1, =>
 			"Did not expect anything after use at #{@pos}"
 
 		use =
-			new E.Use tokens[0], @fileName, @allModules
-		@locals.addLocal use.local
-		new E.DefLocal use.local, use
+			new E.Use tokens[0] , @fileName, @allModules
+
+		if isValue
+			cCheck use.kind == 'use', @pos,
+				"Use as value must be of kind 'use'"
+			use
+		else
+			cCheck use.kind != 'is', @pos, 'is must be at top of file'
+			@locals.addLocal use.local
+			if use.kind == 'does'
+				E.does use
+			else
+				new E.DefLocal use.local, use
 
 	defLocal: (tokens, lazy) ->
 		type tokens, Array
@@ -304,7 +360,8 @@ class Parser
 		locals =
 			@takeNewLocals before
 
-		check locals.length == 1 #TODO: array extraction
+		check locals.length == 1
+
 		local = locals[0]
 		local.lazy = lazy
 
@@ -329,12 +386,15 @@ class Parser
 		new E.DefLocal local, val
 
 
-
+###
+Returns: [ iz, body ]
+###
 parse = (tokens, typeName, fileName, allModules) ->
 	type tokens, Array
 	type typeName, String
 	type fileName, String
 	type allModules, AllModules
+
 	(new Parser typeName, fileName, allModules).all tokens
 
 module.exports = parse

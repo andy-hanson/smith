@@ -5,7 +5,9 @@ lexQuote = require './lexQuote'
 { cFail, cCheck } = require '../CompileError'
 
 keywords =
-	[ 'use', 'use!', 'me', '∙', '∘', 'doc', 'in', 'out', 'eg', 'how' ]
+	[ 'use', 'use!', 'is', 'does',
+		'me', '∙', '∘',
+		'doc', 'in', 'out', 'eg', 'how' ]
 
 module.exports = (stream, inQuote) ->
 	type stream, Stream
@@ -19,7 +21,9 @@ module.exports = (stream, inQuote) ->
 
 	# not space, not bracket, not punc, not quote,
 	# not comment, not bar, not @, not :,
-	nameChar = /[^\s\(\[\{\)\]\}\.;,'"`「」#\|@\:]/
+	nameChar = /[^\s\(\[\{\)\]\};,'"`「」#\|@\:\.]/
+	# like nameChar but can include .
+	usedChar = /[^\s\(\[\{\)\]\};,'"`「」#\|@\:]/
 	digit = /[0-9]/
 	numChar = /[0-9\.]/
 	groupChar = /[\(\[\{\)\]\}]/
@@ -81,10 +85,10 @@ module.exports = (stream, inQuote) ->
 					new T.Name pos, name, 'x_'
 				else if name in keywords
 					switch name
-						when 'use', 'use!'
+						when 'use', 'use!', 'is', 'does'
 							stream.takeMatching /\s/
-							used = stream.takeNotMatching /\n/
-							new T.Use pos, used, name == 'use'
+							used = stream.takeMatching usedChar
+							new T.Use pos, used, name
 						when 'doc', 'how'
 							lexQuote name, stream, indent
 						when 'in', 'out', 'eg'
