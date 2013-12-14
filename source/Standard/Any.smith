@@ -1,21 +1,50 @@
 use Any-Type
 use Str
+use Fun
 
 ∙ A
 	`_prelude.Any`
 
 A.do
 	#{
-	‣ own-property~ name
+	‣ property~ name
 		(hasOwnProperty name).if
 			property nam
 	}#
 
-	#‣ property name
-	#	own-property.force
+	‣ has-property? name:Str
+		`Object.prototype.hasOwnProperty`.call me name
+
+	#‣ property~ name:Str
+	#	(has-property? name).if
+	#		`this[name]`
+
+	‣ property name:Str
+		`
+			if (Object.prototype.hasOwnProperty.call(this, name)) {
+				return this[name];
+			}
+			else
+				throw new Error("" + this + " does not have property " + name);
+
+		#own-property~.force
+
+	‣ property-names
+		`global.Object`.keys me
+
+	‣ each-property fun:Fun
+		property-names.each |name
+			fun name (property name)
 
 	‣ set-property name:Str value
 		`this[name] = value`
+
+	‣ property! name:Str mod:Fun
+		∙ old
+			property name
+		∙ new
+			mod old
+		set-property name new
 
 	‣ is-a type:Any-Type
 		type.subsumes? me

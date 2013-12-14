@@ -1,0 +1,18 @@
+doc
+	Anything with an iterator.
+
+use Iterator
+
+type.do
+	doc
+		All Iterable types have these methods.
+
+	‣ iterator do-to
+		doc
+			DOC ME SO HARD
+
+		type‣ 'Iterator Iterator
+			do do-to
+
+		‣ iterator
+			(type.Iterator) me

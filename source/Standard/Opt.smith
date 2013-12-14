@@ -1,13 +1,19 @@
-#‣type Some Opt
-
-	#TODO
-
+‣sub-type Some
+	# TODO
 	#data |value
 	#	()
 
-#	‣ construct value
-#		`this.__value = value`
+	‣ construct value
+		set-property '_value value
 
-#‣object None Opt
+	‣read value
+
+	#‣ inspect
+	#	"(Some {value})"
+
+
+‣sub-object None
+
+
 
 

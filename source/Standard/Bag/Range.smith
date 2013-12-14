@@ -1,0 +1,32 @@
+is Iterable
+
+use Num
+
+use ✔
+
+‣ construct min:Num max:Num
+	in
+		✔ (min.< max)
+
+	set-property '_min min
+	set-property '_max max
+
+‣read min
+‣read max
+
+iterator
+	‣ construct range:Range
+		set-property '_range range
+		set-property '_current range.min
+
+	‣read range
+	‣read current
+
+	‣ next
+		(current.< range.max).?
+			∙ was
+				current
+			property! '_current _inc
+			was
+		|
+			stop

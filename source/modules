@@ -1,6 +1,8 @@
 Prelude Standard/Prelude
 Standard Standard/index
 
+Source-Map-Support source-map-support FORCE
+
 # Far future: these should be default
 ✔ Standard/✔
 ✔= Standard/✔=
@@ -10,9 +12,12 @@ Console Standard/Console
 Str Standard/Str
 Fun Standard/Fun
 Bag Standard/Bag/index
+Num Standard/Math/Num
 
 Math Standard/Math/index
 
+Iterable Standard/Iterable
+Iterator Standard/Iterator
 
 Singleton Standard/Singleton
 Any Standard/Any

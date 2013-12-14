@@ -302,7 +302,6 @@ class FunDef extends Expression
 			loc.typeCheck fileName, newIndent
 		meta =
 			@meta.toNode fileName, indent
-
 		[ '_f(this, function(', argNames, ') {',
 			'\n', newIndent,
 			argChecks,
@@ -328,8 +327,7 @@ class ItFunDef extends Expression
 		{ @pos } = @name
 
 	compile: (fileName, indent) ->
-		[ "(function(it) { return _c(it, '", @name.text,
-		"', Array.prototype.slice.call(arguments, 1)) })" ]
+		[ "_it('", @name.text, "')" ]
 
 ###
 func_

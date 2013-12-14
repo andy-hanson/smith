@@ -5,6 +5,7 @@ Pos = require './Pos'
 { cCheck } = require './CompileError'
 StringMap = require './StringMap'
 
+
 module.exports = class AllModules
 	constructor: (@baseDir) ->
 		type @baseDir, String
@@ -31,11 +32,23 @@ module.exports = class AllModules
 					continue
 				split =
 					part.split ' '
-				check split.length == 2, ->
+				unexpected = ->
 					"Unexpected module def at line #{index}: #{part}"
+				force =
+					split.length == 3
+				if force
+					check split[2] == 'FORCE', unexpected
+				else
+					check split.length == 2, unexpected
 				[ name, modulePath ] =
 					split
-				modules.add name, @findModule dir, modulePath
+				fullName =
+					if force
+						modulePath
+					else
+						@findFullName dir, modulePath
+
+				modules.add name, { fullName: fullName , force: force }
 
 			@moduleses.add dir, modules
 
@@ -44,12 +57,21 @@ module.exports = class AllModules
 				"In module file #{dir}/modules: #{error.message}"
 			throw error
 
+	###
+	Find the module from its (relative) file name.
+	Checks for .smith, .coffee, .js, or folder with index (.smith, .coffee, .js)
 
-	findModule: (dir, name) ->
+	dir - path relative to @baseDir
+	name - module name
+
+	Returns the usage name (with '.js' left implied)
+	###
+	findFullName: (dir, name, fromGet = no) ->
 		if name.startsWith './'
 			name = path.join dir, name.withoutStart './'
 		else if name.startsWith '../'
 			name = path.join dir, path.dirname name.withoutStart '../'
+		# else name is relative to top
 
 		full = path.join @baseDir, name
 		if fs.existsSync full
@@ -57,7 +79,7 @@ module.exports = class AllModules
 			name = path.join name, 'index'
 
 		extensions =
-			[ '.smith', '.coffee', '.js', '/index.smith', '/index.coffee', '/index.js' ]
+			[ '.smith', '.coffee', '.js' ]
 		mayBeModules =
 			extensions.map (extension) ->
 				"#{name}#{extension}"
@@ -66,9 +88,21 @@ module.exports = class AllModules
 			if fs.existsSync path.join @baseDir, mayBeModule
 				return name
 
-		fail "There is no module #{name}; tried #{mayBeModules}"
+		message =
+			if fromGet
+				"Could not find module #{name} in modules listing or locally"
+			else
+				"There is no module at #{name}; tried #{mayBeModules}"
+
+		fail message
+
+	noForce: (fullName) ->
+		fullName: fullName
+		force: no
 
 	###
+	Get the module for a given name.
+
 	name: What follows 'use'
 	accessFile: file accessing it (relative to top)
 	###
@@ -80,10 +114,9 @@ module.exports = class AllModules
 		accessDir =
 			path.dirname accessFile
 
-
-		relToTop = do =>
+		module = do =>
 			if (name.startsWith './') or name.startsWith '../'
-				@findModule accessDir, name
+				@noForce @findFullName accessDir, name
 			else
 				lookupDir =
 					accessDir
@@ -94,21 +127,26 @@ module.exports = class AllModules
 					if maybe?
 						return maybe
 					else
-						cCheck (not ['', '.'].contains lookupDir), pos, ->
-							# Search is over
-							"Could not find module #{name}"
+						if ['', '.'].contains lookupDir
+							# It wasn't in modules listing, see if it's relative
+							return @noForce @findFullName accessDir, "./#{name}", yes
+						else
+							lookupDir = path.dirname lookupDir
 
-						lookupDir = path.dirname lookupDir
+		if module.force
+			module.fullName
+		else
+			full =
+				path.join @baseDir, module.fullName
 
-		full =
-			path.join @baseDir, relToTop
+			fullAccess =
+				path.join @baseDir, accessDir
 
-		fullAccess =
-			path.join @baseDir, accessDir
+			"./#{path.relative fullAccess, full}"
 
-		'./' + path.relative fullAccess, full
-
-
+	###
+	Load the modules listings for a directory.
+	###
 	@load = (dir) ->
 		type dir, String
 

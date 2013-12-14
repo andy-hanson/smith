@@ -17,7 +17,7 @@ class Parser
 			Pos.start
 
 	###
-	Returns: [ iz, body ]
+	Returns: [ iz, fun ]
 	###
 	all: (tokens) ->
 		typeLocal =
@@ -29,11 +29,10 @@ class Parser
 			type iz, E.Use
 			@locals.addLocal iz.local
 
-		body = @block bodyTokens
-		body.subs.unshift new E.DefLocal typeLocal, new E.Me @pos
-		body
+		fun = @argLessFun bodyTokens
+		fun.body.subs.unshift new E.DefLocal typeLocal, new E.Me @pos
 
-		[ iz, body ]
+		[ iz, fun ]
 
 	###
 	Returns: [ iz, restOfTokens ]
@@ -165,7 +164,7 @@ class Parser
 					when '['
 						unexpected token
 					when '{'
-						@curlied token
+						@argLessFun token.body
 					when '"'
 						@quote token
 					else
@@ -206,9 +205,9 @@ class Parser
 	###
 	TODO: 'it'
 	###
-	curlied: (curlied) ->
+	argLessFun: (body) ->
 		[ meta, body ] =
-			@funBody curlied.body
+			@funBody body
 		new E.FunDef @pos, meta, null, [], body
 
 	fun: (tokens) ->
@@ -318,7 +317,7 @@ class Parser
 
 	# Local from function arg
 	newLocal: (name, typeName) ->
-		check (T.normalName name), ->
+		cCheck (T.normalName name), @pos, ->
 			"Expected local name, not #{name}"
 
 		type =
@@ -387,7 +386,7 @@ class Parser
 
 
 ###
-Returns: [ iz, body ]
+Returns: [ iz, fun ]
 ###
 parse = (tokens, typeName, fileName, allModules) ->
 	type tokens, Array

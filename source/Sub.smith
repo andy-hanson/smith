@@ -1,4 +1,4 @@
-is ./Super
+is Super
 
 ‣ construct
 	(use Console).log! "Constructing..."

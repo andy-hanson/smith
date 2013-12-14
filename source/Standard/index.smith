@@ -3,9 +3,10 @@
 
 use! Any-Type
 use! Any
-use! ./Fun-Methods
+use! Fun-Methods
+use! Bool
 
-use! ./Str-Methods
+use! Str-Methods
 use! Math
-
+use! Bag
 

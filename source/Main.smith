@@ -1,3 +1,5 @@
+(use Source-Map-Support).install
+
 use! Standard
 
 use Bag
@@ -5,14 +7,32 @@ use Console
 use ✔
 use ✘
 
-use ./Standard/Vec
+use Opt
 
-∙ sub
-	(use ./Sub).of
+use Standard/Bag/Range
 
-Console.log! sub.three
+∙ r
+	Range 1 5
 
-Console.log! (1.23.+ 4.56)
+r.iterator.each |num
+	Console.log! num
+
+
+#{
+∙ some1
+	(Opt.Some) 1
+∙ no1
+	Opt.None
+
+Console.log! Opt.Some
+Console.log! some1
+Console.log! (some1.type.= Opt.Some)
+#Console.log! some1.inspect
+#Console.log! no1
+}#
+
+
+#(use Num).test-all-eg
 
 #∙ f |x y ...z
 #	Console.log! z

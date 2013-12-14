@@ -8,5 +8,8 @@ M.do
 	‣read eg
 	‣read how
 
+	‣val empty
+		of `{}`
+
 export M
 

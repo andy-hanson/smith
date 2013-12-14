@@ -12,7 +12,7 @@ B.do
 		`false`
 
 	‣ ? then:Fun else:Fun
-		`this.valueOf() ? then() : $else()`
+		`this.valueOf() ? then() : _else()`
 
 	‣ ∨ a:Fun
 		`this || a()`
@@ -33,7 +33,10 @@ B.do
 		`!(this || a)`
 
 	‣ if then:Fun
-		`this ? Option.None() : Option.Some(then())`
+		?
+			Opt.None
+		|
+			Opt.Some then.of
 
 	#alias '? 'if-then-else
 	#alias '∨ 'or

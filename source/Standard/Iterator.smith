@@ -1,0 +1,23 @@
+# Something with 'next'
+
+use Fun
+
+
+
+
+‣ stop
+	`
+		throw new Error('StopIteration');
+
+‣ each do:Fun
+	`
+		try {
+			while (true)
+				_do(this.next())
+		}
+		catch (error) {
+			if (error.message == 'StopIteration')
+				return null;
+			else
+				throw error;
+		}

@@ -11,7 +11,7 @@ Function.prototype['to-type'] = (name, maybeSuper) ->
 		makeAnyType name, maybeSuper, @prototype
 	@['_to-type']
 
-next_type_id = 0
+nextTypeID = 0
 
 AnyType = null
 Any = null
@@ -40,18 +40,23 @@ makeAnyType = (name, maybeIs, maybeProto) ->
 	metaType._name = "#{name}-Type"
 	type._name = name
 
-	metaType._super = superMetaType
-	type._super = superType
+	metaType._is = superMetaType
+	type._is = superType
 
-	metaType._id = next_type_id
-	type._id = next_type_id + 1
-	next_type_id += 2
+	metaType._id = nextTypeID
+	type._id = nextTypeID + 1
+	nextTypeID += 2
 
 	type._proto =
 		maybeProto ? Object.create superType._proto
 
-	metaType._super = superMetaType
-	type._super = superType
+	metaType._methods = { }
+	type._methods = { }
+
+	(Object.getOwnPropertyNames type._proto).forEach (name) ->
+		value = type._proto[name]
+		if value instanceof Function
+			type._methods[name] = value
 
 	metaType._proto.type = -> metaType
 	metaType._proto["__is-a-id-#{metaType._id}"] = yes
@@ -65,14 +70,15 @@ anyTypeProto = { }
 
 AnyType = { _proto: anyTypeProto }
 
-Any = Object['to-type'] 'Any', null
+Any = Object['to-type'] 'Any'
 
-AnyType = makeAnyType 'Any-Type', null, anyTypeProto
+AnyType = makeAnyType 'Any-Type', Any, anyTypeProto
 
 AnyType._proto['‣'] = (name, method) ->
-	@_proto[name] = method.unbound()
+	@_proto[name] = @_methods[name ] = method.unbound()
 
 AnyType['‣'] 'construct', makeAnyType
+
 
 ###
 AnyType's of is special
@@ -96,7 +102,9 @@ Meta =
 
 Meta['‣'] 'construct', (meta) ->
 	if meta?
-		{ @_doc, @_in, @_out, @_eg, @_how } = meta
+		for name, value of meta
+			@[name] = value
+
 
 
 bind = (object, name) ->
@@ -114,7 +122,7 @@ type = (name, maybeIs, fun) ->
 	tipe =
 		AnyType.of name, maybeIs
 
-	fun.call tipe
+	fun.unbound().call tipe
 
 	tipe.__exported ? tipe
 
@@ -139,9 +147,14 @@ lazy = (delegate, make) ->
 		made
 	get
 
+itMethod = (name) ->
+	(it) ->
+		it[name].apply it, Array.prototype.slice.call arguments, 1
+
 module.exports =
 	fun: fun
 	bind: bind
+	itMethod: itMethod
 	string: string
 	type: type
 	lazy: lazy

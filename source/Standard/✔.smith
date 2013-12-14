@@ -1,9 +1,11 @@
 use Bool
 use Fun
 
-‣‣ of condition:Bool message:Fun
+‣‣ of condition:Bool message
 	condition.if
-		✘ message.of
+		∙ mess
+			`(message == null) ? 'Check failed.' : message()`
+		✘ mess
 
 ‣‣ fails fun:Fun
 	eg

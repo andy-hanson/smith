@@ -6,6 +6,7 @@ use Fun
 	`_prelude['Any-Type']`
 
 T.do
+
 	‣ toString
 		"<Type {name}>"
 
@@ -21,9 +22,9 @@ T.do
 			if (!(Object(name) instanceof String))
 				throw new Error("First argument of 'check' must be a string");
 			if (a == null)
-				throw new Error("Undefined "+name+":"+this);
+				throw new Error("Undefined "+name+":"+this._name);
 			if (!this['subsumes?'](a))
-				throw new Error(name+"is not a "+this+"; is "+a);
+				throw new Error(name+' is not a '+this+'; is '+a);
 
 	‣ to-type
 		me
@@ -47,12 +48,26 @@ T.do
 
 	‣ ‣read name:Str
 		me.‣ name
-			`this['_' + name]`
+			property "_{name}"
+
+	‣ ‣write name:Str
+		me.‣ "{name}!" |mod:Fun
+			property! "_{name}" mod
+
+	‣ ‣access name
+		me.‣read name
+		me.‣write name
 
 	‣read name
 	‣read super
 	‣read proto
 	‣read id
+	‣read methods
+
+	‣ test-all-eg
+		methods.each-property |name method
+			# TODO - try catch
+			method.meta.eg.new-bound-call me
 
 	‣ toString
 		"<Type {name}>"
@@ -60,29 +75,56 @@ T.do
 	‣ sub-type? type
 		`true` #`(this === type) || ???`
 
+	‣ no-instances!
+		`console.log("Okay, no instances of "+this._name)`
 
-	‣ ‣type name do-to
-		∙ type
-			T name
+	‣ type‣ name:Str super do-to
 		∙ doto
 			do-to
+		∙ t
+			()
+		`
+			if (doto == null) {
+				t = T.of(name);
+				doto = _super;
+			}
+			else {
+				t = T.of(name, _super);
+			}
+			if (doto != null)
+				t.do(doto);
 
-		`(doto == null) ? null : type.do(doto)`
+		me.‣val name
+			t
+
+		t
+
+	‣ object‣ name:Str super do-to
+		∙ type
+			me.type‣ name super do-to
+		type.no-instances!
 		type
 
-	‣ ‣object name do-to
-		∙ obj
-			Singleton name
-		∙ doto
-			do-to
-		#`(doto != null) ? obj.do(doto) : null`
-		obj.do do-to
+	‣ ‣sub-type name:Str do-to:Fun
+		type‣ name me do-to
 
-		obj
+	‣ ‣sub-object name:Str do-to:Fun
+		object‣ name me do-to
+
+
+		#∙ obj
+		#	Singleton name
+		#∙ doto
+		#	do-to
+		#`
+		#	if (doto == null)
+		#		obj.do(doto)
+
+		#obj
 
 #{
 Singleton.do
-	‣‣ of name:String
+	‣‣ of name:Str
 		∙ type
 			Type name
 		type.do
