@@ -1,0 +1,56 @@
+is Super-Type
+does Stuff
+use Junk
+use! More-Junk
+
+lowercase-name
+Capitalized-Name
+
+
+# comment
+
+#{
+multi-line comment
+}#
+
+object.method.method!.method
+method
+method!
+
+「string」
+"{interpolated} string"
+
+1.23
+
+`javascript`
+
+
+doc
+	Hello?
+	Yes, this is docstring. sdfklsdjfs
+		More
+in
+	✔ 1.> 0
+out
+	✔ 0.< 1
+eg
+	blah
+how
+	How it's done.
+
+me
+it
+
+∙ local:Type
+	x
+∘ lazy-local:Type
+	x
+
+blah |x:X y:Y
+	x
+
+‣deffer deffed blah:Type blah
+	x
+
+(1 [2 {3}])
+

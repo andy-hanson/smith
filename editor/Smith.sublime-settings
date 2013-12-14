@@ -1,0 +1,17 @@
+{
+	"auto_complete": false,
+	"auto_match_enabled": false,
+	"color_scheme": "Packages/User/Smith.tmTheme",
+	"font_face": "Typography times",
+	"font_size": 12,
+	"highlight_line": true,
+	"draw_indent_guides": true,
+	"indent_guide_options":
+	[
+		"draw_normal",
+		"draw_active"
+	],
+	"scroll_speed": 0.1,
+	"tab_size": 2,
+	"trim_trailing_white_space_on_save": true
+}

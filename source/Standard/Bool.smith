@@ -1,6 +1,7 @@
 use Fun
 use Opt
 
+
 ∙ B
 	`global.Boolean`.to-type 'Bool
 

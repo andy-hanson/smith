@@ -1,0 +1,113 @@
+# [PackageDev] target_format: plist, ext: tmLanguage
+name: Smith
+scopeName: source.smith
+fileTypes:
+- smith
+uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
+
+patterns:
+
+- name: module.use
+  match: (use|use!|is|does)(\s)(.+)
+  captures:
+    '3':
+      name: module.used
+
+- name: entity.name.capitalized
+  match: "[A-Z][^\\.\\s]*"
+
+- name: call.bang
+  match: (\.?)[^\.\s]*!
+
+- name: call.normal
+  match: \.[^\.\s]+
+
+- name: comment
+  begin: \#\{
+  end: \}\#
+
+- name: comment
+  match: \#.*\n
+
+- name: string
+  begin: \"
+  end: \"
+  patterns:
+  - name: constant.other.placeholder.py # you heard me
+    match: \{.*\}
+
+- name: string
+  begin: 「
+  end: 」
+
+- name: constant.numeric
+  match: \d+(\.\d+)*
+
+- name: constant.javascript
+  match: \`(.*\`)?
+
+- name: meta.text
+  comment:
+    We expect it to be followed by another meta,
+    or by a blank line.
+  begin: ^(doc|how)
+  beginCaptures:
+    '1':
+      name: meta.tag
+  end: ^($|(in|out|eg))
+  endCaptures:
+    '1':
+      name: meta.tag
+  patterns:
+  - name: meta.text
+    begin: (how)
+    beginCaptures:
+      '1':
+        name: meta.tag
+    end: ^$
+
+- name: meta.tag
+  match: ^(in|out|eg)
+
+- name: keyword
+  match: \b(me|it)\b
+
+- name: local.define.dot
+  match: (∙\s+)([^:]+)
+  captures:
+    '2':
+      name: local.define.strict
+
+- name: local.define.dot
+  match: (∘\s+)([^:]+)
+  captures:
+    '2':
+      name: local.define.lazy
+
+- name: entity.name.type
+  match: \:\S+
+
+- name: variable.parameter
+  begin: \|
+  end: \n
+  patterns:
+    - name: entity.name.type
+      match: \:\S+
+
+- name: variable.parameter
+  comment: define type of function
+  begin: (‣)(\S*)(\s+)(\S+)
+  beginCaptures:
+    '1':
+      name: local.define.dot
+    '2':
+      name: entity.name.tag
+    '4':
+      name: entity.name.function
+  end: \n
+  patterns:
+    - name: entity.name.type
+      match: \:\S+
+
+- name: bracket
+  match: "[\\(\\[\\{\\}\\]\\)]"
