@@ -1,5 +1,5 @@
 ‣‣ of
-	`global.Array.prototype.slice.call(arguments)`
+	Global@Array@prototype@slice.call `arguments`
 
 ‣ make-string
 	(map String.of_).join " "

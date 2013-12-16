@@ -1,5 +1,5 @@
 ∙ E
-	`global.Error`.to-class
+	Global@Error.to-class
 
 E.do
 	‣‣ of message
@@ -10,13 +10,13 @@ E.do
 			console.log(y.message);
 			Must call 'new Error'
 
+		#New Global@Error message # Nope :(
 		`new global.Error(message)`
 
 	‣ throw!
 		doc
 			Throw this error.
 		eg
-			Console.log! 'hoo
 			✔.fails
 				(Error 'err).throw
 
@@ -26,7 +26,7 @@ E.do
 	‣ re-throw!
 		doc
 			...
-		`
-			throw this;
+
+		throw!
 
 export E

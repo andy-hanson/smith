@@ -9,7 +9,7 @@ class Token
 		@toString()
 
 class Name extends Token
-	@kinds = ['x', '_x', 'x_', '.x', '.x_', ',x', ':x', '‣x', '...x']
+	@kinds = ['x', '_x', 'x_', '.x', '.x_', '@x', ':x', '‣x', '...x']
 
 	constructor: (@pos, @text, @kind) ->
 		type @pos, Pos
@@ -162,7 +162,7 @@ module.exports =
 	bar: (token) ->
 		token instanceof Special and token.kind == '|'
 	dotLikeName: (token) ->
-		token instanceof Name and ['.x', ',x', '.x_'].contains token.kind
+		token instanceof Name and ['.x', '@x', '.x_'].contains token.kind
 	normalName: (token) ->
 		token instanceof Name and token.kind == 'x'
 	typeName: (token) ->

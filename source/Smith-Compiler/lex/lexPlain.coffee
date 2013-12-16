@@ -59,7 +59,7 @@ module.exports = (stream, inQuote) ->
 					n = n.withoutEnd '.'
 				new T.NumberLiteral pos, "#{first}#{n}"
 
-			else if ['_', ':', ',', "'", '.'].contains ch
+			else if ['_', ':', '@', "'", '.'].contains ch
 				stream.readChar()
 				kind =
 					if ch == '.' and stream.maybeTake2More '.'

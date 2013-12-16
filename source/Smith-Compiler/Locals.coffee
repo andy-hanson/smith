@@ -1,10 +1,11 @@
 E = require './Expression'
 T = require './Token'
 { cCheck } = require './CompileError'
+StringMap = require './StringMap'
 
 module.exports = class Locals
 	constructor: ->
-		@names = { } # maps strings to Locals
+		@names = new StringMap # names -> Locals
 		@frames = [] # each frame is a list of Locals
 		@addFrame()
 
@@ -15,9 +16,9 @@ module.exports = class Locals
 		type local, E.Local
 		@frames.last().push local
 		unless canRepeat
-			check not @names[local.name]?, =>
-				"Already have local #{local}, it's #{@names[local.name]}"
-		@names[local.name] = local
+			check not (@names.has local.name), =>
+				"Already have local #{local}, it's #{@names.get local.name}"
+		@names.add local.name, local
 
 	addLocal: (local) ->
 		@_add local, no
@@ -28,7 +29,7 @@ module.exports = class Locals
 	popFrame: ->
 		last = @frames.pop()
 		last.forEach (local) =>
-			delete @names[local.name]
+			@names.delete local.name
 
 	withLocal: (loc, fun) ->
 		@withLocals [loc], fun
@@ -47,14 +48,13 @@ module.exports = class Locals
 
 	get: (name) ->
 		type name, T.Name
-		if @names.hasOwnProperty name.text
-			@names[name.text]
+		x = @names.maybeGet name.text
 
 	getIt: (pos) ->
-		cCheck (@names.hasOwnProperty 'it'), pos,
+		cCheck (@names.has 'it'), pos,
 			"No local 'it'"
-		@names['it']
+		@names.get 'it'
 
 	toString: ->
-		"<locals #{Object.keys @names}>"
+		"<locals #{@names.toString()}>"
 

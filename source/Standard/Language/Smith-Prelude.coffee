@@ -1,6 +1,7 @@
 Function.prototype.unbound = ->
 	if @_unbound?
-		@_unbound._meta = @_meta
+		if @_meta?
+			@_unbound._meta = @_meta
 		@_unbound
 	else
 		@
@@ -128,8 +129,6 @@ Meta['-def'] 'construct', (meta) ->
 				throw new Error '?'
 			@[name] = meta[name]
 
-
-
 bind = (object, name) ->
 	fun = object[name]
 
@@ -142,12 +141,17 @@ bind = (object, name) ->
 			throw new Error "Object #{object} has no method #{name}."
 
 clazz = (name, maybeIs, fun) ->
-	tipe =
+	cls =
 		AnyClass.of name, maybeIs
 
-	fun.unbound().call tipe
+	fun.unbound().call cls
 
-	tipe.__exported ? tipe
+	if cls.__exported?
+		cls.__exported
+	else
+		if fun._meta?
+			cls._meta = fun._meta
+		cls
 
 string = ->
 	Array.prototype.join.call arguments, ''
@@ -157,8 +161,9 @@ fun = (delegate, unbound, meta) ->
 		unbound.bind delegate
 	f._unbound =
 		unbound
-	f._meta =
-		Meta.of meta
+	if meta?
+		f._meta =
+			Meta.of meta
 	f
 
 lazy = (delegate, make) ->

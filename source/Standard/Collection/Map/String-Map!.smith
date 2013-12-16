@@ -1,0 +1,24 @@
+‣access -data
+
+‣ constructor
+	-data!
+		Global@Object.create null
+
+‣ has name:Str
+	Global@Object@prototype@hasOwnProperty.call -data name
+
+‣ get~ name:Str
+	Opt.from-nullable `this['_-data'][name]`
+
+‣ get name:Str
+	(get~ name).force
+
+‣ add name:Str value
+	`this['_-data'][name] = value`
+
+‣ delete name:Str
+	`delete this['_-data'][name]`
+
+‣ keys
+	Global@Object.getOwnPropertyNames -data
+

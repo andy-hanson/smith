@@ -1,0 +1,5 @@
+‣‣ of constructor:Fun
+	∙ new
+		Global@Object.create constructor@prototype
+	constructor.apply new `arguments`
+	new

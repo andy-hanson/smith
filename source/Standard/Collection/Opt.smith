@@ -4,7 +4,7 @@
 	#	()
 
 	‣ construct value:Any
-		set-property '_value value
+		set-property! '_value value
 
 	‣read value
 

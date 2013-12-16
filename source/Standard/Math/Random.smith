@@ -1,8 +1,5 @@
-∙ Math
-	`global.Math`
-
 +in-0-1
-	Math.random
+	Global@Math.random
 
 +in-range |min max
 	∙ size

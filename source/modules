@@ -1,6 +1,7 @@
-auto ↺ ✔ ✔= ✘ Any Any-Class Bag Bool Console Error Fun Iterable Iterator Num Opt Ref Str
+auto ↺ ✔ ✔= ✘ Any Any-Class Bag Bool Console Error Fun
+auto Global Iterable Iterator Meta Num Opt Ref Str
 
-Prelude Standard/Language/Prelude
+Smith-Prelude Standard/Language/Smith-Prelude
 
 Standard Standard/index
 
@@ -17,6 +18,7 @@ Bool Standard/Logic/Bool
 Console Standard/Console
 Error Standard/Logic/Error
 Fun Standard/Language/Fun
+Global Standard/Language/Global
 Iterable Standard/Collection/Iterable
 Iterator Standard/Collection/Iterator
 Math Standard/Math/index

@@ -5,6 +5,9 @@ use! Any-Class
 use! Any
 use! Language/Fun-Methods
 use! Bool
+
+use! Language/Fun-Meta
+
 use! Error
 
 use! Str-Methods

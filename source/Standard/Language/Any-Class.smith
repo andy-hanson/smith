@@ -36,6 +36,11 @@ C.do
 	‣ to-class
 		me
 
+	‣ do-meta fun:Fun
+		meta!
+			it.merge fun.meta
+		do fun
+
 	‣ method name:Str
 		methods.property name
 
@@ -62,25 +67,45 @@ C.do
 		me.‣ name
 			property "_{name}"
 
+	‣ ‣read/~ name:Str
+		doc
+			Both optional and forcing versions of a reader.
+
+		me.‣read name
+		me.‣read~ name
+
 	‣ ‣write name:Str
 		me.‣ "{name}!" |mod:Fun
-			property! "_{name}" mod
+			modify-property! "_{name}" mod
 
 	‣ ‣access name
 		me.‣read name
 		me.‣write name
 
+	# Read things defined in Smith-Prelude
 	‣read name
 	‣read super
 	‣read proto
 	‣read id
 	‣read methods
 
-	‣ test-all-eg!
+	‣ meta
+		(property~ '_meta).or
+			Meta.Empty
+
+	‣ meta! mod:Fun
+		set-property! '_meta (mod meta)
+
+
+	‣ test!
+		✘.annotate
+			meta.test-eg!
+		|
+			"{me}#eg"
+
 		methods.each-property |name method
 			✘.annotate
-				method.meta.eg~.each
-					it.new-bound-call me
+				method.meta.test-eg!
 			|
 				"{me}#{name}#eg"
 

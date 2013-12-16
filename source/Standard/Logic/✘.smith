@@ -43,7 +43,7 @@ no-instances!
 			try-catch
 				✘ 'fail
 			|error
-				error,message
+				error@message
 
 	try-catch-finally try catch { }
 
@@ -87,7 +87,7 @@ no-instances!
 			annotate
 				✘ 'fail
 			|error
-				error,message,length
+				error@message@length
 
 	try-catch try |error
 		∙ annotation

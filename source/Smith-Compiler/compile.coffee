@@ -29,7 +29,7 @@ module.exports = (string, inName, outName, opts) ->
 		parse tokens, typeName, inName, allModules
 
 	prelude =
-		allModules. get 'Prelude', Pos.start, inName
+		allModules. get 'Smith-Prelude', Pos.start, inName
 
 	izNode =
 		if iz then iz.toNode inName, '' else 'null'

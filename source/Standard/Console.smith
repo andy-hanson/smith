@@ -1,4 +1,3 @@
 ‣‣ log! x:Any
-	`global.console`.log x
-	#`global.console`.log arguments.make-string
+	Global@console.log x.toString # arguments.make-string
 

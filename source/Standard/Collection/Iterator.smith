@@ -1,8 +1,7 @@
 # Something with 'next'
 
 ‣ stop
-	`
-		throw new Error('StopIteration');
+	✘ 'StopIteration
 
 ‣ each do:Fun
 	`

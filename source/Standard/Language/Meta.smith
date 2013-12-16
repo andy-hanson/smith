@@ -2,17 +2,41 @@
 	`_prelude.Meta`
 
 M.do
-	‣read~ doc
-	‣read~ in
-	‣read~ out
-	‣read~ eg
-	‣read~ how
+	‣read/~ doc
+	‣read/~ in
+	‣read/~ out
+	‣read/~ eg
+	‣read/~ how
+
+	‣ test-eg!
+		eg~.each _run!
 
 	‣val Empty
 		of `{}`
 
-	#‣ toString
-	#	show-properties
+	‣ merge other:M
+		how
+			TODO: write in Smith
+
+		`
+			var me = this;
+			var m = {};
+			['_doc', '_in', '_out', '_eg', '_how'].forEach(function(met) {
+				if (me[met] != null) {
+					if (other[met])
+						throw new global.Error("Can not merge " + this + " and " + other);
+					m[met] = me[met];
+				}
+				else if (other[met] != null) {
+					m[met] = other[met];
+				}
+			})
+			var res = M.of(m);
+
+	‣override toString
+		show-properties
+
+
 
 export M
 

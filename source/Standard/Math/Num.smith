@@ -4,10 +4,10 @@ use ✔
 use ✔=
 
 ∙ N
-	`global.Number`.to-class 'Num
+	Global@Number.to-class 'Num
 
 ∙ JS-Math
-	`global.Math`
+	Global@Math
 
 N.do
 	‣ ≈ a:N significant-digits:N
@@ -313,10 +313,10 @@ N.do
 		JS-Math.abs me
 
 	‣val Not-A-Number
-		`global.NaN`
+		Global@NaN
 
 	‣ not-a-number?
-		`global.Number.isNaN(this)`
+		Global@Number.isNaN me
 
 	‣ sign
 		doc
@@ -581,7 +581,7 @@ N.do
 		eg
 			✔ 42.finite?
 
-		`global.Number.isFinite(this)`
+		Global@Number.isFinite me
 
 	‣ infinite?
 		doc
@@ -764,7 +764,7 @@ N.do
 		π.÷ 2
 
 	‣val π
-		JS-Math,PI
+		JS-Math@PI
 
 	‣val π3/2
 		π.+ π/2
@@ -773,13 +773,13 @@ N.do
 		π.twice
 
 	‣val E
-		JS-Math,E
+		JS-Math@E
 
 	‣val Golden-Ratio
 		5.square-root.inc.half
 
 	‣val ∞
-		`global.Infinity`
+		Global@Infinity
 
 	‣val -∞
 		∞.negate

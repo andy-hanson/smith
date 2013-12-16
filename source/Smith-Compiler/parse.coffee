@@ -125,12 +125,14 @@ class Parser
 							switch tok0.kind
 								when '.x'
 									new E.Call pop, tok0, []
-								when ',x'
+								when '@x'
 									new E.Property pop, tok0
 								when '.x_'
 									new E.BoundFunc slurped.pop(), tok0
 								else
 									fail()
+						else if tok0.kind == '@x'
+							@soloExpression tok0
 						else
 							fail "Unexpected #{tok0}"
 					else
@@ -171,6 +173,8 @@ class Parser
 						new E.ItFunDef token
 					when 'x_'
 						new E.BoundFun.me token
+					when '@x'
+						E.Property.me @pos, token
 					else
 						unexpected token
 			when T.Group
@@ -221,7 +225,7 @@ class Parser
 
 	getLocalOnly: (name) ->
 		@_accessLocalOr name, =>
-			cFail @pos, "Type #{name.text} must be a local"
+			cFail @pos, "Type #{name.text} must be a local (not in #{@locals})"
 
 	containsIt: (x) ->
 		if x instanceof Array

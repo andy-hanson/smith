@@ -1,36 +1,13 @@
+doc
+	I am doc
+
 (use Source-Map-Support).install
 
 use! Standard
 
-Any-Class.all-classes.each _test-all-eg!
+Fun.test!
 
-
-#Console.log! Meta.Empty
-
-#Console.log! (`Object.prototype.hasOwnProperty`.call f 'sdfds)
-
-#Console.log! f.has-property? 'sdfds
-
-
-
-#Console.log! f.has-property? 'sdfds
-
-#Console.log! f.property~ 'sdfds
-
-#f.meta
-
-
-#Console.log! (Error 3)
-
-
-#Error.test-all-eg!
-
-
-
-#Console.log! (Error.proto.property 'throw!)
-
-
-#Console.log! `e instanceof global.Error`
+#Any-Class.all-classes.each _test!
 
 
 #all.forEach |x

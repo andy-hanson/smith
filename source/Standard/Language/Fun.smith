@@ -1,1 +1,1 @@
-export (`global.Function`.to-class 'Fun)
+export (Global@Function.to-class 'Fun)

@@ -1,12 +1,10 @@
-use Meta
-
-(use Fun).do
+Fun.do
 	‣ meta
 		(property~ '_meta).or
 			Meta.Empty
 
-	‣‣ from-JS #...rest
-		`global.Function`.apply () arguments
+	‣‣ from-JS
+		Global@Function.apply () `arguments`
 
 	‣ new-bound-call new-bound-to
 		unbound.apply new-bound-to `Array.prototype.slice.call(arguments, 1)`
@@ -16,6 +14,8 @@ use Meta
 
 	‣ of
 		apply () `arguments`
+
+	alias 'of 'run!
 
 	‣ cached
 		`

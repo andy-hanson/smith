@@ -11,63 +11,83 @@ A.do
 	#‣override toString
 	#	"<some {class.name}>"
 
+	‣ property-names
+		Global@Object.getOwnPropertyNames me
+
 	‣ show-properties
 		`
-			var s = "", me = this;
+			var s = "{", me = this;
 			Object.getOwnPropertyNames(this).forEach(function(key) {
-				s += key + ': ' + me[key].show() + ';';
+				s += key + ': ' + global.String(me[key]) + ',';
 			});
-			return s;
-
-	#{
-	‣ property~ name
-		(hasOwnProperty name).if
-			property nam
-	}#
+			return s + "}";
 
 	‣ has-property? name:Str
 		`Object.prototype.hasOwnProperty`.call me name
 
-	#‣ property~ name:Str
-	#	(has-property? name).if
-	#		`this[name]`
-
 	‣ property name:Str
 		how
 			must be in JS because fundamental methods depend on this.
+
 		`
-			if (Object.prototype.hasOwnProperty.call(this, name)) {
+			if (Object.prototype.hasOwnProperty.call(this, name))
 				return this[name];
-			}
 			else
-				throw new Error("" + this + " does not have property " + name);
+				throw new global.Error("" + this + " does not have property " + name);
+
+	‣‣ exists? a
+		`a != null`
 
 	‣ property~ name:Str
 		(has-property? name).if
-			`this[name]`
-
-	‣ property-names
-		`global.Object`.keys me
+			∙ h
+				`this[name]`
+			✔ (A.exists? h)
+				"Object has key {name} but no value"
+			h
 
 	‣ each-property fun:Fun
 		property-names.each |name
 			fun name (property name)
 
-	‣ set-property name:Str value
+	‣ new! name:Str value
+		✔ (has-property? name).¬
+		set-property! name value
+
+	‣ set-property! name:Str value
 		`this[name] = value`
 
-	‣ property! name:Str mod:Fun
+	‣ modify-property! name:Str mod:Fun
 		∙ old
 			property name
 		∙ new
 			mod old
-		set-property name new
+		set-property! name new
 
 	‣ is-a class:Any-Class
 		class.subsumes? me
 
 	‣ identical? a
 		`this === a`
+
+	‣ structural-= a
+		(class.= a.class).∧
+			∙ keys
+				property-names
+
+			(keys.size.= a.property-names.size).∧
+				keys.every
+					(property it).= (a.property it)
+
+			#{`
+				var meKeys = global.Object.getOwnPropertyNames(this);
+				var aKeys = global.Object.getOwnPropertyNames(a);
+				if (meKeys.length != aKeys.length)
+					return false;
+				return meKeys.every(function(key) {
+					return this[key]['='](a[key]);
+				})
+			}#
 
 	‣ = a
 		identical? a

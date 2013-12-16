@@ -215,6 +215,9 @@ class Property extends Expression
 	compile: (fileName, indent) ->
 		[ (@subject.toNode fileName, indent), '.', @prop.text ]
 
+	@me = (pos, name) ->
+		new Property (new Me pos), name
+
 class Meta extends Expression
 	constructor: (@pos) ->
 		type @pos, Pos
@@ -250,9 +253,9 @@ class Meta extends Expression
 			body =
 				parts.interleave ",\n#{newIndent}"
 
-			[ '{\n', newIndent, body, '\n', indent, '}' ]
+			[ ', {\n', newIndent, body, '\n', indent, '}' ]
 		else
-			'{}'
+			''
 
 class FunDef extends Expression
 	constructor: (@pos, @meta, @tipe, @args, @body) ->
@@ -306,7 +309,7 @@ class FunDef extends Expression
 			typeCheck,
 			outCond,
 			'return res\n',
-			indent, '}, ',
+			indent, '}',
 			meta, ')' ]
 
 	@plain = (body) ->

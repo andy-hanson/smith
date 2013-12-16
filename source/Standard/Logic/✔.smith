@@ -27,7 +27,7 @@ no-instances!
 				# doesn't fail
 
 	✘.try
-		fun.of
+		fun.run!
 		✘ 「did not fail」
 
 ‣‣ rel relation-name:Str a make-b

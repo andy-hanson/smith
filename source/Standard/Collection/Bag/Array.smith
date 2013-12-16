@@ -2,9 +2,12 @@ use ../Type
 use ../Object
 
 ∙ A
-	`global.Array`.to-class
+	Global@Array.to-class
 
 A.do
 	alias 'forEach 'each
+
+	‣ size
+		@length
 
 A

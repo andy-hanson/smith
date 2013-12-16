@@ -1,5 +1,5 @@
 ∙ B
-	`global.Boolean`.to-class 'Bool
+	Global@Boolean.to-class 'Bool
 
 B.do
 	‣val Yes
@@ -13,7 +13,10 @@ B.do
 
 	‣ ∨ a:Fun
 		eg
-			✔= 32
+			✔= No
+				No.∨
+					No
+			✔= Yes
 				Yes.∨
 					No
 
@@ -35,10 +38,7 @@ B.do
 		`!(this || a)`
 
 	‣ if then:Fun
-		?
-			Opt.some then.of
-		|
-			Opt.None
+		`this ? Opt().some(then()) : Opt().None()`
 
 	‣ unless then:Fun
 		¬.if then

@@ -9,6 +9,8 @@ module.exports = class StringMap
 		Object.prototype.hasOwnProperty.call @_data, name
 
 	get: (name) ->
+		type name, String
+		
 		if @has name
 			@_data[name]
 		else
@@ -22,3 +24,9 @@ module.exports = class StringMap
 
 	add: (name, value) ->
 		@_data[name] = value
+
+	delete: (name) ->
+		delete @_data[name]
+
+	toString: ->
+		Object.getOwnPropertyNames @_data
