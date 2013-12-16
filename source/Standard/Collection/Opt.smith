@@ -1,0 +1,55 @@
+‣sub-class Some
+	# TODO
+	#data |value
+	#	()
+
+	‣ construct value:Any
+		set-property '_value value
+
+	‣read value
+
+	‣ show
+		"(Some {value})"
+
+	‣ force
+		value
+
+	‣ or else:Fun
+		value
+
+	‣ each fun:Fun
+		fun value
+		()
+
+	‣ ~ if-some:Fun if-none:Fun
+		if-some value
+
+
+	#‣ inspect
+	#	"(Some {value})"
+
+
+‣sub-object None
+	‣‣ force
+		✘ 「Tried to force None.」
+
+	‣‣ or else:Fun
+		else.of
+
+	‣‣ each fun:Fun
+		()
+
+	‣‣ ~ if-some:Fun if-none:Fun
+		if-none ()
+
+‣‣ some value:Any
+	(Some) value
+
+‣‣ filter value:Any condition:Fun
+	(condition value).if
+		value
+
+
+‣‣ from-nullable a
+	`a != null`.if
+		a

@@ -1,0 +1,32 @@
+∙ E
+	`global.Error`.to-class
+
+E.do
+	‣‣ of message
+		doc
+			For some reason, this won't work:
+			var y = Object.create(global.Error.prototype);
+			global.Error.call(y, 'message');
+			console.log(y.message);
+			Must call 'new Error'
+
+		`new global.Error(message)`
+
+	‣ throw!
+		doc
+			Throw this error.
+		eg
+			Console.log! 'hoo
+			✔.fails
+				(Error 'err).throw
+
+		`
+			throw this;
+
+	‣ re-throw!
+		doc
+			...
+		`
+			throw this;
+
+export E

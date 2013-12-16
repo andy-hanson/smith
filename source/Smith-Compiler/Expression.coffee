@@ -2,7 +2,6 @@
 T = require './Token'
 Pos = require './Pos'
 mangle = require './mangle'
-AllModules = require './AllModules'
 
 ###
 All must have @pos
@@ -242,11 +241,7 @@ class Meta extends Expression
 							when 'doc', 'how'
 								val.toNode fileName, indent
 							when 'eg'
-								#(FunDef.plain val).toNode fileName, newIndent
-								newNewIndent = newIndent + '\t'
-								body =
-									val.noReturn fileName, newNewIndent
-								[ '_f(this, function() {\n', newNewIndent, body, '\n', newIndent, '})' ]
+								(FunDef.plain val).toNode fileName, newIndent
 							else
 								fail()
 
@@ -321,6 +316,7 @@ class FunDef extends Expression
 
 ###
 _func
+(unrelated to keyword 'it')
 ###
 class ItFunDef extends Expression
 	constructor: (@name) ->
@@ -365,7 +361,7 @@ class LocalAccess extends Expression
 		@local.toString()
 
 	compile: ->
-		m = mangle @local.text
+		m = mangle @local.name
 		if @local.lazy
 			"#{m}()"
 		else
@@ -376,25 +372,28 @@ class Local extends Expression
 		type name, T.Name
 		type @tipe, Expression if @tipe?
 		type @lazy, Boolean
-		{ @text, @pos } = name
+		@name = name.text
+		{ @pos } = name
 
 	toString: ->
-		"<#{@text}>"
+		"<#{@name}:#{@pos}>"
 
 	compile: ->
-		mangle @text
+		mangle @name
 
 	typeCheck: (fileName, indent) ->
 		if @tipe?
 			tipe =
 				@tipe.toNode fileName, indent
 			nameLit =
-				new Literal new T.StringLiteral @pos, @text
+				new Literal new T.StringLiteral @pos, @name
 			name =
 				nameLit.toNode fileName, indent
-			[ tipe, '.check(', name, ', ', @compile(), ')\n', indent ]
+			[ tipe, '.check(', name, ', ', @compile(), ');\n', indent ]
 		else
 			''
+	@it = (pos) ->
+		@eager new T.Name pos, 'it', 'x'
 
 	@eager = (name, tipe) ->
 		new Local name, tipe, no
@@ -428,11 +427,15 @@ class Quote extends Expression
 
 		[ '_s(', (nodes.join ', '), ')' ]
 
+###
+Represents requiring something.
+Does NOT represent defining the local.
+###
 class Use extends Expression
 	constructor: (use, fileName, allModules) ->
 		type use, T.Use
 		type fileName, String
-		type allModules, AllModules
+		type allModules, require './AllModules'
 		{ @pos, @kind } = use
 		name =
 			new T.Name @pos, use.shortName(), 'x'
@@ -442,7 +445,7 @@ class Use extends Expression
 			allModules.get use.used, @pos, fileName
 
 	toString: ->
-		"<#{@kind} #{@fullname}>"
+		"<#{@kind} #{@fullName}>"
 
 	compile: (fileName, indent) ->
 		val =

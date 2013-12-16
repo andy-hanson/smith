@@ -1,9 +1,7 @@
 doc
 	Anything with an iterator.
 
-use Iterator
-
-type.do
+class.do
 	doc
 		All Iterable types have these methods.
 
@@ -15,4 +13,4 @@ type.do
 			do do-to
 
 		‣ iterator
-			(type.Iterator) me
+			(class.Iterator) me

@@ -1,12 +1,16 @@
-`_prelude.Any`.‣ 'do |fun
+`_prelude.Any`.-def 'do |fun
 	fun.unbound.call `this`
 
-use! Any-Type
+use! Any-Class
 use! Any
-use! Fun-Methods
+use! Language/Fun-Methods
 use! Bool
+use! Error
 
 use! Str-Methods
 use! Math
+
 use! Bag
+
+use! Meta
 

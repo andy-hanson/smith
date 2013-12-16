@@ -4,7 +4,31 @@ path = require 'path'
 Pos = require './Pos'
 { cCheck } = require './CompileError'
 StringMap = require './StringMap'
+T = require './Token'
+E = require './Expression'
 
+class Module
+	constructor: (@fullName, @force) ->
+		type @fullName, String
+		type @force, Boolean
+
+class Modules
+	constructor: ->
+		@modules = new StringMap
+		@autos = []
+		@autoBangs = []
+
+	add: (name, fullName, force) ->
+		@modules.add name, new Module fullName, force
+
+	addAutos: (names, kind) ->
+		switch kind
+			when 'auto'
+				@autos = @autos.concat names
+			when 'auto!'
+				@autoBangs = @autoBangs.concat names
+			else
+				fail()
 
 module.exports = class AllModules
 	constructor: (@baseDir) ->
@@ -22,33 +46,34 @@ module.exports = class AllModules
 
 		try
 			modules =
-				new StringMap
+				new Modules
 
-			parts =
-				text.split '\n'
-
-			for part, index in parts
-				if part == '' or part.startsWith '#'
-					continue
+			for part, index in text.split '\n'
+				part = (part.split '#')[0]
+				continue if part == ''
 				split =
 					part.split ' '
 				unexpected = ->
 					"Unexpected module def at line #{index}: #{part}"
-				force =
-					split.length == 3
-				if force
-					check split[2] == 'FORCE', unexpected
-				else
-					check split.length == 2, unexpected
-				[ name, modulePath ] =
-					split
-				fullName =
-					if force
-						modulePath
-					else
-						@findFullName dir, modulePath
 
-				modules.add name, { fullName: fullName , force: force }
+				if ['auto', 'auto!'].contains split[0]
+					modules.addAutos split.tail(), split[0]
+				else
+					force =
+						split.length == 3
+					if force
+						check split[2] == 'FORCE', unexpected
+					else
+						check split.length == 2, unexpected
+					[ name, modulePath ] =
+						split
+					fullName =
+						if force
+							modulePath
+						else
+							@findFullName dir, modulePath
+
+					modules.add name, fullName, force
 
 			@moduleses.add dir, modules
 
@@ -100,6 +125,44 @@ module.exports = class AllModules
 		fullName: fullName
 		force: no
 
+	autoUses: (fileName) ->
+		lookupDir = path.dirname fileName
+		uses = []
+
+		loop
+			modules = @moduleses.maybeGet lookupDir
+			if modules?
+				au = (bang) => (auto) =>
+					useT = new T.Use Pos.start, auto, (if bang then 'use!' else 'use')
+					uses.push new E.Use useT, fileName, @
+
+				modules.autos.forEach au no
+				modules.autoBangs.forEach au yes
+
+			if ['', '.'].contains lookupDir
+				return uses
+			else
+				lookupDir = path.dirname lookupDir
+
+	###
+	_iterModules: (accessDir, getter, final) ->
+		lookupDir =
+			accessDir
+
+		do => loop
+			maybe =
+				@moduleses.maybeGet lookupDir
+			if maybe?
+				got = getter maybe
+				if got?
+					got
+			else
+				if ['', '.'].contains lookupDir
+					return final accessDir
+				else
+					lookupDir = path.dirname lookupdir
+	###
+
 	###
 	Get the module for a given name.
 
@@ -114,16 +177,15 @@ module.exports = class AllModules
 		accessDir =
 			path.dirname accessFile
 
-		module = do =>
+		module =
 			if (name.startsWith './') or name.startsWith '../'
 				@noForce @findFullName accessDir, name
 			else
 				lookupDir =
 					accessDir
-				loop
-					# TODO: hasownproperty
+				do => loop
 					maybe =
-						(@moduleses.maybeGet lookupDir)?.maybeGet name
+						(@moduleses.maybeGet lookupDir)?.modules.maybeGet name
 					if maybe?
 						return maybe
 					else

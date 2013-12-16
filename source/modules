@@ -1,29 +1,31 @@
-Prelude Standard/Prelude
+auto ↺ ✔ ✔= ✘ Any Any-Class Bag Bool Console Error Fun Iterable Iterator Num Opt Ref Str
+
+Prelude Standard/Language/Prelude
+
 Standard Standard/index
 
 Source-Map-Support source-map-support FORCE
 
-# Far future: these should be default
-✔ Standard/✔
-✔= Standard/✔=
-✘ Standard/✘
-Bool Standard/Bool
+↺ Standard/Logic/↺
+✔ Standard/Logic/✔
+✔= Standard/Logic/✔=
+✘ Standard/Logic/✘
+Any Standard/Language/Any
+Any-Class Standard/Language/Any-Class
+Bag Standard/Collection/Bag/index
+Bool Standard/Logic/Bool
 Console Standard/Console
-Str Standard/Str
-Fun Standard/Fun
-Bag Standard/Bag/index
-Num Standard/Math/Num
-
+Error Standard/Logic/Error
+Fun Standard/Language/Fun
+Iterable Standard/Collection/Iterable
+Iterator Standard/Collection/Iterator
 Math Standard/Math/index
-
-Iterable Standard/Iterable
-Iterator Standard/Iterator
-
-Singleton Standard/Singleton
-Any Standard/Any
-Any-Type Standard/Any-Type
-Meta Standard/Meta
-Opt Standard/Opt
+Meta Standard/Language/Meta
+Num Standard/Math/Num
+Opt Standard/Collection/Opt
 Random Standard/Math/Random
+Ref Standard/Language/Ref
+Str Standard/Str
+
 
 X X

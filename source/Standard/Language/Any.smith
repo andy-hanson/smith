@@ -1,11 +1,24 @@
-use Any-Type
-use Str
-use Fun
-
 ∙ A
 	`_prelude.Any`
 
 A.do
+	‣override class
+		doc
+			if not overridden...
+
+		(property 'constructor).to-class
+
+	#‣override toString
+	#	"<some {class.name}>"
+
+	‣ show-properties
+		`
+			var s = "", me = this;
+			Object.getOwnPropertyNames(this).forEach(function(key) {
+				s += key + ': ' + me[key].show() + ';';
+			});
+			return s;
+
 	#{
 	‣ property~ name
 		(hasOwnProperty name).if
@@ -20,6 +33,8 @@ A.do
 	#		`this[name]`
 
 	‣ property name:Str
+		how
+			must be in JS because fundamental methods depend on this.
 		`
 			if (Object.prototype.hasOwnProperty.call(this, name)) {
 				return this[name];
@@ -27,7 +42,9 @@ A.do
 			else
 				throw new Error("" + this + " does not have property " + name);
 
-		#own-property~.force
+	‣ property~ name:Str
+		(has-property? name).if
+			`this[name]`
 
 	‣ property-names
 		`global.Object`.keys me
@@ -46,8 +63,8 @@ A.do
 			mod old
 		set-property name new
 
-	‣ is-a type:Any-Type
-		type.subsumes? me
+	‣ is-a class:Any-Class
+		class.subsumes? me
 
 	‣ identical? a
 		`this === a`
@@ -59,6 +76,6 @@ A.do
 		(= a).¬
 
 	‣ send name:Str
-		`this[name](Array.prototype.slice.call(arguments, 1))`
+		`this[name].apply(this, Array.prototype.slice.call(arguments, 1))`
 
 export A

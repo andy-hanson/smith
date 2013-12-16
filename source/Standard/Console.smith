@@ -1,6 +1,4 @@
-use Str
-
-‣‣ log!
-	`global.console`.log `arguments[0]`
+‣‣ log! x:Any
+	`global.console`.log x
 	#`global.console`.log arguments.make-string
 

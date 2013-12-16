@@ -1,21 +1,22 @@
-use Fun
-use Opt
-
-
 ∙ B
-	`global.Boolean`.to-type 'Bool
+	`global.Boolean`.to-class 'Bool
 
 B.do
-	‣‣ Yes
+	‣val Yes
 		`true`
 
-	‣‣ No
+	‣val No
 		`false`
 
 	‣ ? then:Fun else:Fun
 		`this.valueOf() ? then() : _else()`
 
 	‣ ∨ a:Fun
+		eg
+			✔= 32
+				Yes.∨
+					No
+
 		`this || a()`
 
 	‣ ∧ a:Fun
@@ -35,9 +36,12 @@ B.do
 
 	‣ if then:Fun
 		?
-			Opt.None
+			Opt.some then.of
 		|
-			Opt.Some then.of
+			Opt.None
+
+	‣ unless then:Fun
+		¬.if then
 
 	#alias '? 'if-then-else
 	#alias '∨ 'or

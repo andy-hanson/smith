@@ -1,0 +1,128 @@
+∙ C
+	`_prelude['Any-Class']`
+
+C.do
+	-def 'check |name a
+		`
+			if (!(global.Object(name) instanceof String))
+				throw new global.Error("First argument of 'check' must be a string");
+			if (a == null)
+				throw new global.Error("Undefined "+name+":"+this._name);
+			if (!this['subsumes?'](a))
+				throw new global.Error(name+' is not a '+this+'; is '+a);
+
+	-def '‣ |name:Str method:Fun
+		`
+			if (this._proto[name] != null)
+				throw new global.Error(this + ' already has method ' + name)
+		-def name method
+
+	-def 'export |exported
+		`
+			this.__exported = exported;
+
+	-def 'subsumes? |a
+		`a['__is-a-id-' + this._id] == true`
+
+	‣ ‣override name:Str method:Fun
+		`
+			if (this._proto[name] == null)
+				throw new global.Error('No need to override ' + name + ' in ' + this)
+		-def name method
+
+	‣override toString
+		name
+
+	‣ to-class
+		me
+
+	‣ method name:Str
+		methods.property name
+
+	‣ alias old-name:Str new-name:Str
+		∙ old
+			old-name
+		me.‣ new-name
+			`this[old].apply(this, arguments)`
+
+	‣ ‣‣ name:Str method:Fun
+		`this[name] = method`
+
+	‣‣ all-classes
+		`_prelude`.all-classes
+
+	‣ ‣val name:Str make-val:Fun
+		me.‣‣ name make-val.cached
+
+	‣ ‣read~ name:Str
+		me.‣ "{name}~"
+			property~ "_{name}"
+
+	‣ ‣read name:Str
+		me.‣ name
+			property "_{name}"
+
+	‣ ‣write name:Str
+		me.‣ "{name}!" |mod:Fun
+			property! "_{name}" mod
+
+	‣ ‣access name
+		me.‣read name
+		me.‣write name
+
+	‣read name
+	‣read super
+	‣read proto
+	‣read id
+	‣read methods
+
+	‣ test-all-eg!
+		methods.each-property |name method
+			✘.annotate
+				method.meta.eg~.each
+					it.new-bound-call me
+			|
+				"{me}#{name}#eg"
+
+	‣ sub-class? class:C
+		`true` #(this === class) || ???
+
+	‣ no-instances!
+		()
+
+	‣ class‣ name:Str super do-to
+		∙ doto
+			do-to
+		∙ c
+			()
+		`
+			if (doto == null) {
+				c = C.of(name);
+				doto = _super;
+			}
+			else {
+				c = C.of(name, _super);
+			}
+			if (doto != null)
+				c.do(doto);
+
+		me.‣val name
+			c
+
+		c
+
+	‣ object‣ name:Str super do-to
+		∙ class
+			me.class‣ name super do-to
+		class.no-instances!
+		class
+
+	‣ ‣sub-class name:Str do-to:Fun
+		me.class‣ name me do-to
+
+	‣ ‣sub-object name:Str do-to:Fun
+		object‣ name me do-to
+
+
+
+export C

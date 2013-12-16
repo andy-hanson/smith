@@ -2,21 +2,49 @@
 
 use! Standard
 
-use Bag
-use Console
-use ✔
-use ✘
+Any-Class.all-classes.each _test-all-eg!
 
-use Opt
 
-use Standard/Bag/Range
+#Console.log! Meta.Empty
 
+#Console.log! (`Object.prototype.hasOwnProperty`.call f 'sdfds)
+
+#Console.log! f.has-property? 'sdfds
+
+
+
+#Console.log! f.has-property? 'sdfds
+
+#Console.log! f.property~ 'sdfds
+
+#f.meta
+
+
+#Console.log! (Error 3)
+
+
+#Error.test-all-eg!
+
+
+
+#Console.log! (Error.proto.property 'throw!)
+
+
+#Console.log! `e instanceof global.Error`
+
+
+#all.forEach |x
+#	x.test-all-eg!
+
+
+
+#{
 ∙ r
 	Range 1 5
 
-r.iterator.each |num
-	Console.log! num
-
+r.iterator.each
+	Console.log! it
+}#
 
 #{
 ∙ some1

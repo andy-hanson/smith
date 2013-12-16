@@ -1,0 +1,23 @@
+doc
+	BLAH
+eg
+	∙ ref
+		Ref 1
+	ref.! 2
+	✔= 2
+		ref.get
+	ref.!
+		it.increment
+	✔= 3
+		ref.get
+
+use Fun
+
+‣ construct value
+	property! 'value
+
+‣ ! setter:Fun
+	property! 'value fun
+
+‣ get
+	property 'value

@@ -20,19 +20,37 @@ class Parser
 	Returns: [ iz, fun ]
 	###
 	all: (tokens) ->
+		autoUses = @autoUses()
+
+		[ iz, bodyTokens ] = @readIs tokens # TODO: don't conflict with auto
+		if iz?
+			type iz, E.Use
+			@locals.addLocalMayShadow iz.local
+
+		fun = @argLessFun bodyTokens
+		fun.body.subs = autoUses.concat fun.body.subs
+
+		[ iz, fun ]
+
+	autoUses: ->
 		typeLocal =
 			E.Local.eager new T.Name @pos, @typeName, 'x'
 		@locals.addLocal typeLocal
+		defTypeLocal =
+			new E.DefLocal typeLocal, new E.Me @pos
 
-		[ iz, bodyTokens ] = @readIs tokens
-		if iz?
-			type iz, E.Use
-			@locals.addLocal iz.local
+		noUseMe =
+			(@allModules.autoUses @fileName).filter (use) =>
+				use.local.name != @typeName
+		autoUses =
+			noUseMe.map (use) =>
+				@locals.addLocal use.local
+				new E.DefLocal use.local, use
 
-		fun = @argLessFun bodyTokens
-		fun.body.subs.unshift new E.DefLocal typeLocal, new E.Me @pos
+		autoUses.unshift defTypeLocal
+		autoUses
 
-		[ iz, fun ]
+
 
 	###
 	Returns: [ iz, restOfTokens ]
@@ -173,6 +191,8 @@ class Parser
 				switch token.kind
 					when 'me'
 						new E.Me token.pos
+					when 'it'
+						@locals.getIt()
 					else
 						unexpected token
 			else
@@ -188,6 +208,7 @@ class Parser
 			@soloExpression part
 
 	_accessLocalOr: (name, orElse) ->
+		type name, T.Name
 		local = @locals.get name
 		if local?
 			new E.LocalAccess @pos, local
@@ -202,13 +223,31 @@ class Parser
 		@_accessLocalOr name, =>
 			cFail @pos, "Type #{name.text} must be a local"
 
-	###
-	TODO: 'it'
-	###
+	containsIt: (x) ->
+		if x instanceof Array
+			x.containsWhere @bound 'containsIt'
+		else
+			type x, T.Token
+			if x instanceof T.Group and not T.curlied x
+				@containsIt x.body
+			else if T.it x
+				yes
+			else
+				no
+
+
 	argLessFun: (body) ->
-		[ meta, body ] =
-			@funBody body
-		new E.FunDef @pos, meta, null, [], body
+		args =
+			if @containsIt body
+				[ E.Local.it @pos ]
+			else
+				[ ]
+
+		@locals.withLocals args, =>
+			[ meta, body ] =
+				@funBody body
+
+			new E.FunDef @pos, meta, null, args, body
 
 	fun: (tokens) ->
 		lastToken = tokens.last()
@@ -292,10 +331,12 @@ class Parser
 					@block curlied.body
 
 				switch token.kind
-					when 'in', 'out'
+					when 'in', 'eg'
 						getBlock()
 					when 'out'
 						@locals.withLocal (E.Local.res @pos), getBlock
+					else
+						fail()
 
 			else
 				fail()
@@ -341,7 +382,7 @@ class Parser
 			use
 		else
 			cCheck use.kind != 'is', @pos, 'is must be at top of file'
-			@locals.addLocal use.local
+			@locals.addLocalMayShadow use.local
 			if use.kind == 'does'
 				E.does use
 			else

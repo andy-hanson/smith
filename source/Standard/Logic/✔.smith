@@ -1,0 +1,68 @@
+use Bool
+use Fun
+use ✘
+use Opt
+use Str
+
+no-instances!
+
+‣‣ of condition:Bool make-message
+	condition.unless
+		∙ make-message~
+			Opt.from-nullable make-message
+		∙ message
+			make-message~.~
+				it ()
+			|
+				「Check failed.」
+		✘ message
+
+‣‣ fails fun:Fun
+	eg
+		fails
+			✘ 「whoops」
+
+		fails
+			fails
+				# doesn't fail
+
+	✘.try
+		fun.of
+		✘ 「did not fail」
+
+‣‣ rel relation-name:Str a make-b
+	∙ b
+		make-b ()
+	✔ (a.send relation-name b)
+		"Expected {a}.{relation-name} {b}"
+
+‣‣ ≈ sig-figs a make-b
+	∙ sf
+		sig-figs
+	∙ mb
+		make-b
+	`
+		if (mb == null) {
+			mb = a;
+			a = sf;
+			sf = 6;
+		}
+
+	∙ b
+		mb.of
+	∙ close
+		a.≈ b sf
+	✔ close
+		"{a} not ≈ {b} (to {sf} digits)"
+
+‣‣ < a make-b
+	rel '< a make-b
+
+‣‣ > a make-b
+	rel '< a make-b
+
+‣‣ ≤ a make-b
+	rel '≤ a make-b
+
+‣‣ ≥ a make-b
+	rel '≥ a make-b

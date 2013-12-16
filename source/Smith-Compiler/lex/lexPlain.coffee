@@ -6,7 +6,7 @@ lexQuote = require './lexQuote'
 
 keywords =
 	[ 'use', 'use!', 'is', 'does',
-		'me', '∙', '∘',
+		'me', 'it', '∙', '∘',
 		'doc', 'in', 'out', 'eg', 'how' ]
 
 module.exports = (stream, inQuote) ->

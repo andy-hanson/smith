@@ -1,10 +1,5 @@
 # Something with 'next'
 
-use Fun
-
-
-
-
 ‣ stop
 	`
 		throw new Error('StopIteration');

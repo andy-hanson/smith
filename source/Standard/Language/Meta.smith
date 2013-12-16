@@ -1,0 +1,18 @@
+∙ M
+	`_prelude.Meta`
+
+M.do
+	‣read~ doc
+	‣read~ in
+	‣read~ out
+	‣read~ eg
+	‣read~ how
+
+	‣val Empty
+		of `{}`
+
+	#‣ toString
+	#	show-properties
+
+export M
+

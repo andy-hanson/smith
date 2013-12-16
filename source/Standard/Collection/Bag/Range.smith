@@ -1,9 +1,5 @@
 is Iterable
 
-use Num
-
-use ✔
-
 ‣ construct min:Num max:Num
 	in
 		✔ (min.< max)

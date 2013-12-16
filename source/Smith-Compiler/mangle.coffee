@@ -65,6 +65,8 @@ jsWords =
 
 
 module.exports = (text) ->
+	type text, String
+
 	if jsWords.contains text
 		"_#{text}"
 	else

@@ -1,0 +1,53 @@
+use Ref
+
+‣‣ loop fun:Fun
+	doc
+		Keep running fun until it returns Some.
+		Then return the value in that Some.
+
+	`
+		while (true) {
+			var result = body();
+			if (Option.Some['subsumes?'](body))
+				return body.value;
+		}
+
+‣‣ while condition:Fun body:Fun
+	doc
+		Run `body` as long as `condition` holds.
+	eg
+		∙ a
+			Ref 3
+		∙ b
+			Ref 0
+		while
+			a.positive?
+		|
+			a.! _decrement
+			b.! _increment
+		✔= 0
+			a
+		✔= 3
+			b
+
+	loop
+		condition.of.?
+			do.of
+			None
+		|
+			Some 0
+
+‣‣ do-while do:Fun condition:Fun
+	doc
+		Run `body`, then keep running it as long as `condition` holds.
+	eg
+		∙ a
+			Ref ()
+		do-while Bool.No
+			a.! 1
+		✔= 1
+			a.get
+
+	loop
+		(Some do.of).filter condition.of
+

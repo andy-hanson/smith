@@ -1,0 +1,104 @@
+no-instances!
+
+‣‣ TODO
+	✘ 'TODO
+
+‣‣ of message:Str
+	doc
+		Throw a new Error with the given message.
+	eg
+		✔.fails
+			✘ 'fail
+
+	(Error message).throw!
+
+‣‣ try try:Fun
+	doc
+		If an error occurs in `try`, ignores it and returns None.
+		Else, returns Some of the result.
+	eg
+		✔= (Opt.some 'success)
+			try
+				'success
+		✔= Opt.None
+			try
+				✘ 'fail
+
+	try-catch
+		Opt.some (try ())
+	|
+		Opt.None
+
+‣‣ try-catch try:Fun catch:Fun
+	doc
+		If an error occurs in `try`, returns `catch` of that error.
+		Else returns the result of `try`.
+	eg
+		✔= 'success
+			try-catch
+				'success
+			|
+				'fail
+		✔= 'fail
+			try-catch
+				✘ 'fail
+			|error
+				error,message
+
+	try-catch-finally try catch { }
+
+‣‣ try-catch-finally try:Fun catch:Fun finally:Fun
+	doc
+		If an error occurs in `try`, returns `catch` of that error.
+		Else returns the result of `try`.
+		`finally` is called before returning the result.
+	eg
+		∙ ref
+			Ref ()
+		✔= 'fail
+			try-catch-finally
+				✘ 'fail
+			|
+				error.message
+			|
+				ref.! 'set
+		✔= 'set
+			ref.get
+
+
+	`
+		var res;
+		try {
+			res = _try();
+		}
+		catch (error) {
+			res = _catch(error);
+		}
+		finally {
+			_finally();
+		}
+		return res;
+
+‣‣ annotate try:Fun make-annotation:Fun
+	doc
+		If an error happens in `try`, prepend new text to its message and throw it again.
+	eg
+		✔= 「4: fail」
+			annotate
+				✘ 'fail
+			|error
+				error,message,length
+
+	try-catch try |error
+		∙ annotation
+			make-annotation error
+		`error.message = annotation + ': ' + error.message`
+		error.re-throw!
+
+
+
+
+
+
+
+

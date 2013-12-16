@@ -1,11 +1,9 @@
-use Str
-
 ‣‣ of
 	`global.Array.prototype.slice.call(arguments)`
 
 ‣ make-string
 	(map String.of_).join " "
 
-‣ toString
+‣override toString
 	"({type.name} {make-string})"
 

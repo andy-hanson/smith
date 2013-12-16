@@ -8,7 +8,7 @@ uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
 patterns:
 
 - name: module.use
-  match: (use|use!|is|does)(\s)(.+)
+  match: ^\s*(use|use!|is|does)(\s)(.+)
   captures:
     '3':
       name: module.used
@@ -17,7 +17,7 @@ patterns:
   match: "[A-Z][^\\.\\s]*"
 
 - name: call.bang
-  match: (\.?)[^\.\s]*!
+  match: (\b|\.)[^\.\s]*!
 
 - name: call.normal
   match: \.[^\.\s]+
@@ -34,7 +34,7 @@ patterns:
   end: \"
   patterns:
   - name: constant.other.placeholder.py # you heard me
-    match: \{.*\}
+    match: \{[^\}]*\}
 
 - name: string
   begin: 「
@@ -50,11 +50,11 @@ patterns:
   comment:
     We expect it to be followed by another meta,
     or by a blank line.
-  begin: ^(doc|how)
+  begin: ^\s*(doc|how)
   beginCaptures:
     '1':
       name: meta.tag
-  end: ^($|(in|out|eg))
+  end: ^\s*(in|out|eg)?$
   endCaptures:
     '1':
       name: meta.tag
@@ -67,7 +67,7 @@ patterns:
     end: ^$
 
 - name: meta.tag
-  match: ^(in|out|eg)
+  match: ^\s*(in|out|eg)$
 
 - name: keyword
   match: \b(me|it)\b

@@ -56,7 +56,10 @@ class NumberLiteral extends Literal
 		@value.toString()
 
 	toJS: ->
-		@value.toString()
+		if @value.startsWith '-'
+			"(#{@value})"
+		else
+			@value.toString()
 
 class JavascriptLiteral extends Literal
 	constructor: (@pos, @text, @kind) ->
@@ -174,3 +177,5 @@ module.exports =
 		token instanceof Special and ['∙', '∘'].contains token.kind
 	is: (token) ->
 		token instanceof Use and ['is', 'does'].contains token.kind
+	it: (token) ->
+		token instanceof Special and token.kind == 'it'

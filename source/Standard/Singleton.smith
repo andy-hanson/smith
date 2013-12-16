@@ -1,7 +1,0 @@
-use Fun
-use Str
-
-
-
-‣ construct name:Str
-	`this._prop_name = name`

@@ -2,14 +2,8 @@ use Meta
 
 (use Fun).do
 	‣ meta
-		# TODO
-		# (property~ 'meta).or
-		#		Meta.empty
-		(has-property? 'meta).?
-			property 'meta
-		|
-			Meta.empty
-
+		(property~ '_meta).or
+			Meta.Empty
 
 	‣‣ from-JS #...rest
 		`global.Function`.apply () arguments

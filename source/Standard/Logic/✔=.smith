@@ -1,0 +1,4 @@
+use ✔
+
+export |a make-b
+	✔.rel '= a make-b
