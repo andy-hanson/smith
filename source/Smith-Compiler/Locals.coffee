@@ -2,6 +2,7 @@ E = require './Expression'
 T = require './Token'
 { cCheck } = require './CompileError'
 StringMap = require './StringMap'
+Pos = require './Pos'
 
 module.exports = class Locals
 	constructor: ->
@@ -51,6 +52,7 @@ module.exports = class Locals
 		x = @names.maybeGet name.text
 
 	getIt: (pos) ->
+		type pos, Pos
 		cCheck (@names.has 'it'), pos,
 			"No local 'it'"
 		@names.get 'it'

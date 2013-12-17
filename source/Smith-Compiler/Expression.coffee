@@ -36,10 +36,10 @@ class Does extends Expression
 		type @local, Local
 		type @value, Expression
 ###
-does = (use) ->
+trait = (use) ->
 	type use, Use
 	{ local, pos } = use
-	verb = new T.Name pos, 'does'
+	verb = new T.Name pos, 'trait'
 	value = Call.me pos, verb, [ use ]
 	new DefLocal local, value
 
@@ -77,8 +77,7 @@ class DefLocal extends Expression
 			else
 				''
 
-		[ 'var ', name, '=\n',
-			newIndent, val, check ]
+		[ 'var ', name, ' =\n', newIndent, val, check ]
 
 
 class Block extends Expression
@@ -167,10 +166,11 @@ class Block extends Expression
 			doIfNotSpecial node
 
 class Call extends Expression
-	constructor: (@subject, @verb, @args) ->
+	constructor: (@subject, @verb, @optionArgs, @args) ->
 		type @subject, Expression
 		type @verb, T.Name
 		check @verb.kind == '.x'
+		type @optionArgs, Array
 		type @args, Array
 
 		@args.forEach (arg) ->
@@ -187,21 +187,26 @@ class Call extends Expression
 			@args.map (x) -> x.toNode fileName, indent
 		args =
 			nodes.interleave ', '
+		optionArgs =
+			if @optionArgs.isEmpty()
+				''
+			else
+				opts =
+					(@optionArgs.map (x) -> x.toNode fileName, indent).interleavePlus ','
+				[ '_opt, [', opts, '], ' ]
 
-		[ subject, "['", @verb.text, "'](", args, ')' ]
+		[ subject, "['", @verb.text, "'](", optionArgs, args, ')' ]
 
 	@me = (pos, verb, args) ->
-		type pos, Pos
-		type verb, String
-		type args, Array
-		verb =
-			new T.Name pos, verb, '.x'
-		new Call (new Me pos), verb, args
+		verb = new T.Name pos, verb, '.x'
+		new Call (new Me pos), verb, [], args
 
-	@of = (expr, args) ->
-		type expr, Expression
+	@of = (expr, opts, args) ->
 		verb = new T.Name expr.pos, 'of', '.x'
-		new Call expr, verb, args
+		new Call expr, verb, opts, args
+
+	@noArgs = (subject, verb) ->
+		new Call subject, verb, [], []
 
 class Property extends Expression
 	constructor: (@subject, @prop) ->
@@ -244,7 +249,7 @@ class Meta extends Expression
 							when 'doc', 'how'
 								val.toNode fileName, indent
 							when 'eg'
-								(FunDef.plain val).toNode fileName, newIndent
+								(FunDef.body val).toNode fileName, newIndent
 							else
 								fail()
 
@@ -258,11 +263,15 @@ class Meta extends Expression
 			''
 
 class FunDef extends Expression
-	constructor: (@pos, @meta, @tipe, @args, @body) ->
+	constructor: (@pos, @meta, @tipe, @optArgs, \
+			   @optRest, @args, @maybeRest, @body) ->
 		type @pos, Pos
 		type @meta, Meta
 		type @tipe, Expression if @tipe?
-		type @args, Array
+		type @optArgs, Array if @optArgs?
+		type @optRest, Array if @optRest?
+		type @args, Array # of Locals
+		type @maybeRest, Local if @maybeRest?
 		if @body?
 			if @body instanceof T.JavascriptLiteral
 				check @body.kind == 'indented'
@@ -271,6 +280,81 @@ class FunDef extends Expression
 
 	toString: ->
 		"{#{@args} ->\n #{@body?.toString().indent()}}"
+
+
+	assignArgs: (fileName, indent) ->
+		getRest = (maybeRest, argsRendered, nArgs, ignoreOpts) =>
+			if @maybeRest?
+				get =
+					jsLiteral @pos,
+						"Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
+				def =
+					new DefLocal maybeRest, get
+				def.toNode fileName, indent
+			else
+				# TODO
+				#if ignoreOpts
+					# skip first 2
+				"_nArgs(#{argsRendered}, #{nArgs})"
+
+		#argChecks =
+		#	# TODO: opt args too
+		#	@args.map (arg) -> arg.typeCheck fileName, newIndent
+
+		if @optArgs?
+			nOpts = @optArgs.length
+			newIndent = indent + '\t'
+
+			assign = (arg, args, index, isOpt = no) ->
+				val = "#{args}[#{index}]"
+				if arg.tipe?
+					val = [
+						(arg.tipe.toNode fileName, indent),
+						".check('#{arg.name}', #{val})"
+					]
+				if isOpt
+					val = [ 'Opt().some(', val, ')' ]
+
+				[ "var #{arg.toNode fileName, indent} = ", val ]
+
+			getOpts =
+				for opt, index in @optArgs
+					assign opt, "_opts", index, yes
+
+			getArgsIfOpts =
+				for arg, index in @args
+					assign arg, "arguments", index + 2
+
+			getNoOpts =
+				for opt in @optArgs
+					[ 'var ', (opt.toNode fileName, indent), ' = Opt().None()' ]
+
+			getArgsNoOpts =
+				for arg, index in @args
+					assign arg, "arguments", index
+
+			nl = "\n#{newIndent}"
+			snl = ";#{nl}"
+
+			s = [
+				'if (arguments[0] == _opt) {',
+					nl, 'var _opts = arguments[1]',
+					snl,
+					(getOpts.interleavePlus snl),
+					(getArgsIfOpts.interleavePlus snl),
+					(getRest @optRest, '_opts', nOpts), snl,
+					(getRest @maybeRest, 'arguments', @args.length + 2),
+				';\n', indent, '} else {', nl,
+					(getNoOpts.interleavePlus snl),
+					(getArgsNoOpts.interleavePlus snl),
+					(getRest @maybeRest, 'arguments', @args.length),
+				';\n', indent, '}'
+				]
+
+		else
+			[ (getRest @maybeRest, 'arguments', @args.length), ';\n', indent ]
+
+
 
 	compile: (fileName, indent) ->
 		maybeMeta = (kind) =>
@@ -283,8 +367,8 @@ class FunDef extends Expression
 
 		argNames =
 			(@args.map (arg) -> arg.toNode fileName, newIndent).interleave ', '
-		argChecks =
-			@args.map (arg) -> arg.typeCheck fileName, newIndent
+
+		assignArgs = @assignArgs fileName, newIndent
 		inCond =
 			maybeMeta 'in'
 		body =
@@ -300,22 +384,25 @@ class FunDef extends Expression
 			loc.typeCheck fileName, newIndent
 		meta =
 			@meta.toNode fileName, indent
+
 		[ '_f(this, function(', argNames, ') {',
 			'\n', newIndent,
-			argChecks,
+			assignArgs,
 			inCond,
+			'\n', newIndent,
 			body,
 			'\n', newIndent,
 			typeCheck,
 			outCond,
-			'return res\n',
+			'return res;\n',
 			indent, '}',
 			meta, ')' ]
 
-	@plain = (body) ->
-		type body, Block
+	@plain = (pos, meta, args, body) ->
+		new FunDef pos, meta, null, null, null, args, null, body
 
-		new FunDef body.pos, (new Meta body.pos), null, [], body
+	@body = (body) ->
+		@plain body.pos, (new Meta body.pos), [], body
 
 ###
 _func
@@ -479,7 +566,8 @@ class Parend extends Expression
 	compile: (fileName, indent) ->
 		@content.compile fileName, indent
 
-
+jsLiteral = (pos, text) ->
+	new Literal new T.JavascriptLiteral pos, text, 'special'
 
 module.exports =
 	Block: Block
@@ -499,4 +587,5 @@ module.exports =
 	Use: Use
 	Null: Null
 	Parend: Parend
-	does: does
+	trait: trait
+	jsLiteral: jsLiteral

@@ -8,20 +8,6 @@ A.do
 
 		(property 'constructor).to-class
 
-	#‣override toString
-	#	"<some {class.name}>"
-
-	‣ property-names
-		Global@Object.getOwnPropertyNames me
-
-	‣ show-properties
-		`
-			var s = "{", me = this;
-			Object.getOwnPropertyNames(this).forEach(function(key) {
-				s += key + ': ' + global.String(me[key]) + ',';
-			});
-			return s + "}";
-
 	‣ has-property? name:Str
 		`Object.prototype.hasOwnProperty`.call me name
 
@@ -35,9 +21,6 @@ A.do
 			else
 				throw new global.Error("" + this + " does not have property " + name);
 
-	‣‣ exists? a
-		`a != null`
-
 	‣ property~ name:Str
 		(has-property? name).if
 			∙ h
@@ -46,13 +29,35 @@ A.do
 				"Object has key {name} but no value"
 			h
 
+	‣ property-names
+		Global@Object.getOwnPropertyNames me
+
+	‣ show-properties
+		`
+			var s = "{", me = this;
+			Object.getOwnPropertyNames(this).forEach(function(key) {
+				s += key + ': ' + global.String(me[key]) + ',';
+			});
+			return s + "}";
+
+	‣‣ exists? a
+		`a != null`
+
 	‣ each-property fun:Fun
 		property-names.each |name
 			fun name (property name)
 
-	‣ new! name:Str value
+	‣ new-mutable! name:Str value
 		✔ (has-property? name).¬
 		set-property! name value
+
+	‣ new! name:Str value
+		doc
+			Defines a new immutable property on this object.
+		how
+			Writable is false by default.
+
+		`global.Object.defineProperty(this, name, {value: value})`
 
 	‣ set-property! name:Str value
 		`this[name] = value`
@@ -95,7 +100,7 @@ A.do
 	‣ ≠ a
 		(= a).¬
 
-	‣ send name:Str
-		`this[name].apply(this, Array.prototype.slice.call(arguments, 1))`
+	‣ send name:Str ...args
+		`this[name].apply(this, args)`
 
 export A

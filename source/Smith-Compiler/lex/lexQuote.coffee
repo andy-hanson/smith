@@ -18,7 +18,7 @@ module.exports = (quoteType, stream, oldIndent) ->
 	indented =
 		stream.peek() == '\n'
 	canInterpolate =
-		not ['「', '`'].contains quoteType
+		not quoteType.isAny '「', '`'
 	quoteIndent =
 		oldIndent + 1
 

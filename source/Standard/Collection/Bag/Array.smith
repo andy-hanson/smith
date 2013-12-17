@@ -7,6 +7,12 @@ use ../Object
 A.do
 	alias 'forEach 'each
 
+	‣ of n:Num
+		in
+			✔ n.integer?
+
+		`this[n]`
+
 	‣ size
 		@length
 

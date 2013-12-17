@@ -17,28 +17,28 @@ class Parser
 			Pos.start
 
 	###
-	Returns: [ iz, fun ]
+	Returns: [ super, autoUses, fun ]
 	###
 	all: (tokens) ->
 		autoUses = @autoUses()
 
-		[ iz, bodyTokens ] = @readIs tokens # TODO: don't conflict with auto
-		if iz?
-			type iz, E.Use
-			@locals.addLocalMayShadow iz.local
-
-		fun = @argLessFun bodyTokens
-		fun.body.subs = autoUses.concat fun.body.subs
-
-		[ iz, fun ]
-
-	autoUses: ->
 		typeLocal =
 			E.Local.eager new T.Name @pos, @typeName, 'x'
 		@locals.addLocal typeLocal
 		defTypeLocal =
 			new E.DefLocal typeLocal, new E.Me @pos
 
+		[ sooper, bodyTokens ] = @readSuper tokens # TODO: don't conflict with auto
+		if sooper?
+			type sooper, E.Use
+			@locals.addLocalMayShadow sooper.local
+
+		fun = @argLessFun bodyTokens
+		fun.body.subs.unshift defTypeLocal
+
+		[ sooper, autoUses, fun ]
+
+	autoUses: ->
 		noUseMe =
 			(@allModules.autoUses @fileName).filter (use) =>
 				use.local.name != @typeName
@@ -47,38 +47,18 @@ class Parser
 				@locals.addLocal use.local
 				new E.DefLocal use.local, use
 
-		autoUses.unshift defTypeLocal
 		autoUses
 
 
 
 	###
-	Returns: [ iz, restOfTokens ]
+	Returns: [ super, restOfTokens ]
 	###
-	readIs: (tokens) ->
-		if T.is tokens[0]
+	readSuper: (tokens) ->
+		if T.super tokens[0]
 			[ (new E.Use tokens[0], @fileName, @allModules), tokens.tail() ]
 		else
 			[ null, tokens ]
-
-		###
-		iz = null
-		doesses = []
-
-		for token, index in tokens
-			continue if T.nl token
-			if T.isOrDoes token
-				if token.kind == 'is'
-					use = new E.Use token, @fileName, @allModules
-					iss = E.IsDoes use, 'is'
-				else
-					doesses.push E.IsDoes token, 'does'
-			else
-				break
-
-		return [ iz, doesses, tokens.slice index ]
-		###
-
 
 	block: (tokens) ->
 		type tokens, Array
@@ -93,6 +73,9 @@ class Parser
 
 		new E.Block @pos, parsed
 
+	unexpected: (token) ->
+		cFail @pos, "Unexpected #{token}"
+
 	valueExpression: (tokens) ->
 		@expression tokens, yes
 
@@ -100,31 +83,62 @@ class Parser
 		type tokens, Array
 		type isValue, Boolean
 
-		if tokens.isEmpty()
-			return new E.Null @pos
+		[ parts, opts ] = @expressionParts tokens, isValue
+
+		if parts.isEmpty()
+			cCheck opts.isEmpty
+			new E.Null @pos
+		else
+			[ e0, tail ] = parts.unCons()
+
+			if e0 instanceof E.Call
+				unless tail.isEmpty()
+					check e0.args.isEmpty()
+					e0.args = tail
+				e0.optionArgs = opts
+				e0
+			else if tail.isEmpty()
+				e0
+			else
+				new E.Call.of e0, opts, tail
+
+	###
+	Returns [regularParts, optionParts]
+	###
+	expressionParts: (tokens, isValue) ->
+		type tokens, Array
+		type isValue, Boolean
 
 		tok0 = tokens[0]
 
+		plain = (x) ->
+			[ [x], [] ]
+
 		if tok0 instanceof T.Use
-			@use tokens, isValue
+			plain @use tokens, isValue
 		else if tok0 instanceof T.Def
 			cCheck not isValue, @pos,
 				'Can not have local def in inner expression.'
-			@def tok0, tokens
+			plain @def tok0, tokens
 		else if T.defLocal tok0
-			@defLocal tokens.tail(), tok0.kind == '∘'
+			plain @defLocal tokens.tail(), tok0.kind == '∘'
 		else
+			###
+			1.~= 2 [5]
+			###
+
 			slurped = []
+			opts = []
 			until tokens.isEmpty()
 				tok0 = tokens[0]
+				tokens = tokens.tail()
 				x =
 					if T.dotLikeName tok0
-						tokens = tokens.tail()
 						pop = slurped.pop()
 						if pop?
 							switch tok0.kind
 								when '.x'
-									new E.Call pop, tok0, []
+									new E.Call.noArgs pop, tok0
 								when '@x'
 									new E.Property pop, tok0
 								when '.x_'
@@ -134,24 +148,23 @@ class Parser
 						else if tok0.kind == '@x'
 							@soloExpression tok0
 						else
-							fail "Unexpected #{tok0}"
+							@unexpected tok0
+					else if T.square tok0
+						@pos = tok0.pos
+						[ someOpts, optOpts ] = @expressionParts tok0.body, yes
+						cCheck optOpts.isEmpty(),
+							'Did not expect options within options'
+						opts.pushAll someOpts
+						null
 					else
-						tokens = tokens.tail()
 						z = @soloExpression tok0
 
-				type x, E.Expression
-				slurped.push x
+				if x?
+					type x, E.Expression
+					slurped.push x
 
-			[ e0, tail ] = slurped.unCons()
+			[ slurped, opts ]
 
-			if e0 instanceof E.Call
-				check e0.args.isEmpty()
-				e0.args = tail
-				e0
-			else if tail.isEmpty()
-				e0
-			else
-				new E.Call.of e0, tail
 
 	###
 	Expression of a single token
@@ -160,9 +173,7 @@ class Parser
 		type token, T.Token
 
 		@pos = token.pos
-
-		unexpected = =>
-			cFail @pos, "Unexpected #{token}"
+		type @pos, Pos
 
 		switch token.constructor
 			when T.Name
@@ -176,7 +187,7 @@ class Parser
 					when '@x'
 						E.Property.me @pos, token
 					else
-						unexpected token
+						@unexpected token
 			when T.Group
 				switch token.kind
 					when '|'
@@ -184,26 +195,26 @@ class Parser
 					when '('
 						new E.Parend @valueExpression token.body
 					when '['
-						unexpected token
+						@unexpected token
 					when '{'
-						@argLessFun token.body
+						@headLessFun token.body
 					when '"'
 						@quote token
 					else
-						unexpected token
+						@unexpected token
 			when T.Special
 				switch token.kind
 					when 'me'
 						new E.Me token.pos
 					when 'it'
-						@locals.getIt()
+						@locals.getIt @pos
 					else
-						unexpected token
+						@unexpected token
 			else
 				if token instanceof T.Literal
 					new E.Literal token
 				else
-					unexpected token
+					@unexpected token
 
 	quote: (quote) ->
 		type quote, T.Group
@@ -239,8 +250,13 @@ class Parser
 			else
 				no
 
-
 	argLessFun: (body) ->
+		[ meta, body ] =
+			@funBody body
+
+		E.FunDef.plain @pos, meta, [], body
+
+	headLessFun: (body) ->
 		args =
 			if @containsIt body
 				[ E.Local.it @pos ]
@@ -251,7 +267,7 @@ class Parser
 			[ meta, body ] =
 				@funBody body
 
-			new E.FunDef @pos, meta, null, args, body
+			E.FunDef.plain @pos, meta, args, body
 
 	fun: (tokens) ->
 		lastToken = tokens.last()
@@ -267,16 +283,62 @@ class Parser
 			else
 				[ null, before ]
 
-		args =
-			@takeNewLocals argsTokens
+		[ optArgs, optRest, restArgsTokens ] =
+			@takeOptionalArguments argsTokens
+		[ args, maybeRest ] =
+			@takeNewLocals restArgsTokens
+
+		newLocals =
+			if optArgs? then optArgs.concat args else args
+
 		[ meta, body ] =
 			if T.curlied last
-				@locals.withLocals args, =>
+				@locals.withLocals newLocals, =>
+					@locals.addLocal maybeRest if maybeRest?
 					@funBody last.body
 			else
 				[ (new E.Meta @pos), null ]
 
-		new E.FunDef @pos, meta, returnType, args, body
+		new E.FunDef \
+			@pos, meta, returnType, \
+			optArgs, optRest, \
+			args, maybeRest, body
+
+	takeOptionalArguments: (tokens) ->
+		if T.square tokens[0]
+			[ optArgs, optRest ] =
+				@takeNewLocals tokens[0].body
+			[ optArgs, optRest, tokens.tail() ]
+		else
+			[ null, null, tokens ]
+
+	###
+	Returns [plainLocals, restLocal]
+	###
+	takeNewLocals: (tokens) ->
+		out = []
+		rest = null
+
+		while not tokens.isEmpty()
+			name = tokens[0]
+
+			if T.ellipsisName name
+				tokens = tokens.tail()
+				cCheck tokens.isEmpty(), @pos, ->
+					"Did not expect anything after ellipsis"
+				rest = E.Local.eager name, null
+
+			else if T.plainName name
+				[ typeName, tokens ] =
+					if T.typeName tokens[1]
+						[ tokens[1], tokens.tail().tail() ]
+					else
+						[ null, tokens.tail() ]
+				out.push @newLocal name, typeName
+			else
+				@unexpected name
+
+		[out, rest]
 
 	###
 	Returns: [Meta, Block]
@@ -345,24 +407,9 @@ class Parser
 			else
 				fail()
 
-	takeNewLocals: (tokens) ->
-		out = []
-
-		while not tokens.isEmpty()
-			name = tokens[0]
-			[ typeName, tokens ] =
-				if T.typeName tokens[1]
-					[ tokens[1], tokens.tail().tail() ]
-				else
-					[ null, tokens.tail() ]
-
-			out.push @newLocal name, typeName, no
-
-		out
-
 	# Local from function arg
 	newLocal: (name, typeName) ->
-		cCheck (T.normalName name), @pos, ->
+		cCheck (T.plainName name), @pos, ->
 			"Expected local name, not #{name}"
 
 		type =
@@ -385,10 +432,10 @@ class Parser
 				"Use as value must be of kind 'use'"
 			use
 		else
-			cCheck use.kind != 'is', @pos, 'is must be at top of file'
+			cCheck use.kind != 'super', @pos, 'is must be at top of file'
 			@locals.addLocalMayShadow use.local
-			if use.kind == 'does'
-				E.does use
+			if use.kind == 'trait'
+				E.trait use
 			else
 				new E.DefLocal use.local, use
 
@@ -401,10 +448,11 @@ class Parser
 		[ before, value ] =
 			tokens.allButAndLast()
 
-		locals =
+		[ locals, rest ] =
 			@takeNewLocals before
 
-		check locals.length == 1
+		cCheck locals.length == 1, @pos, "Multiple assignments are TODO"
+		cCheck rest == null, @pos, "Multiple assignments are TODO"
 
 		local = locals[0]
 		local.lazy = lazy
@@ -423,7 +471,7 @@ class Parser
 				when '{'
 					@block value.body
 				else
-					throw new Error "Unexpected value #{val}"
+					@unexpected val
 
 		@locals.addLocal local
 
@@ -431,14 +479,9 @@ class Parser
 
 
 ###
-Returns: [ iz, fun ]
+Returns: [ sooper, autoUses, fun ]
 ###
 parse = (tokens, typeName, fileName, allModules) ->
-	type tokens, Array
-	type typeName, String
-	type fileName, String
-	type allModules, AllModules
-
 	(new Parser typeName, fileName, allModules).all tokens
 
 module.exports = parse

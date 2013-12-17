@@ -1,18 +1,10 @@
-use Bool
-use Fun
-use ✘
-use Opt
-use Str
-
 no-instances!
 
-‣‣ of condition:Bool make-message
+‣‣ of condition:Bool ...args
 	condition.unless
-		∙ make-message~
-			Opt.from-nullable make-message
 		∙ message
-			make-message~.~
-				it ()
+			args@length.positive?.?
+				(args 0).of
 			|
 				「Check failed.」
 		✘ message
@@ -32,28 +24,20 @@ no-instances!
 
 ‣‣ rel relation-name:Str a make-b
 	∙ b
-		make-b ()
+		make-b.of
 	✔ (a.send relation-name b)
 		"Expected {a}.{relation-name} {b}"
 
-‣‣ ≈ sig-figs a make-b
-	∙ sf
-		sig-figs
-	∙ mb
-		make-b
-	`
-		if (mb == null) {
-			mb = a;
-			a = sf;
-			sf = 6;
-		}
-
+‣‣ ≈ [significant-digits~] a make-b
+	∙ significant-digits
+		significant-digits~.or
+			6
 	∙ b
-		mb.of
+		make-b.of
 	∙ close
-		a.≈ b sf
+		a.≈ [significant-digits] b
 	✔ close
-		"{a} not ≈ {b} (to {sf} digits)"
+		"{a} not ≈ {b} (to {significant-digits} digits)"
 
 ‣‣ < a make-b
 	rel '< a make-b

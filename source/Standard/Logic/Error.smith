@@ -3,14 +3,9 @@
 
 E.do
 	‣‣ of message
-		doc
-			For some reason, this won't work:
-			var y = Object.create(global.Error.prototype);
-			global.Error.call(y, 'message');
-			console.log(y.message);
-			Must call 'new Error'
+		how
+			For some reason, `New Global@Error message` won't work.
 
-		#New Global@Error message # Nope :(
 		`new global.Error(message)`
 
 	‣ throw!

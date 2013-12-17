@@ -59,14 +59,26 @@ String.prototype.map =
 String.prototype.contains = (substr) ->
 	(@indexOf substr) != -1
 
+Array.prototype.contains = (em) ->
+	(@indexOf em) != -1
+
+String.prototype.isAny = ->
+	args =
+		Array.prototype.slice.call arguments
+	Array.prototype.contains.call args, @toString()
+
 Array.prototype.tail = String.prototype.tail = ->
 	@slice 1
 
 Array.prototype.interleave = (leaf) ->
-	out = []
-	@forEach (elem) ->
-		out.push elem, leaf
+	out = @interleavePlus leaf
 	out.pop()
+	out
+
+Array.prototype.interleavePlus = (leaf) ->
+	out = []
+	@forEach (em) ->
+		out.push em, leaf
 	out
 
 Array.prototype.beforeAtAfter = (idx) ->
@@ -88,8 +100,6 @@ Array.prototype.takeWhile = (cond) ->
 	else
 		[ (@slice 0, afterLastIndex), (@slice afterLastIndex, @length) ]
 
-Array.prototype.contains = (em) ->
-	(@indexOf em) != -1
 
 Array.prototype.containsWhere = (em) ->
 	(@indexOfWhere em) != -1

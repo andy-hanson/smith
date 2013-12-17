@@ -1,0 +1,9 @@
+doc
+	Prepares the program.
+	Don't edit this file.
+
+(use Source-Map-Support).install
+
+use! Standard
+
+use! Main

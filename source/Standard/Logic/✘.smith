@@ -25,7 +25,7 @@ no-instances!
 				✘ 'fail
 
 	try-catch
-		Opt.some (try ())
+		Opt.some try.of
 	|
 		Opt.None
 
@@ -65,7 +65,6 @@ no-instances!
 		✔= 'set
 			ref.get
 
-
 	`
 		var res;
 		try {
@@ -94,11 +93,4 @@ no-instances!
 			make-annotation error
 		`error.message = annotation + ': ' + error.message`
 		error.re-throw!
-
-
-
-
-
-
-
 

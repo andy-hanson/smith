@@ -1,1 +1,23 @@
-export (Global@Function.to-class 'Fun)
+∙ F
+	Global@Function.to-class 'Fun
+
+F.do
+	-def 'meta
+		how
+			Must be in JS.
+
+		(property~ '_meta).or
+			Meta.Empty
+
+		#{
+		`
+			if (this._meta == null)
+				return Meta().Empty();
+			else
+				return this._meta;
+		}#
+
+	-def 'meta! |meta:Meta
+		set-property! '_meta (me.meta.merge meta)
+
+export F

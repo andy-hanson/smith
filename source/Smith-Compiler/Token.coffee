@@ -129,7 +129,7 @@ class Use extends Token
 class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
 		type @pos, Pos
-		check ['doc', 'how'].contains @kind
+		check @kind.isAny 'doc', 'how'
 		type @text, Group
 
 	show: ->
@@ -162,20 +162,24 @@ module.exports =
 	bar: (token) ->
 		token instanceof Special and token.kind == '|'
 	dotLikeName: (token) ->
-		token instanceof Name and ['.x', '@x', '.x_'].contains token.kind
-	normalName: (token) ->
+		token instanceof Name and token.kind.isAny '.x', '@x', '.x_'
+	plainName: (token) ->
 		token instanceof Name and token.kind == 'x'
 	typeName: (token) ->
 		token instanceof Name and token.kind == ':x'
+	ellipsisName: (token) ->
+		token instanceof Name and token.kind == '...x'
 	curlied: (token) ->
 		token instanceof Group and token.kind == '{'
+	square: (token) ->
+		token instanceof Group and token.kind == '['
 	metaGroup: (token) ->
-		token instanceof Group and [ 'in', 'out', 'eg' ].contains token.kind
+		token instanceof Group and token.kind.isAny 'in', 'out', 'eg'
 	indentedJS: (token) ->
 		token instanceof JavascriptLiteral and token.kind == 'indented'
 	defLocal: (token) ->
-		token instanceof Special and ['∙', '∘'].contains token.kind
-	is: (token) ->
-		token instanceof Use and ['is', 'does'].contains token.kind
+		token instanceof Special and token.kind.isAny '∙', '∘'
+	super: (token) ->
+		token instanceof Use and token.kind == 'super'
 	it: (token) ->
 		token instanceof Special and token.kind == 'it'

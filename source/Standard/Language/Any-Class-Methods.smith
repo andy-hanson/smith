@@ -1,0 +1,21 @@
+Any-Class.do
+	‣read methods
+		doc
+			Dictionary of this class' own methods.
+			Does not include inherited methods.
+
+	‣read name
+		doc
+			Name of this class.
+
+	‣read super
+		doc
+			Super-class.
+
+	‣read proto
+		doc
+			Instances of this class have this as their prototype.
+
+	‣read id
+		doc
+			Unique number for this class.

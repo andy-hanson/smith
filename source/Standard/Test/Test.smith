@@ -1,0 +1,5 @@
+export |name:Str do:Fun
+	✘.annotate
+		do.run!
+	|
+		"Testing {name}"

@@ -8,9 +8,6 @@
 
 	‣read value
 
-	‣ show
-		"(Some {value})"
-
 	‣ force
 		value
 
@@ -24,9 +21,8 @@
 	‣ ~ if-some:Fun if-none:Fun
 		if-some value
 
-
-	#‣ inspect
-	#	"(Some {value})"
+	‣override toString
+		"(Some {value})"
 
 
 ‣sub-object None

@@ -1,19 +1,12 @@
 Fun.do
-	‣ meta
-		(property~ '_meta).or
-			Meta.Empty
-
 	‣‣ from-JS
 		Global@Function.apply () `arguments`
 
-	‣ new-bound-call new-bound-to
-		unbound.apply new-bound-to `Array.prototype.slice.call(arguments, 1)`
+	‣ new-bound-of new-bound-to ...arguments
+		unbound.apply new-bound-to arguments
 
-	#‣ new-bound-call new-bound-to ...rest
-	#	unbound.apply new-bound-to rest
-
-	‣ of
-		apply () `arguments`
+	‣ of ...args
+		apply () args
 
 	alias 'of 'run!
 
@@ -28,6 +21,13 @@ Fun.do
 				return made;
 			}
 			return get;
+
+	#‣ apply-with-options options:Array arguments:Array
+	#	∙ args
+	#		(Array `_prelude.optionalArgumentTag` options).concat arguments
+
+
+
 
 	#{
 	‣ argument-names

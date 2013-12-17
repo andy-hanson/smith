@@ -1,45 +1,6 @@
 doc
-	I am doc
+	Here's my nifty program.
 
-(use Source-Map-Support).install
+use! Standard/Test/Syntax-Test
 
-use! Standard
-
-Fun.test!
-
-#Any-Class.all-classes.each _test!
-
-
-#all.forEach |x
-#	x.test-all-eg!
-
-
-
-#{
-∙ r
-	Range 1 5
-
-r.iterator.each
-	Console.log! it
-}#
-
-#{
-∙ some1
-	(Opt.Some) 1
-∙ no1
-	Opt.None
-
-Console.log! Opt.Some
-Console.log! some1
-Console.log! (some1.type.= Opt.Some)
-#Console.log! some1.inspect
-#Console.log! no1
-}#
-
-
-#(use Num).test-all-eg
-
-#∙ f |x y ...z
-#	Console.log! z
-
-#f 1 2 3 4 5
+Any-Class.all-classes.each _test!

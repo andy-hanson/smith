@@ -32,8 +32,8 @@ require('just-the-job') ->
 	@task 'compile',
 		'Compile all code in source',
 		['compile-compiler'],
-		'bin/smith --quiet'  #--print-module-defines'
-	@task 'just-run-smith', 'node js/run.js'
+		'bin/smith --quiet'  # --print-module-defines # --just Main.smith
+	@task 'just-run-smith', 'node js/Standard/run.js'
 	@task 'run',
 		'Run the compiled program',
 		['compile', 'just-run-smith']

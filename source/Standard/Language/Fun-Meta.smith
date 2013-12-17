@@ -1,6 +1,4 @@
 Fun.do-meta
 	doc
 		doc...
-	eg
-		Console.log! 'hello-from-Fun-eg
 

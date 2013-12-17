@@ -24,7 +24,7 @@ M.do
 			['_doc', '_in', '_out', '_eg', '_how'].forEach(function(met) {
 				if (me[met] != null) {
 					if (other[met])
-						throw new global.Error("Can not merge " + this + " and " + other);
+						throw new global.Error("Can not merge " + me + " and " + other);
 					m[met] = me[met];
 				}
 				else if (other[met] != null) {

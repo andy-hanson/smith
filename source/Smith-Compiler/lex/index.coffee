@@ -15,62 +15,20 @@ checkSpaces = (str) ->
 			pos = new Pos lineNumber, line.length - 1
 			cFail pos, "Line #{lineNumber + 1} ends with a space."
 
-###
-Remove any '\n' preceding a '|' or '.x'
-Only one '\n' in a row
-remove_some_newlines = (tokens) ->
-	out = []
-	onNewLines = no
-
-	tokens.forEach (token) ->
-		if onNewLines
-			unless T.nl token
-				unless T.bar token or T.dotLikeName token
-					out.push onNewLines
-				onNewLines = no
-				out.push token
-		else
-			if T.nl token
-				onNewLines = token
-			else
-				out.push token
-
-	if onNewLines
-		out.push onNewLines
-
-	# Check it worked
-	for token, idx in out
-		if T.nl token
-			next = out[idx + 1]
-			if T.nl next
-				fail 'Two \\n in a row'
-			else if T.bar next or T.dotLikeName next
-				fail '\\n precedes | or .x'
-			else
-				# yer OK
-
-	if T.nl out[0]
-		out.shift()
-	out
-###
-
 joinGroups = (tokens) ->
 	stack = []
-	current = []
+	current = [] # Tokens to form this body
 	opens = [] # GroupPres
 
 	new_level = (open) ->
 		type open, GroupPre
-		#console.log "push #{current}"
 		opens.push open
 		stack.push current
 		current = []
 
 	finish_level = (result) ->
-		#console.log "pop #{result}"
 		current = stack.pop()
 		current.push result
-
 
 	for tok in tokens
 		if tok instanceof GroupPre
@@ -89,10 +47,11 @@ joinGroups = (tokens) ->
 					finish_level new T.Group \
 						open.pos, tok.pos, open.kind, current
 
-					if [ '|', 'in', 'out', 'eg' ].contains opens.last()?.kind
-						open = opens.pop()
-						finish_level new T.Group \
-							open.pos, tok.pos, open.kind, current
+					if kind.isAny '}', '<-'
+						if opens.last()?.kind?.isAny '|', 'in', 'out', 'eg'
+							open = opens.pop()
+							finish_level new T.Group \
+								open.pos, tok.pos, open.kind, current
 
 		else
 			if tok instanceof T.Group # From Quotes

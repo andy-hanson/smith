@@ -1,26 +1,26 @@
-use Bag
-use Opt
-use ✔
-use ✔=
-
 ∙ N
 	Global@Number.to-class 'Num
 
 ∙ JS-Math
 	Global@Math
 
-N.do
-	‣ ≈ a:N significant-digits:N
+N.do-meta
+	doc
+		...
+
+	‣ ≈[significant-digits~:N] a:N
 		doc
 			Whether two I am equal to a to within `significant-digits` digits.
 			Delegates to ≈0 when I or a are 0.
-		in
-			significant-digits.natural?
 		eg
-			✔ (1001.≈ 1000 3)
-			✔ (1001.≈ 1000 4).¬
-			✔ (0.001001.≈ 0.001 3)
-			✔ (0.001001.≈ 0.001 4).¬
+			✔ (1001.≈[3] 1000)
+			✔ (1001.≈[4] 1000).¬
+			✔ (0.001001.≈[3] 0.001)
+			✔ (0.001001.≈[4] 0.001).¬
+
+		∙ significant-digits
+			significant-digits~.or
+				6
 
 		zero?.?
 			a.≈0 significant-digits
@@ -634,7 +634,7 @@ N.do
 		doc
 			Product of all integers up to me.
 		in
-			natural?
+			✔ natural?
 		eg
 			✔= 6
 				3.factorial
@@ -695,7 +695,7 @@ N.do
 		doc
 			Forces me in between min and max.
 		in
-			min.< max
+			✔ (min.< max)
 		eg
 			✔= 1
 				0.crop 1 2
@@ -710,8 +710,8 @@ N.do
 		doc
 			Highest integer that both I and `a` are divisible by.
 		in
-			natural?
-			a.natural?
+			✔ natural?
+			✔ a.natural?
 		eg
 			✔= 6
 				12.greatest-common-divisor 18
@@ -728,8 +728,8 @@ N.do
 		doc
 			Lowest integer that both I and `a` are factors of.
 		in
-			natural?
-			a.natural?
+			✔ natural?
+			✔ a.natural?
 		out
 			me.divisible? res
 			a.divisible? res

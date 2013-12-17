@@ -20,6 +20,10 @@ Any = null
 def = (name, method) ->
 	this._proto[name] = this._methods[name] = method.unbound()
 
+imm = (object, name, value) ->
+	global.Object.defineProperty object, name,
+		value: value
+
 makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 	unless (Object name) instanceof String
 		throw new Error "name is not a String; is #{name}"
@@ -36,8 +40,8 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 		# Any-Class is a Any-Class.
 		metaClassProto = Object.create Object.prototype
 		metaClass = Object.create metaClassProto
-		metaClass._proto = metaClassProto
-		metaClass._is = metaClass
+		imm metaClass, '_proto', metaClassProto
+		imm metaClass, '_is', metaClass
 		# metaClass._proto is made when constructing AnyClass
 	else
 		superClass =
@@ -45,41 +49,43 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 		superMetaClass = superClass.class()
 
 		metaClass = Object.create superMetaClass._proto
-		metaClass._proto = Object.create superMetaClass._proto
+		imm metaClass, '_proto', Object.create superMetaClass._proto
 
-		metaClass._is = superMetaClass
+		imm metaClass, '_is', superMetaClass
 
 	clazz = Object.create metaClass._proto
 
-	clazz._proto =
+	imm clazz, '_proto',
 		maybeProto ? Object.create superClass._proto
 
-	metaClass._name = "#{name}-Class"
-	clazz._name = name
+	imm metaClass, '_name',
+		"#{name}-Class"
+	imm clazz, '_name',
+		name
 
-	clazz._is = superClass
+	imm clazz, '_is',
+		superClass
 
-	metaClass._id = nextClassID
-	clazz._id = nextClassID + 1
+	imm metaClass, '_id', nextClassID
+	imm clazz, '_id', nextClassID + 1
 	nextClassID += 2
 
-	metaClass._methods = { }
-	clazz._methods = { }
+	imm metaClass, '_methods', {}
+	imm clazz, '_methods', {}
 
 	(Object.getOwnPropertyNames clazz._proto).forEach (name) ->
 		value = clazz._proto[name]
 		if value instanceof Function
-			clazz._methods[name] = value
+			def .call clazz, name, value#imm clazz._methods, name, value
 
 	def.call metaClass, 'class', -> metaClass
-	metaClass._proto["__is-a-id-#{metaClass._id}"] = yes
+	imm metaClass._proto, "__is-a-id-#{metaClass._id}", yes
 
 	def.call clazz, 'class', -> clazz
-	clazz._proto["__is-a-id-#{clazz._id}"] = yes
+	imm clazz._proto, "__is-a-id-#{clazz._id}", yes
 
 	if maybeConstructor? and not isAny
-		def.call clazz, 'construct', ->
-			maybeConstructor.apply @, arguments
+		def.call clazz, 'construct', maybeConstructor
 
 	allClasses.push metaClass
 	allClasses.push clazz
@@ -105,7 +111,7 @@ AnyClass['-def'] 'construct', makeAnyClass
 ###
 AnyClass's of is special
 ###
-AnyClass.of = (name, maybeIs) ->
+imm AnyClass, 'of', (name, maybeIs) ->
 	if @['_is_meta']
 		throw up
 
@@ -123,11 +129,10 @@ Meta =
 	AnyClass.of 'Meta'
 
 Meta['-def'] 'construct', (meta) ->
-	if meta?
-		Object.keys(meta).forEach (name) =>
-			unless meta[name]?
-				throw new Error '?'
-			@[name] = meta[name]
+	(Object.keys meta).forEach (name) =>
+		unless meta[name]?
+			throw new Error '?'
+		imm @, name, meta[name]
 
 bind = (object, name) ->
 	fun = object[name]
@@ -179,6 +184,16 @@ itMethod = (name) ->
 	(it) ->
 		it[name].apply it, Array.prototype.slice.call arguments, 1
 
+checkNumberOfArguments = (args, expectedNumber) ->
+	if args.length < expectedNumber
+		throw new global.Error \
+			"Expected #{expectedNumber} arguments, only got [" +
+			(Array.prototype.join.call args, ', ') + ']'
+
+# A unique object to indicate when optinal arguments are passed.
+optionalArgumentTag =
+	'OPTIONAL-ARGUMENT-TAG'
+
 module.exports =
 	fun: fun
 	bind: bind
@@ -191,4 +206,6 @@ module.exports =
 	Meta: Meta
 	'all-classes': ->
 		allClasses
+	checkNumberOfArguments: checkNumberOfArguments
+	optionalArgumentTag: optionalArgumentTag
 

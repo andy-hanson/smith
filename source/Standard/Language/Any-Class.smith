@@ -10,6 +10,7 @@ C.do
 				throw new global.Error("Undefined "+name+":"+this._name);
 			if (!this['subsumes?'](a))
 				throw new global.Error(name+' is not a '+this+'; is '+a);
+			return a;
 
 	-def '‣ |name:Str method:Fun
 		`
@@ -31,7 +32,10 @@ C.do
 		-def name method
 
 	‣override toString
-		name
+		how
+			TODO: name
+
+		`this._name`
 
 	‣ to-class
 		me
@@ -59,35 +63,44 @@ C.do
 	‣ ‣val name:Str make-val:Fun
 		me.‣‣ name make-val.cached
 
-	‣ ‣read~ name:Str
-		me.‣ "{name}~"
-			property~ "_{name}"
+	‣ ‣method-meta name:Str fun:Fun
+		how
+			blsah
 
-	‣ ‣read name:Str
+		`
+			if (fun._meta != null)
+				this.method(name)['meta!'](fun._meta);
+			return null;
+
+	‣ ‣read~ name:Str meta:Fun
+		∙ method-name
+			"{name}~"
+		me.‣ method-name
+			property~ "_{name}"
+		me.‣method-meta method-name meta
+
+	‣ ‣read name:Str meta:Fun
 		me.‣ name
 			property "_{name}"
+		me.‣method-meta name meta
 
-	‣ ‣read/~ name:Str
+	‣ ‣read/~ name:Str meta:Fun
 		doc
 			Both optional and forcing versions of a reader.
 
-		me.‣read name
-		me.‣read~ name
+		me.‣read name meta
+		me.‣read~ name meta
 
-	‣ ‣write name:Str
-		me.‣ "{name}!" |mod:Fun
+	‣ ‣write name:Str meta:Fun
+		∙ method-name
+			"{name}!"
+		me.‣ method-name |mod:Fun
 			modify-property! "_{name}" mod
+		me.‣method-meta method-name meta
 
-	‣ ‣access name
-		me.‣read name
-		me.‣write name
-
-	# Read things defined in Smith-Prelude
-	‣read name
-	‣read super
-	‣read proto
-	‣read id
-	‣read methods
+	‣ ‣access name:Str meta:Fun
+		me.‣read name meta
+		me.‣write name meta
 
 	‣ meta
 		(property~ '_meta).or
@@ -115,18 +128,20 @@ C.do
 	‣ no-instances!
 		()
 
-	‣ class‣ name:Str super do-to
+	‣ class‣ name:Str super-class do-to
 		∙ doto
 			do-to
+		∙ sc
+			super-class
 		∙ c
 			()
 		`
 			if (doto == null) {
 				c = C.of(name);
-				doto = _super;
+				doto = sc;
 			}
 			else {
-				c = C.of(name, _super);
+				c = C.of(name, sc);
 			}
 			if (doto != null)
 				c.do(doto);
@@ -136,9 +151,9 @@ C.do
 
 		c
 
-	‣ object‣ name:Str super do-to
+	‣ object‣ name:Str super-class do-to
 		∙ class
-			me.class‣ name super do-to
+			me.class‣ name super-class do-to
 		class.no-instances!
 		class
 

@@ -5,7 +5,7 @@ lexQuote = require './lexQuote'
 { cFail, cCheck } = require '../CompileError'
 
 keywords =
-	[ 'use', 'use!', 'is', 'does',
+	[ 'use', 'use!', 'super', 'trait',
 		'me', 'it', '∙', '∘',
 		'doc', 'in', 'out', 'eg', 'how' ]
 
@@ -59,7 +59,7 @@ module.exports = (stream, inQuote) ->
 					n = n.withoutEnd '.'
 				new T.NumberLiteral pos, "#{first}#{n}"
 
-			else if ['_', ':', '@', "'", '.'].contains ch
+			else if ch.isAny '_', ':', '@', "'", '.'
 				stream.readChar()
 				kind =
 					if ch == '.' and stream.maybeTake2More '.'
@@ -73,7 +73,7 @@ module.exports = (stream, inQuote) ->
 					check kind != '...x', 'Unexpected _'
 					kind = '.x_'
 
-				removePrecedingNL() if [',', '.'].contains ch
+				removePrecedingNL() if ch.isAny ',', '.'
 				if ch == "'"
 					new T.StringLiteral pos, name
 				else
@@ -85,7 +85,7 @@ module.exports = (stream, inQuote) ->
 					new T.Name pos, name, 'x_'
 				else if name in keywords
 					switch name
-						when 'use', 'use!', 'is', 'does'
+						when 'use', 'use!', 'super', 'trait'
 							stream.takeMatching /\s/
 							used = stream.takeMatching usedChar
 							new T.Use pos, used, name
@@ -150,7 +150,7 @@ module.exports = (stream, inQuote) ->
 				else
 					cFail pos, "Too indented! Was #{old}, now #{now}"
 
-			else if ['`', '「', '"'].contains ch
+			else if ch.isAny '`', '「', '"'
 				stream.readChar()
 				lexQuote ch, stream, indent
 

@@ -1,6 +1,7 @@
 jsWords =
 	"""
 	abstract
+	arguments
 	boolean
 	break
 	byte
@@ -18,6 +19,7 @@ jsWords =
 	double
 	else
 	enum
+	eval
 	export
 	extends
 	false
@@ -75,7 +77,7 @@ module.exports = (text) ->
 				if ch.match /[a-zA-Z0-9_]/
 					ch
 				else
-					"$#{ch.charCodeAt 0}$"
+					"_#{ch.charCodeAt 0}_"
 
 		parts.join ''
 

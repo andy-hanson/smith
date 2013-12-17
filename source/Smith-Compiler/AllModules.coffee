@@ -56,7 +56,7 @@ module.exports = class AllModules
 				unexpected = ->
 					"Unexpected module def at line #{index}: #{part}"
 
-				if ['auto', 'auto!'].contains split[0]
+				if split[0].isAny 'auto', 'auto!'
 					modules.addAutos split.tail(), split[0]
 				else
 					force =
@@ -139,29 +139,10 @@ module.exports = class AllModules
 				modules.autos.forEach au no
 				modules.autoBangs.forEach au yes
 
-			if ['', '.'].contains lookupDir
+			if lookupDir.isAny '', '.'
 				return uses
 			else
 				lookupDir = path.dirname lookupDir
-
-	###
-	_iterModules: (accessDir, getter, final) ->
-		lookupDir =
-			accessDir
-
-		do => loop
-			maybe =
-				@moduleses.maybeGet lookupDir
-			if maybe?
-				got = getter maybe
-				if got?
-					got
-			else
-				if ['', '.'].contains lookupDir
-					return final accessDir
-				else
-					lookupDir = path.dirname lookupdir
-	###
 
 	###
 	Get the module for a given name.
@@ -189,7 +170,7 @@ module.exports = class AllModules
 					if maybe?
 						return maybe
 					else
-						if ['', '.'].contains lookupDir
+						if lookupDir.isAny '', '.'
 							# It wasn't in modules listing, see if it's relative
 							return @noForce @findFullName accessDir, "./#{name}", yes
 						else
