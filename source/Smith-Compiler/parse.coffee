@@ -49,8 +49,6 @@ class Parser
 
 		autoUses
 
-
-
 	###
 	Returns: [ super, restOfTokens ]
 	###
@@ -86,7 +84,8 @@ class Parser
 		[ parts, opts ] = @expressionParts tokens, isValue
 
 		if parts.isEmpty()
-			cCheck opts.isEmpty
+			cCheck opts.isEmpty, @pos,
+				'Unexpected options'
 			new E.Null @pos
 		else
 			[ e0, tail ] = parts.unCons()
@@ -97,6 +96,8 @@ class Parser
 					e0.args = tail
 				e0.optionArgs = opts
 				e0
+			else if e0 instanceof E.ManyArgs
+				@unexpected e0
 			else if tail.isEmpty()
 				e0
 			else
@@ -129,6 +130,8 @@ class Parser
 
 			slurped = []
 			opts = []
+
+			# TODO: tokens.forEach
 			until tokens.isEmpty()
 				tok0 = tokens[0]
 				tokens = tokens.tail()
@@ -156,8 +159,10 @@ class Parser
 							'Did not expect options within options'
 						opts.pushAll someOpts
 						null
+					else if T.ellipsisName tok0
+						new E.ManyArgs @get tok0
 					else
-						z = @soloExpression tok0
+						@soloExpression tok0
 
 				if x?
 					type x, E.Expression
@@ -217,10 +222,11 @@ class Parser
 					@unexpected token
 
 	quote: (quote) ->
-		type quote, T.Group
-
-		new E.Quote quote.pos, quote.body.map (part) =>
-			@soloExpression part
+		if quote instanceof T.Group
+			# every part is a string literal or () group
+			new E.Quote quote.pos, quote.body.map @bound 'soloExpression'
+		else
+			new E.Literal quote
 
 	_accessLocalOr: (name, orElse) ->
 		type name, T.Name
@@ -288,8 +294,11 @@ class Parser
 		[ args, maybeRest ] =
 			@takeNewLocals restArgsTokens
 
-		newLocals =
-			if optArgs? then optArgs.concat args else args
+		newLocals = args.slice()
+		if optArgs?
+			newLocals.pushAll optArgs
+		if optRest?
+			newLocals.push optRest
 
 		[ meta, body ] =
 			if T.curlied last
@@ -351,7 +360,6 @@ class Parser
 				(T.nl x) or \
 					x instanceof T.MetaText or \
 					T.metaGroup x
-
 		meta =
 			new E.Meta @pos
 

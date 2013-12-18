@@ -1,4 +1,4 @@
-auto ↺ ✔ ✔= ✘ Any Any-Class Bag Bool Console Error Fun
+auto ↺ ✔ ✔= ✘ Any Any-Class Array Bag Bool Console Error Fun
 auto Global Iterable Iterator Meta Num Opt Ref Str
 
 Standard Standard/index
@@ -9,6 +9,7 @@ Standard Standard/index
 ✘ Standard/Logic/✘
 Any Standard/Language/Any
 Any-Class Standard/Language/Any-Class
+Array Standard/Collection/Bag/Array
 Bag Standard/Collection/Bag/index
 Bool Standard/Logic/Bool
 Console Standard/Console

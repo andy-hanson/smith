@@ -1,0 +1,13 @@
+doc
+	We can't give Meta a meta before defining it. So Standard/index calls this after.
+
+Meta.do-meta
+	doc
+		Hi there
+
+Meta.Argument.do-meta
+	doc
+		poop
+
+
+

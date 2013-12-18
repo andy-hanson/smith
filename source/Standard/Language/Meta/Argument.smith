@@ -1,0 +1,18 @@
+
+`_prelude`@Argument.do
+	doc
+		I came here for an argument.
+
+	‣ construct name:Str class-of
+		new! '_name name
+		(Opt.from-nullable class-of).each
+			new! '_class-of it
+
+	‣read name
+	‣read~ class-of
+
+	‣override toString
+		class-of~.~
+			"{name}:{it}"
+		|
+			name

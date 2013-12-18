@@ -34,9 +34,9 @@ joinGroups = (tokens) ->
 		if tok instanceof GroupPre
 			{ pos, kind } = tok
 			switch kind
-				when '(', '[', '{', '->', '|', 'in', 'out', 'eg'
+				when '(', '[', '{', '→', '|', 'in', 'out', 'eg'
 					new_level tok
-				when ')', ']', '}', '<-'
+				when ')', ']', '}', '←'
 					cCheck not opens.isEmpty(), pos, ->
 						"Unexpected closing #{kind}"
 					open = opens.pop()
@@ -47,7 +47,7 @@ joinGroups = (tokens) ->
 					finish_level new T.Group \
 						open.pos, tok.pos, open.kind, current
 
-					if kind.isAny '}', '<-'
+					if kind.isAny '}', '←'
 						if opens.last()?.kind?.isAny '|', 'in', 'out', 'eg'
 							open = opens.pop()
 							finish_level new T.Group \

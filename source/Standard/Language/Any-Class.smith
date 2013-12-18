@@ -1,5 +1,5 @@
 ∙ C
-	`_prelude['Any-Class']`
+	`_prelude`@Any.class
 
 C.do
 	-def 'check |name a
@@ -65,12 +65,12 @@ C.do
 
 	‣ ‣method-meta name:Str fun:Fun
 		how
-			blsah
+			This is used before Bool is defined, so must be in JS.
 
 		`
 			if (fun._meta != null)
 				this.method(name)['meta!'](fun._meta);
-			return null;
+			return;
 
 	‣ ‣read~ name:Str meta:Fun
 		∙ method-name
@@ -102,13 +102,34 @@ C.do
 		me.‣read name meta
 		me.‣write name meta
 
+
+	‣read methods
+		doc
+			Dictionary of this class' own methods.
+			Does not include inherited methods.
+
+	‣read name
+		doc
+			Name of this class.
+
+	‣read super
+		doc
+			Super-class.
+
+	‣read proto
+		doc
+			Instances of this class have this as their prototype.
+
+	‣read id
+		doc
+			Unique number for this class.
+
 	‣ meta
 		(property~ '_meta).or
 			Meta.Empty
 
 	‣ meta! mod:Fun
 		set-property! '_meta (mod meta)
-
 
 	‣ test!
 		✘.annotate

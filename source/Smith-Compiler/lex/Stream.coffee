@@ -9,12 +9,13 @@ module.exports = class Stream
 	hasMore: ->
 		@idx < @str.length
 
-	stepBack: ->
-		@idx -= 1
-		if @peek() == '\n'
-			@pos = @pos.minusLine()
-		else
-			@pos = @pos.minusColumn()
+	stepBack: (n = 1) ->
+		n.times =>
+			@idx -= 1
+			if @peek() == '\n'
+				@pos = @pos.minusLine()
+			else
+				@pos = @pos.minusColumn()
 
 	prev: ->
 		@str[@idx - 1]

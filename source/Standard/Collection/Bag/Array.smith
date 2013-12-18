@@ -4,8 +4,14 @@ use ../Object
 ∙ A
 	Global@Array.to-class
 
+
+
+
 A.do
 	alias 'forEach 'each
+
+	‣‣ of ...members
+		proto@slice.call members
 
 	‣ of n:Num
 		in
@@ -16,4 +22,9 @@ A.do
 	‣ size
 		@length
 
-A
+	# TODO: inherit this from Bag!
+	‣ make-string
+		#(map Str.of_).join " "
+		join " "
+
+export A

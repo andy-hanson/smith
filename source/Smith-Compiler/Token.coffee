@@ -30,7 +30,7 @@ class Group extends Token
 		type body, Array
 
 		@kind =
-			if open == '->'
+			if open == '→'
 				'{'
 			else
 				open
@@ -44,7 +44,7 @@ class Group extends Token
 		'(': ')'
 		'[': ']'
 		'{': '}'
-		'->': '<-'
+		'→': '←'
 		'"': '"'
 
 class Literal extends Token
@@ -130,7 +130,7 @@ class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
 		type @pos, Pos
 		check @kind.isAny 'doc', 'how'
-		type @text, Group
+		type @text, Token # string literal or interpolated group
 
 	show: ->
 		"<MetaText #{@kind}>"
@@ -143,7 +143,7 @@ class Def extends Token
 		check @name.startsWith "‣"
 
 	show: ->
-		"<Def @def @name>"
+		"<Def #{@name} #{@name2}>"
 
 module.exports =
 	Def: Def

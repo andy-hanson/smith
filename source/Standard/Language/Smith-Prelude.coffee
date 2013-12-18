@@ -92,14 +92,6 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 
 	clazz
 
-#AnyClassProto = { }
-
-#AnyClass = { _proto: AnyClassProto }
-
-#Any = Object['to-class'] 'Any'
-
-#AnyClass = makeAnyClass 'Any-Class', Any, AnyClassProto
-
 Any = Object['to-class'] 'Any'
 
 AnyClass = Any.class()
@@ -122,7 +114,15 @@ Instances of AnyClass (except AnyClass itself) are not as special.
 ###
 AnyClass['-def'] 'of', ->
 	obj = Object.create @_proto
-	@_proto.construct.apply obj, Array.prototype.slice.call arguments
+	constructor = @_proto.construct
+	unless constructor instanceof Function
+		message =
+			if constructor?
+				"#{@} has bad constructor #{constructor}"
+			else
+				"#{@} has no constructor"
+		throw new Error message
+	constructor.apply obj, Array.prototype.slice.call arguments
 	obj
 
 Meta =
@@ -161,14 +161,13 @@ clazz = (name, maybeIs, fun) ->
 string = ->
 	Array.prototype.join.call arguments, ''
 
-fun = (delegate, unbound, meta) ->
+fun = (delegate, unbound, makeMetaPre) ->
 	f =
 		unbound.bind delegate
 	f._unbound =
 		unbound
-	if meta?
-		f._meta =
-			Meta.of meta
+	if makeMetaPre?
+		imm f, '_make-meta-pre', makeMetaPre
 	f
 
 lazy = (delegate, make) ->
@@ -190,9 +189,30 @@ checkNumberOfArguments = (args, expectedNumber) ->
 			"Expected #{expectedNumber} arguments, only got [" +
 			(Array.prototype.join.call args, ', ') + ']'
 
+call = (subject, verb, options, argumentses) ->
+	unless Object(verb) instanceof String
+		throw new global.Error '?'
+
+	args = []
+	for newArgs in argumentses
+		Array.prototype.push.apply args, newArgs
+	opts = []
+	for newOpts in options
+		Array.prototype.push.apply opts, newOpts
+	if opts.length == 0
+		subject[verb].apply subject, args
+	else
+		args.unshift optionalArgumentTag, opts
+		subject[verb].apply subject, args
+
 # A unique object to indicate when optinal arguments are passed.
 optionalArgumentTag =
 	'OPTIONAL-ARGUMENT-TAG'
+
+Argument = AnyClass.of 'Argument'
+
+argument = (name, clazz) ->
+	Argument.of name, clazz
 
 module.exports =
 	fun: fun
@@ -202,10 +222,11 @@ module.exports =
 	class: clazz
 	lazy: lazy
 	Any: Any
-	'Any-Class': AnyClass #TODO: not needed, use Any.class()
 	Meta: Meta
-	'all-classes': ->
-		allClasses
+	'all-classes': -> allClasses
 	checkNumberOfArguments: checkNumberOfArguments
 	optionalArgumentTag: optionalArgumentTag
+	call: call
+	argument: argument
+	Argument: Argument
 

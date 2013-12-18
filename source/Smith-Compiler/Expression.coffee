@@ -3,6 +3,9 @@ T = require './Token'
 Pos = require './Pos'
 mangle = require './mangle'
 
+tab = (indent) ->
+	"\t#{indent}"
+
 ###
 All must have @pos
 All must have compile (produces an array)
@@ -30,12 +33,6 @@ class Expression
 
 		@nodeWrap chunk, fileName
 
-###
-class Does extends Expression
-	constructor: (@local, @use) ->
-		type @local, Local
-		type @value, Expression
-###
 trait = (use) ->
 	type use, Use
 	{ local, pos } = use
@@ -54,23 +51,31 @@ class DefLocal extends Expression
 
 	compile: (fileName, indent) ->
 		newIndent =
-			indent + '\t'
+			tab indent
 		name =
 			@local.toNode fileName, indent
-		inner =
-			if @value instanceof Block
-				@value.toValue fileName, newIndent
-			else
-				@value.toNode fileName, newIndent
 		val =
 			if @local.lazy
-				if inner instanceof Use
+				newNewIndent =
+					tab newIndent
+				inner =
+					if @value instanceof Block
+						@value.toNode fileName, newNewIndent
+					else
+						[ 'return ', (@value.toNode fileName, newNewIndent), ';' ]
+				x =
+					[ 'function() {\n', newNewIndent, inner, '\n', newIndent, '}' ]
+				if @value instanceof Use
 					# require is cached anyway
-					[ 'function() { return ', inner, '})' ]
+					x
 				else
-					[ '_l(this, function() { return ', inner, ' })' ]
+					[ '_l(this, ', x, ')' ]
 			else
-				inner
+				if @value instanceof Block
+					@value.toValue fileName, newIndent
+				else
+					@value.toNode fileName, newIndent
+
 		check =
 			if @local.tipe?
 				[ ';\n', indent, @local.typeCheck fileName, indent ]
@@ -95,7 +100,8 @@ class Block extends Expression
 		if @subs.length == 1 and not @subs[0] instanceof DefLocal
 			@subs[0].toNode fileName, indent
 		else
-			newIndent = indent + '\t'
+			newIndent =
+				tab indent
 			x =
 				[ '_f(this, function() {\n',
 					newIndent,
@@ -125,7 +131,7 @@ class Block extends Expression
 
 		lastCompiled =
 			@compileLast fileName, indent, (x) ->
-				[ 'return ', x ]
+				[ 'return ', x, ';' ]
 
 		compiled.push lastCompiled
 
@@ -140,7 +146,7 @@ class Block extends Expression
 
 		lastCompiled =
 			@compileLast fileName, indent, (x) ->
-				[ 'var res =\n', indent + '\t', x, ';' ]
+				[ 'var res =\n', (tab indent), x, ';' ]
 
 		compiled.push lastCompiled
 
@@ -181,21 +187,39 @@ class Call extends Expression
 		"#{@subject}.#{@verb.text}(#{@args})"
 
 	compile: (fileName, indent) ->
+		newIndent =
+			tab indent
 		subject =
-			@subject.toNode fileName, indent
-		nodes =
-			@args.map (x) -> x.toNode fileName, indent
-		args =
-			nodes.interleave ', '
-		optionArgs =
-			if @optionArgs.isEmpty()
-				''
-			else
-				opts =
-					(@optionArgs.map (x) -> x.toNode fileName, indent).interleavePlus ','
-				[ '_opt, [', opts, '], ' ]
+			@subject.toNode fileName, newIndent
+		hasMany = (xx) ->
+			xx.containsWhere (x) ->
+				x instanceof ManyArgs
+		if hasMany @args or hasMany @optionArgs
+			renderArgs = (args) ->
+				parts =
+					args.map (arg) ->
+						if arg instanceof ManyArgs
+							# TODO - to-array
+							arg.value.toNode fileName, newIndent
+						else
+							[ '[', (arg.value.toNode fileName, newIndent), ']' ]
+				[ '[', (parts.interleave ', '), ']' ]
+			[ '_call(', subject, ", '", @verb.text, "', ",
+				(renderArgs @optionArgs), ', ', (renderArgs @args), ')' ]
+		else
+			nodes =
+				@args.map (x) -> x.toNode fileName, newIndent
+			args =
+				nodes.interleave ', '
+			optionArgs =
+				if @optionArgs.isEmpty()
+					''
+				else
+					opts =
+						(@optionArgs.map (x) -> x.toNode fileName, newIndent).interleavePlus ','
+					[ '_opt, [', opts, '], ' ]
 
-		[ subject, "['", @verb.text, "'](", optionArgs, args, ')' ]
+			[ subject, "['", @verb.text, "'](", optionArgs, args, ')' ]
 
 	@me = (pos, verb, args) ->
 		verb = new T.Name pos, verb, '.x'
@@ -218,7 +242,7 @@ class Property extends Expression
 		"#{@subject},#{@prop.text}"
 
 	compile: (fileName, indent) ->
-		[ (@subject.toNode fileName, indent), '.', @prop.text ]
+		[ (@subject.toNode fileName, indent), "['", @prop.text, "']" ]
 
 	@me = (pos, name) ->
 		new Property (new Me pos), name
@@ -230,37 +254,49 @@ class Meta extends Expression
 	@all =
 		[ 'doc', 'eg', 'how' ]
 
-	compile: (fileName, indent) ->
-		newIndent = indent + '\t'
+	make: (fun, fileName, indent) ->
+		newIndent = tab indent
 
-		exist =
-			Meta.all.containsWhere (name) =>
-				@[name]?
+		parts = []
 
-		if exist
-			parts = []
+		Meta.all.forEach (name) =>
+			val =
+				@[name]
+			if val?
+				part =
+					switch name
+						when 'doc', 'how'
+							val.toNode fileName, indent
+						when 'eg'
+							(FunDef.body val).toNode fileName, newIndent
+						else
+							fail()
 
-			Meta.all.forEach (name) =>
-				val =
-					@[name]
-				if val?
-					part =
-						switch name
-							when 'doc', 'how'
-								val.toNode fileName, indent
-							when 'eg'
-								(FunDef.body val).toNode fileName, newIndent
-							else
-								fail()
+				parts.push [ '_', name, ': ', part ]
 
-					parts.push [ '_', name, ': ', part ]
+		arg = (x) ->
+			type x, Local
+			x.toMeta fileName, indent
+		args = (x) ->
+			(x.map arg).interleave ', '
+		rest = (name, x) ->
+			if fun[x]?
+				parts.push [ "'_#{name}': ", arg fun[x] ]
 
-			body =
-				parts.interleave ",\n#{newIndent}"
+		if fun.optArgs?
+			parts.push [ '_options: [', (args fun.optArgs), ']' ]
+		rest 'rest-option', 'optRest'
+		parts.push [ '_arguments: [', (args fun.args), ']' ]
+		rest 'rest-argument', 'maybeRest'
 
-			[ ', {\n', newIndent, body, '\n', indent, '}' ]
-		else
-			''
+		body =
+			parts.interleave ",\n#{newIndent}"
+
+		[ ', function() { return {\n', newIndent, body, '\n', indent, '}; }' ]
+
+
+	toString: ->
+		"doc: #{@doc}; eg: #{@eg}; how: #{@how}"
 
 class FunDef extends Expression
 	constructor: (@pos, @meta, @tipe, @optArgs, \
@@ -269,7 +305,7 @@ class FunDef extends Expression
 		type @meta, Meta
 		type @tipe, Expression if @tipe?
 		type @optArgs, Array if @optArgs?
-		type @optRest, Array if @optRest?
+		type @optRest, Local if @optRest?
 		type @args, Array # of Locals
 		type @maybeRest, Local if @maybeRest?
 		if @body?
@@ -287,7 +323,7 @@ class FunDef extends Expression
 			if @maybeRest?
 				get =
 					jsLiteral @pos,
-						"Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
+						"global.Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
 				def =
 					new DefLocal maybeRest, get
 				def.toNode fileName, indent
@@ -303,7 +339,7 @@ class FunDef extends Expression
 
 		if @optArgs?
 			nOpts = @optArgs.length
-			newIndent = indent + '\t'
+			newIndent = tab indent
 
 			assign = (arg, args, index, isOpt = no) ->
 				val = "#{args}[#{index}]"
@@ -329,6 +365,13 @@ class FunDef extends Expression
 				for opt in @optArgs
 					[ 'var ', (opt.toNode fileName, indent), ' = Opt().None()' ]
 
+			getNoOptRest =
+				if @optRest?
+					[ 'var ', (@optRest.toNode fileName, indent),
+						' = Opt().None();\n', newIndent ]
+				else
+					''
+
 			getArgsNoOpts =
 				for arg, index in @args
 					assign arg, "arguments", index
@@ -347,14 +390,13 @@ class FunDef extends Expression
 				';\n', indent, '} else {', nl,
 					(getNoOpts.interleavePlus snl),
 					(getArgsNoOpts.interleavePlus snl),
+					getNoOptRest,
 					(getRest @maybeRest, 'arguments', @args.length),
 				';\n', indent, '}'
 				]
 
 		else
-			[ (getRest @maybeRest, 'arguments', @args.length), ';\n', indent ]
-
-
+			[ (getRest @maybeRest, 'arguments', @args.length), ';' ]
 
 	compile: (fileName, indent) ->
 		maybeMeta = (kind) =>
@@ -362,13 +404,12 @@ class FunDef extends Expression
 				[ (@meta[kind].noReturn fileName, newIndent), '\n', newIndent ]
 			else
 				''
-
-		newIndent = indent + '\t'
-
+		newIndent =
+			tab indent
 		argNames =
 			(@args.map (arg) -> arg.toNode fileName, newIndent).interleave ', '
-
-		assignArgs = @assignArgs fileName, newIndent
+		assignArgs =
+			@assignArgs fileName, newIndent
 		inCond =
 			maybeMeta 'in'
 		body =
@@ -383,7 +424,7 @@ class FunDef extends Expression
 				Local.res @pos, @tipe
 			loc.typeCheck fileName, newIndent
 		meta =
-			@meta.toNode fileName, indent
+			@meta.make @, fileName, indent
 
 		[ '_f(this, function(', argNames, ') {',
 			'\n', newIndent,
@@ -482,6 +523,16 @@ class Local extends Expression
 			[ tipe, '.check(', name, ', ', @compile(), ');\n', indent ]
 		else
 			''
+
+	toMeta: (fileName, indent) ->
+		tipe =
+			if @tipe?
+				[ ", ", (@tipe.toNode fileName, indent) ]
+			else
+				''
+
+		@nodeWrap [ "_arg('", @name, "'", tipe, ')' ], fileName
+
 	@it = (pos) ->
 		@eager new T.Name pos, 'it', 'x'
 
@@ -561,13 +612,21 @@ class Parend extends Expression
 		{ @pos } = @content
 
 	toString: ->
-		'(' + @content + ')'
+		"(#{@content})"
 
 	compile: (fileName, indent) ->
 		@content.compile fileName, indent
 
 jsLiteral = (pos, text) ->
 	new Literal new T.JavascriptLiteral pos, text, 'special'
+
+class ManyArgs extends Expression
+	constructor: (@value) ->
+		type @value, Expression
+		@pos = @value.pos
+
+	toString: ->
+		"...#{@value}"
 
 module.exports =
 	Block: Block
@@ -589,3 +648,4 @@ module.exports =
 	Parend: Parend
 	trait: trait
 	jsLiteral: jsLiteral
+	ManyArgs: ManyArgs

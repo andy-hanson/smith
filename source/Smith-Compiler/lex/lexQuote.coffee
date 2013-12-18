@@ -1,5 +1,6 @@
 T = require '../Token'
 Stream = require './Stream'
+GroupPre = require './GroupPre'
 { cFail, cCheck } = require '../CompileError'
 
 module.exports = (quoteType, stream, oldIndent) ->
@@ -17,6 +18,8 @@ module.exports = (quoteType, stream, oldIndent) ->
 
 	indented =
 		stream.peek() == '\n'
+	canEscape =
+		quoteType != '`'
 	canInterpolate =
 		not quoteType.isAny '「', '`'
 	quoteIndent =
@@ -35,17 +38,20 @@ module.exports = (quoteType, stream, oldIndent) ->
 	finish = ->
 		text =
 			if indented
-				read.tail() # skip initial newline
+				read.tail().trimRight() # skip initial newline
 			else
 				read
 
 		getInterpolatedGroup = ->
 			check canInterpolate
-			lit = new T.StringLiteral stream.pos, text
-			out.push lit
-			new T.Group startPos, stream.pos, '"', out
+			literal = new T.StringLiteral stream.pos, text
+			if out.isEmpty()
+				literal
+			else
+				out.push literal
+				new T.Group startPos, stream.pos, '"', out
 
-		x =
+		quote =
 			switch quoteType
 				when '"'
 					getInterpolatedGroup()
@@ -58,20 +64,16 @@ module.exports = (quoteType, stream, oldIndent) ->
 				when 'doc', 'how'
 					new T.MetaText startPos, quoteType, getInterpolatedGroup()
 				else
-					fail
+					fail()
 
-		if indented
-			[ x, (new T.Special stream.pos, '\n') ]
-		else
-			x
+		quote
 
 	loop
 		ch = stream.readChar()
 
-		cCheck ch?, stream.pos, ->
-			"Unclosed quote starting at #{startPos}"
+		cCheck ch?, startPos, 'Unclosed quote.'
 
-		if ch == '\\' and quoteType != '`'
+		if ch == '\\' and canEscape
 			next = stream.readChar()
 			read += (escape[next] or next)
 
@@ -86,11 +88,15 @@ module.exports = (quoteType, stream, oldIndent) ->
 			out.push new T.Group startPos, stream.pos, '(', interpolated
 
 		else if ch == '\n'
-			unless indented
-				throw new Error "Quote at #{startPos} not closed."
+			cCheck indented, startPos, 'Unclosed quote.'
 			# Read an indented section.
 			nowIndent = (stream.takeMatching /\t/).length
-			if nowIndent < quoteIndent
+			if nowIndent == 0 and stream.peek() == '\n'
+				read += '\n'
+			else if nowIndent < quoteIndent
+				# undo reading those tabs
+				stream.stepBack nowIndent + 1
+				check stream.peek() == '\n'
 				return finish()
 			else
 				read += '\n' + '\t'.repeated nowIndent - quoteIndent

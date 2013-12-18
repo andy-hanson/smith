@@ -1,5 +1,5 @@
-‣‣ of constructor:Fun
+export |constructor:Fun ...arguments
 	∙ new
 		Global@Object.create constructor@prototype
-	constructor.apply new `arguments`
+	constructor.apply new arguments
 	new

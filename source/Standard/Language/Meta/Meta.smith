@@ -7,6 +7,10 @@ M.do
 	‣read/~ out
 	‣read/~ eg
 	‣read/~ how
+	‣read arguments
+	‣read~ rest-argument
+	‣read options
+	‣read~ rest-option
 
 	‣ test-eg!
 		eg~.each _run!
@@ -35,8 +39,6 @@ M.do
 
 	‣override toString
 		show-properties
-
-
 
 export M
 

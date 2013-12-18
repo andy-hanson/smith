@@ -27,6 +27,7 @@ module.exports = (stream, inQuote) ->
 	digit = /[0-9]/
 	numChar = /[0-9\.]/
 	groupChar = /[\(\[\{\)\]\}]/
+	space = RegExp ' '
 
 	indent = 0
 
@@ -45,117 +46,119 @@ module.exports = (stream, inQuote) ->
 			stream.readChar()
 			return out
 
+		match = (regex) ->
+			ch.match regex
+
 		token =
-			if ch.match groupChar
-				stream.readChar()
-				new GroupPre stream.pos, ch
+			switch
+				when (match digit) or (ch == '-' and (stream.peek 1).match digit)
+					first = stream.readChar()
+					n = stream.takeMatching numChar
+					if n.endsWith '.'
+						stream.stepBack()
+						n = n.withoutEnd '.'
+					new T.NumberLiteral pos, "#{first}#{n}"
 
-			else if (ch.match digit) or \
-					((ch == '-') and stream.peek(1).match digit)
-				first = stream.readChar()
-				n = stream.takeMatching numChar
-				if n.endsWith '.'
-					stream.stepBack()
-					n = n.withoutEnd '.'
-				new T.NumberLiteral pos, "#{first}#{n}"
+				when match groupChar
+					stream.readChar()
+					new GroupPre stream.pos, ch
 
-			else if ch.isAny '_', ':', '@', "'", '.'
-				stream.readChar()
-				kind =
-					if ch == '.' and stream.maybeTake2More '.'
-						'...x'
-					else
-						"#{ch}x"
-
-				name = takeName()
-
-				if ch == '.' and stream.maybeTake '_'
-					check kind != '...x', 'Unexpected _'
-					kind = '.x_'
-
-				removePrecedingNL() if ch.isAny ',', '.'
-				if ch == "'"
-					new T.StringLiteral pos, name
-				else
-					new T.Name pos, name, kind
-
-			else if ch.match nameChar
-				name = takeName()
-				if stream.maybeTake '_'
-					new T.Name pos, name, 'x_'
-				else if name in keywords
-					switch name
-						when 'use', 'use!', 'super', 'trait'
-							stream.takeMatching /\s/
-							used = stream.takeMatching usedChar
-							new T.Use pos, used, name
-						when 'doc', 'how'
-							lexQuote name, stream, indent
-						when 'in', 'out', 'eg'
-							new GroupPre pos, name
+				when match /[_:@'\.]/
+					stream.readChar()
+					kind =
+						if ch == '.' and stream.maybeTake2More '.'
+							'...x'
 						else
-							new T.Special pos, name
-				else
-					if name.startsWith '‣'
-						stream.takeMatching /\s/
+							"#{ch}x"
+
+					name = takeName()
+
+					if ch == '.' and stream.maybeTake '_'
+						check kind != '...x', 'Unexpected _'
+						kind = '.x_'
+
+					removePrecedingNL() if ch.isAny ',', '.'
+					if ch == "'"
+						new T.StringLiteral pos, name
+					else
+						new T.Name pos, name, kind
+
+				when match nameChar
+					name = takeName()
+					if stream.maybeTake '_'
+						new T.Name pos, name, 'x_'
+					else if keywords.contains name
+						switch name
+							when 'use', 'use!', 'super', 'trait'
+								stream.takeMatching space
+								used = stream.takeMatching usedChar
+								new T.Use pos, used, name
+							when 'doc', 'how'
+								lexQuote name, stream, indent
+							when 'in', 'out', 'eg'
+								new GroupPre pos, name
+							else
+								new T.Special pos, name
+					else if name.startsWith '‣'
+						stream.takeMatching space
 						name2 = takeName()
 						new T.Def pos, name, name2
 					else
 						new T.Name pos, name, 'x'
 
-			else if ch == '|'
-				stream.readChar()
-				removePrecedingNL()
-				new GroupPre pos, ch
-
-			else if ch == ' '
-				stream.takeMatching /\s/
-				[]
-
-			else if ch == '#'
-				stream.readChar()
-				next = stream.peek()
-
-				if next == '{'
-					stream.takeUpToAndIncludingString '}#'
-					#unless stream.hasMore()
-						# Ate up whole file!
-						# One final newline will close all indents.
-					stream.str += '\n\n'
-
-				else
-					stream.takeUpToString '\n'
-					check stream.peek() == '\n'
-				[]
-
-			else if ch == '\n'
-				#check stream.prev() != ' ', ->
-				#	new Error "Line ends in space at #{pos}"
-				stream.takeMatching /\n/ #Skip through blank lines!
-				old = indent
-				now = (stream.takeMatching /\t/).length
-				#check stream.peek() != ' ',
-				#	new Error "Line begins with space at #{stream.pos}"
-				indent = now
-				if now == old
+				when ch == '|'
+					stream.readChar()
 					removePrecedingNL()
-					new T.Special pos, '\n'
-				else if now < old
-					x = (old - now).repeat new GroupPre stream.pos, '<-'
-					x.push new T.Special stream.pos, '\n'
-					x
-				else if now == old + 1
-					#lexPlain stream, '->'
-					new GroupPre stream.pos, '->'
+					new GroupPre pos, ch
+
+				when ch == ' '
+					stream.takeMatching space
+					[]
+
+				when ch == '#'
+					stream.readChar()
+					next = stream.peek()
+
+					if next == '{'
+						stream.takeUpToAndIncludingString '}#'
+						#unless stream.hasMore()
+							# Ate up whole file!
+							# One final newline will close all indents.
+						stream.str += '\n\n'
+
+					else
+						stream.takeUpToString '\n'
+						check stream.peek() == '\n'
+					[]
+
+				when ch == '\n'
+					#check stream.prev() != ' ', ->
+					#	new Error "Line ends in space at #{pos}"
+					stream.takeMatching /\n/ #Skip through blank lines!
+					old = indent
+					now = (stream.takeMatching /\t/).length
+					#check stream.peek() != ' ',
+					#	new Error "Line begins with space at #{stream.pos}"
+					indent = now
+					if now == old
+						removePrecedingNL()
+						new T.Special pos, '\n'
+					else if now < old
+						x = (old - now).repeat new GroupPre stream.pos, '←'
+						x.push new T.Special stream.pos, '\n'
+						x
+					else if now == old + 1
+						new GroupPre stream.pos, '→'
+					else
+						cFail pos, "Too indented! Was #{old}, now #{now}"
+
+				when match /[`「"]/
+					stream.readChar()
+					lexQuote ch, stream, indent
+
 				else
-					cFail pos, "Too indented! Was #{old}, now #{now}"
+					cFail pos, "Do not recognize char '#{ch}'"
 
-			else if ch.isAny '`', '「', '"'
-				stream.readChar()
-				lexQuote ch, stream, indent
-
-			else
-				cFail pos, "Do not recognize char '#{stream.peek()}'"
 
 		if token instanceof Array
 			out.pushAll token

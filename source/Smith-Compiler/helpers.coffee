@@ -25,6 +25,12 @@ Array.prototype.pushAll = (arr) ->
 Array.prototype.isEmpty = String.prototype.isEmpty = ->
 	@length == 0
 
+Number.prototype.times = (act) ->
+	count = this
+	while count > 0
+		act()
+		count -= 1
+
 Array.prototype.last = ->
 	@[@length - 1]
 
