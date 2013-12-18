@@ -4,9 +4,6 @@ use ../Object
 ∙ A
 	Global@Array.to-class
 
-
-
-
 A.do
 	alias 'forEach 'each
 
@@ -22,9 +19,16 @@ A.do
 	‣ size
 		@length
 
+	# TODO: inherit from Bag
+	‣ first
+		of 0
+
+	‣ second
+		of 1
+
 	# TODO: inherit this from Bag!
-	‣ make-string
-		#(map Str.of_).join " "
-		join " "
+	#‣ make-string joiner:Str
+	#	(map Str.of_).join joiner
+	#	#join " "
 
 export A

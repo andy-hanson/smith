@@ -2,10 +2,10 @@
 	Global@Boolean.to-class 'Bool
 
 B.do
-	‣val Yes
+	‣val True
 		`true`
 
-	‣val No
+	‣val False
 		`false`
 
 	‣ ? then:Fun else:Fun
@@ -13,12 +13,12 @@ B.do
 
 	‣ ∨ a:Fun
 		eg
-			✔= No
-				No.∨
-					No
-			✔= Yes
-				Yes.∨
-					No
+			✔= False
+				False.∨
+					False
+			✔= True
+				True.∨
+					False
 
 		`this || a()`
 

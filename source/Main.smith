@@ -1,10 +1,19 @@
 doc
 	Here's my nifty program.
 
-use! Standard/Test/Syntax-Test
+use! Standard/Test
 
 Any-Class.all-classes.each _test!
 
+Console.log! 'bai
+
+#use! Vec
+
+#∙ v
+#	Vec 1 2
+
+
+#{
 ∙ f |[a ...b] c:Num d:Str ...e
 	doc
 		this is f
@@ -14,4 +23,5 @@ Any-Class.all-classes.each _test!
 		work f
 
 Console.log! f.meta
+}#
 

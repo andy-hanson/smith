@@ -14,3 +14,10 @@ class.do
 
 		‣ iterator
 			(class.Iterator) me
+
+
+‣ make-string
+	(map String.of_).join " "
+
+‣override toString
+	"({type.name} {make-string})"

@@ -1,12 +1,25 @@
-`_prelude.Any`.-def 'do |fun
+Prelude@Any.-def 'do |fun
 	fun.unbound.call `this`
+
+Prelude@Any.-def 'new! |name:Str value
+	doc
+		Defines a new immutable property on this object.
+	how
+		Writable is false by default.
+
+	`
+		if (global.Object.hasOwnProperty.call(this, name))
+			throw new Error(this + " already has property " + name);
+		global.Object.defineProperty(this, name, {value: value})
 
 use! Any-Class
 use! Any
 use! Language/Fun-Methods
 use! Bool
 
+
 use! Meta
+
 use! Language/Meta/Meta-Metas
 use! Language/Fun-Meta
 
@@ -16,5 +29,3 @@ use! Str-Methods
 use! Math
 
 use! Bag
-
-

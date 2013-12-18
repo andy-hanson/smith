@@ -47,7 +47,7 @@ class DefLocal extends Expression
 		{ @pos } = @local
 
 	toString: ->
-		"<DefLocal #{@local.text} {#{@value.toString()}}>"
+		"<DefLocal #{@local.name} {#{@value.toString()}}>"
 
 	compile: (fileName, indent) ->
 		newIndent =
@@ -97,7 +97,7 @@ class Block extends Expression
 		'<BLOCK ' + (@subs.join '\n').indent() + '>\n'
 
 	toValue: (fileName, indent) ->
-		if @subs.length == 1 and not @subs[0] instanceof DefLocal
+		if @subs.length == 1 and not (@subs[0] instanceof DefLocal)
 			@subs[0].toNode fileName, indent
 		else
 			newIndent =
@@ -217,7 +217,9 @@ class Call extends Expression
 				else
 					opts =
 						(@optionArgs.map (x) -> x.toNode fileName, newIndent).interleavePlus ','
-					[ '_opt, [', opts, '], ' ]
+					comma =
+						if @args.isEmpty() then '' else ', '
+					[ '_opt, [', opts, ']', comma ]
 
 			[ subject, "['", @verb.text, "'](", optionArgs, args, ')' ]
 
@@ -333,11 +335,8 @@ class FunDef extends Expression
 					# skip first 2
 				"_nArgs(#{argsRendered}, #{nArgs})"
 
-		#argChecks =
-		#	# TODO: opt args too
-		#	@args.map (arg) -> arg.typeCheck fileName, newIndent
 
-		if @optArgs?
+		if @optArgs? or @optRest?
 			nOpts = @optArgs.length
 			newIndent = tab indent
 
@@ -349,7 +348,7 @@ class FunDef extends Expression
 						".check('#{arg.name}', #{val})"
 					]
 				if isOpt
-					val = [ 'Opt().some(', val, ')' ]
+					val = [ '_prelude.Some.of(', val, ')' ]
 
 				[ "var #{arg.toNode fileName, indent} = ", val ]
 
@@ -359,22 +358,22 @@ class FunDef extends Expression
 
 			getArgsIfOpts =
 				for arg, index in @args
-					assign arg, "arguments", index + 2
+					assign arg, 'arguments', index + 2
 
 			getNoOpts =
 				for opt in @optArgs
-					[ 'var ', (opt.toNode fileName, indent), ' = Opt().None()' ]
+					[ 'var ', (opt.toNode fileName, indent), ' = _prelude.None' ]
 
 			getNoOptRest =
 				if @optRest?
 					[ 'var ', (@optRest.toNode fileName, indent),
-						' = Opt().None();\n', newIndent ]
+						' = [];\n', newIndent ]
 				else
 					''
 
 			getArgsNoOpts =
 				for arg, index in @args
-					assign arg, "arguments", index
+					assign arg, 'arguments', index
 
 			nl = "\n#{newIndent}"
 			snl = ";#{nl}"
@@ -396,7 +395,11 @@ class FunDef extends Expression
 				]
 
 		else
-			[ (getRest @maybeRest, 'arguments', @args.length), ';' ]
+			checks =
+				@args.map (arg) -> arg.typeCheck fileName, indent
+			rest =
+				getRest @maybeRest, 'arguments', @args.length
+			[ (checks.interleave ";\n#{indent}"), rest, ';' ]
 
 	compile: (fileName, indent) ->
 		maybeMeta = (kind) =>

@@ -1,5 +1,5 @@
 ∙ M
-	`_prelude.Meta`
+	Prelude@Meta
 
 M.do
 	‣read/~ doc
@@ -12,11 +12,21 @@ M.do
 	‣read options
 	‣read~ rest-option
 
-	‣ test-eg!
-		eg~.each _run!
+	‣ test-eg![caller~]
+		eg~.each |egg
+			caller~.~
+				egg.new-bound-of it
+			|
+				egg.run!
 
 	‣val Empty
 		of `{}`
+
+	‣‣ from-maybe-pre maybe-make-meta-pre:Opt
+		maybe-make-meta-pre.~ |make-pre:Fun
+			M make-pre.of
+		|
+			M.Empty
 
 	‣ merge other:M
 		how

@@ -2,9 +2,12 @@
 	Global@Function.to-class 'Fun
 
 F.do
+	eg
+		Console.log! 'hi
+
 	-def 'meta |:Meta
 		doc
-			Lazily creates this function's meta.
+			Gets this function's meta.
 		how
 			Must be in JS.
 

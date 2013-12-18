@@ -1,5 +1,4 @@
-
-`_prelude`@Argument.do
+Prelude@Argument.do
 	doc
 		I came here for an argument.
 
@@ -16,3 +15,5 @@
 			"{name}:{it}"
 		|
 			name
+
+export Prelude@Argument

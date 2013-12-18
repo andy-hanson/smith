@@ -1,8 +1,8 @@
 use ./Str
 
-Str.do
-	‣ ++ a:Str
-		`this + a`
+Str.do-meta
+	doc
+		...
 
 	‣‣ of a
 		`
@@ -16,6 +16,9 @@ Str.do
 				default:
 					return a.toString();
 			}
+
+	‣ ++ a:Str
+		`this + a`
 
 	#{
 	+index-of-substring~ |needle
@@ -32,5 +35,12 @@ Str.do
 
 	‣ size
 		`this.length`
+
+	‣ char-at n:Num
+		`this[n]`
+
+	# TODO: from seq
+	‣ tail
+		slice 1
 
 	# Iterator?

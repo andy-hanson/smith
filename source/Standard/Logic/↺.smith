@@ -43,7 +43,7 @@ use Ref
 	eg
 		∙ a
 			Ref ()
-		do-while Bool.No
+		do-while Bool.False
 			a.! 1
 		✔= 1
 			a.get

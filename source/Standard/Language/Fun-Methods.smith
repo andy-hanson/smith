@@ -1,6 +1,6 @@
 Fun.do
-	‣‣ from-JS
-		Global@Function.apply () `arguments`
+	‣‣ from-JS ...arguments-and-body
+		Global@Function.apply () arguments-and-body
 
 	‣ new-bound-of new-bound-to ...arguments
 		unbound.apply new-bound-to arguments
@@ -21,25 +21,3 @@ Fun.do
 				return made;
 			}
 			return get;
-
-	#‣ apply-with-options options:Array arguments:Array
-	#	∙ args
-	#		(Array `_prelude.optionalArgumentTag` options).concat arguments
-
-
-
-
-	#{
-	‣ argument-names
-		∙ strip-comments
-			`/((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg`
-		∙ str
-			un-bound.toString.replace strip-comments ""
-		∙ args-part
-			str.slice (str.indexOf "(").inc (str.indexOf ")")
-		∙ result
-			args-part.match `/([^\s,]+)/g`
-
-		(`result === null`).? { Bag () } { result }
-	}#
-

@@ -1,51 +1,67 @@
-‣sub-class Some
-	# TODO
-	#data |value
-	#	()
+Prelude@Opt.do
 
-	‣ construct value:Any
-		set-property! '_value value
+	‣‣ Some
+		Prelude@Some
 
-	‣read value
+	‣‣ None
+		Prelude@None
 
-	‣ force
-		value
+	Some.do #‣sub-class Some
+		# TODO
+		#data |value
+		#	()
 
-	‣ or else:Fun
-		value
+		‣read value
 
-	‣ each fun:Fun
-		fun value
-		()
+		‣ force
+			value
 
-	‣ ~ if-some:Fun if-none:Fun
-		if-some value
+		‣ or else:Fun
+			value
 
-	‣override toString
-		"(Some {value})"
+		‣ each fun:Fun
+			fun value
+			()
 
+		‣ ~ if-some:Fun if-none:Fun
+			if-some value
 
-‣sub-object None
-	‣‣ force
-		✘ 「Tried to force None.」
+		‣ to-nullable
+			value
 
-	‣‣ or else:Fun
-		else.of
-
-	‣‣ each fun:Fun
-		()
-
-	‣‣ ~ if-some:Fun if-none:Fun
-		if-none ()
-
-‣‣ some value:Any
-	(Some) value
-
-‣‣ filter value:Any condition:Fun
-	(condition value).if
-		value
+		‣override toString
+			"(Some {value})"
 
 
-‣‣ from-nullable a
-	`a != null`.if
-		a
+	None.class.do #‣sub-object None
+		‣ force
+			✘ 「Tried to force None.」
+
+		‣ or else:Fun
+			else.of
+
+		‣ each fun:Fun
+			()
+
+		‣ ~ if-some:Fun if-none:Fun
+			if-none ()
+
+		‣ to-nullable
+			()
+
+		‣override toString
+			"None"
+
+	‣‣ some value:Any
+		(Some) value
+
+	‣‣ filter value:Any condition:Fun
+		(condition value).if
+			value
+
+
+	‣‣ from-nullable a
+		`a != null`.if
+			a
+
+export Prelude@Opt

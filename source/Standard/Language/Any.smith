@@ -1,5 +1,5 @@
 ∙ A
-	`_prelude.Any`
+	Prelude@Any
 
 A.do
 	‣override class
@@ -50,14 +50,6 @@ A.do
 	‣ new-mutable! name:Str value
 		✔ (has-property? name).¬
 		set-property! name value
-
-	‣ new! name:Str value
-		doc
-			Defines a new immutable property on this object.
-		how
-			Writable is false by default.
-
-		`global.Object.defineProperty(this, name, {value: value})`
 
 	‣ set-property! name:Str value
 		`this[name] = value`

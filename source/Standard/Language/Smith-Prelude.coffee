@@ -26,7 +26,7 @@ imm = (object, name, value) ->
 
 makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 	unless (Object name) instanceof String
-		throw new Error "name is not a String; is #{name}"
+		throw new Error "In makeAnyClass: name is not a String; is #{name}"
 
 	superClass = superMetaClass = metaClass = clazz = null
 
@@ -100,21 +100,14 @@ def.call AnyClass, '-def', def
 
 AnyClass['-def'] 'construct', makeAnyClass
 
-###
-AnyClass's of is special
-###
-imm AnyClass, 'of', (name, maybeIs) ->
+AnyClass['-def'] 'of', ->
 	if @['_is_meta']
 		throw up
 
-	makeAnyClass name, maybeIs
-
-###
-Instances of AnyClass (except AnyClass itself) are not as special.
-###
-AnyClass['-def'] 'of', ->
-	obj = Object.create @_proto
-	constructor = @_proto.construct
+	obj =
+		Object.create @_proto
+	constructor =
+		@_proto.construct
 	unless constructor instanceof Function
 		message =
 			if constructor?
@@ -126,7 +119,7 @@ AnyClass['-def'] 'of', ->
 	obj
 
 Meta =
-	AnyClass.of 'Meta'
+	makeAnyClass 'Meta'
 
 Meta['-def'] 'construct', (meta) ->
 	(Object.keys meta).forEach (name) =>
@@ -147,15 +140,14 @@ bind = (object, name) ->
 
 clazz = (name, maybeIs, fun) ->
 	cls =
-		AnyClass.of name, maybeIs
+		makeAnyClass name, maybeIs
 
 	fun.unbound().call cls
 
 	if cls.__exported?
 		cls.__exported
 	else
-		if fun._meta?
-			cls._meta = fun._meta
+		cls['_make-meta-pre'] = fun['_make-meta-pre']
 		cls
 
 string = ->
@@ -180,7 +172,12 @@ lazy = (delegate, make) ->
 	get
 
 itMethod = (name) ->
+	unless (Object name) instanceof String
+		throw new Error '?'
 	(it) ->
+		method = it[name]
+		unless method?
+			throw new Error "#{it} has no method #{name}"
 		it[name].apply it, Array.prototype.slice.call arguments, 1
 
 checkNumberOfArguments = (args, expectedNumber) ->
@@ -189,30 +186,46 @@ checkNumberOfArguments = (args, expectedNumber) ->
 			"Expected #{expectedNumber} arguments, only got [" +
 			(Array.prototype.join.call args, ', ') + ']'
 
-call = (subject, verb, options, argumentses) ->
-	unless Object(verb) instanceof String
+call = (subject, verb, optionses, argumentses) ->
+	# optionses and argumentses are arrays of arrays
+	unless (Object verb) instanceof String
 		throw new global.Error '?'
+
+	opts = []
+	for newOpts in optionses
+		Array.prototype.push.apply opts, newOpts
 
 	args = []
 	for newArgs in argumentses
 		Array.prototype.push.apply args, newArgs
-	opts = []
-	for newOpts in options
-		Array.prototype.push.apply opts, newOpts
+
+	op = subject[verb]
+	unless op?
+		throw new Error "#{subject} has no method #{verb}"
+
 	if opts.length == 0
-		subject[verb].apply subject, args
+		op.apply subject, args
 	else
 		args.unshift optionalArgumentTag, opts
-		subject[verb].apply subject, args
+		op.apply subject, args
 
 # A unique object to indicate when optinal arguments are passed.
 optionalArgumentTag =
 	'OPTIONAL-ARGUMENT-TAG'
 
-Argument = AnyClass.of 'Argument'
+Argument = makeAnyClass 'Argument'
 
 argument = (name, clazz) ->
 	Argument.of name, clazz
+
+Opt = makeAnyClass 'Opt'
+Some = makeAnyClass 'Some', Opt
+Some['-def'] 'construct', (x) ->
+	@_value = x
+	Object.freeze @
+
+NoneClass = makeAnyClass 'None', Opt
+None = Object.create NoneClass._proto
 
 module.exports =
 	fun: fun
@@ -229,4 +242,8 @@ module.exports =
 	call: call
 	argument: argument
 	Argument: Argument
+	Opt: Opt
+	Some: Some
+	None: None
+	#makeAnyClass: makeAnyClass
 

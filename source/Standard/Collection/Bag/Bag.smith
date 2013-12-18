@@ -1,9 +1,3 @@
 ‣‣ of ...members
 	Array ...members
 
-‣ make-string
-	(map String.of_).join " "
-
-‣override toString
-	"({type.name} {make-string})"
-
