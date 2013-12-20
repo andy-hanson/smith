@@ -2,6 +2,7 @@ lex = require './lex'
 parse = require './parse'
 AllModules = require './AllModules'
 Pos = require './Pos'
+path = require 'path'
 
 shortName = (fullName) ->
 	(fullName.split '/').pop()
@@ -31,11 +32,20 @@ module.exports = (string, inName, outName, opts) ->
 	prelude =
 		allModules. get 'Smith-Prelude', Pos.start, inName
 
+	# TODO: not hard-coded
+	fullIn = 'source/' + inName
+	fullOut = 'js/' + outName
+
+	sourceMapRel = path.relative fullOut, fullIn
+
+	toNode = (x) ->
+		x.toNode sourceMapRel, ''
+
 	superNode =
-		if sooper then sooper.toNode inName, '' else 'null'
+		if sooper then toNode sooper else 'null'
 
 	autos =
-		(autoUses.map (au) -> au.toNode inName, '').interleavePlus ';\n'
+		(autoUses.map toNode).interleavePlus ';\n'
 
 	classConstruct =
 		"_prelude.class('#{typeName}', #{superNode}, "
@@ -65,7 +75,7 @@ module.exports = (string, inName, outName, opts) ->
 		#{if printModuleDefines then "console.log('← #{typeName}...');" else ''}
 	"""
 
-	node = fun.toNode inName, ''
+	node = toNode fun
 	node.prepend open
 	node.add close
 

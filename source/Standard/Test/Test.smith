@@ -1,5 +1,8 @@
-export |name:Str do:Fun
+‣‣ of name:Str do:Fun
 	✘.annotate
 		do.run!
 	|
 		"Testing {name}"
+
+‣‣ all!
+	Any-Class.all-classes.each _test!

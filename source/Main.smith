@@ -1,27 +1,8 @@
 doc
 	Here's my nifty program.
 
-use! Standard/Test
 
-Any-Class.all-classes.each _test!
+
+Test.all!
 
 Console.log! 'bai
-
-#use! Vec
-
-#∙ v
-#	Vec 1 2
-
-
-#{
-∙ f |[a ...b] c:Num d:Str ...e
-	doc
-		this is f
-	eg
-		test f
-	how
-		work f
-
-Console.log! f.meta
-}#
-

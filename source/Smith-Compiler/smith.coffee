@@ -49,8 +49,8 @@ class Smith
 						smithCompile text, inFile, out, @
 
 					[	[ out, code ],
-						[ "#{out}.map", map.toString() ],
-						[ inFile, text ] ]
+						[ "#{out}.map", map.toString() ] ]
+						#[ inFile, text ] ]
 
 				when 'js'
 					[ [ inFile, text ] ]

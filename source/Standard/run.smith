@@ -4,6 +4,41 @@ doc
 
 (use Source-Map-Support).install
 
-use! Standard
+∙ f |
+	use! Standard
 
-use! Main
+	use! Main
+
+`
+	try {
+		f();
+	}
+	catch (error) {
+		error.stack.split('\n').forEach(function(line) {
+			var rgx =
+				/at (\S*)\s*(\[as (.*)\])?\s*\((.*)\)/;
+			var match =
+				line.match(rgx);
+
+			if (match == null) {
+				console.log(line);
+			}
+			else {
+				var declareName =
+					match[1];
+				// match[2] is [as {callName}]
+				var callName =
+					match[3];
+				if (callName == null)
+					callName = '';
+				else
+					callName += ' ';
+				var sourceLocation =
+					match[4].slice('/home/andy/programming/smith/'.length);
+
+				console.log(callName+'at '+sourceLocation+' ('+declareName + ')');
+			}
+		});
+		//throw error;
+	}
+	return;
