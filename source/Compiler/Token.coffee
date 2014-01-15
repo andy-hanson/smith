@@ -1,5 +1,6 @@
 Pos = require './Pos'
 { cCheck } = require './CompileError'
+{ metaTextKeywords } = require './keywords'
 
 class Token
 	toString: ->
@@ -129,7 +130,7 @@ class Use extends Token
 class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
 		type @pos, Pos
-		check @kind.isAny 'doc', 'how'
+		check metaTextKeywords.contains @kind
 		type @text, Token # string literal or interpolated group
 
 	show: ->

@@ -7,7 +7,7 @@ comment:
 
 settings:
 - settings:
-    background: '#FFfcFF'
+    background: '#fffff8'
     caret: '#000000'
     foreground: '#000000'
     invisibles: '#c000c0' # ???
@@ -15,7 +15,7 @@ settings:
     activeGuide: '#0080ff' # indentation guide that cursor is near
     stackGuide: '#0080ff40' # rightmost active indentation guide
     lineHighlight: '#00000004'
-    selection: '#00000020'
+    selection: '#0000ff10'
 
 - name: Use
   scope: module.use
@@ -35,7 +35,7 @@ settings:
 - name: Normal Call
   scope: call.normal
   settings:
-    foreground: '#000080'
+    foreground: '#0000c0'
 
 - name: Bang Call
   scope: call.bang
@@ -45,7 +45,7 @@ settings:
 - name: Comment
   scope: comment
   settings:
-    foreground: '#aaaaaa'
+    foreground: '#808080'
 
 - name: String
   scope: string
@@ -133,7 +133,7 @@ settings:
 - name: Bracket
   scope: bracket
   settings:
-    foreground: '#000080'
+    foreground: '#0000ff'
     fontStyle: bold
 
 

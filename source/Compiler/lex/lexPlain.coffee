@@ -3,11 +3,8 @@ Stream = require './Stream'
 GroupPre = require './GroupPre'
 lexQuote = require './lexQuote'
 { cFail, cCheck } = require '../CompileError'
+{ keywords, metaTextKeywords } = require '../keywords'
 
-keywords =
-	[ 'use', 'use!', 'super', 'trait',
-		'me', 'it', '∙', '∘',
-		'doc', 'in', 'out', 'eg', 'how' ]
 
 module.exports = (stream, inQuote) ->
 	type stream, Stream
@@ -21,9 +18,9 @@ module.exports = (stream, inQuote) ->
 
 	# not space, not bracket, not punc, not quote,
 	# not comment, not bar, not @, not :,
-	nameChar = /[^\s\(\[\{\)\]\};,'"`「」#\|@\:\.]/
+	nameChar = /[^\s\(\[\{\)\]\};,'"`「」\\\|@\:\.]/
 	# like nameChar but can include .
-	usedChar = /[^\s\(\[\{\)\]\};,'"`「」#\|@\:]/
+	usedChar = /[^\s\(\[\{\)\]\};,'"`「」\\\|@\:]/
 	digit = /[0-9]/
 	numChar = /[0-9\.]/
 	groupChar = /[\(\[\{\)\]\}]/
@@ -73,9 +70,10 @@ module.exports = (stream, inQuote) ->
 
 					name = takeName()
 
-					if ch == '.' and stream.maybeTake '_'
+					if ch == '.' and name.last() == '_'
 						check kind != '...x', 'Unexpected _'
 						kind = '.x_'
+						name = name.withoutEnd '_'
 
 					removePrecedingNL() if ch.isAny ',', '.'
 					if ch == "'"
@@ -87,14 +85,14 @@ module.exports = (stream, inQuote) ->
 					name = takeName()
 					if stream.maybeTake '_'
 						new T.Name pos, name, 'x_'
+					else if metaTextKeywords.contains name
+						lexQuote name, stream, indent
 					else if keywords.contains name
 						switch name
 							when 'use', 'use!', 'super', 'trait'
 								stream.takeMatching space
 								used = stream.takeMatching usedChar
 								new T.Use pos, used, name
-							when 'doc', 'how'
-								lexQuote name, stream, indent
 							when 'in', 'out', 'eg'
 								new GroupPre pos, name
 							else
@@ -115,20 +113,20 @@ module.exports = (stream, inQuote) ->
 					stream.takeMatching space
 					[]
 
-				when ch == '#'
+				when ch == '\\'
 					stream.readChar()
 					next = stream.peek()
 
-					if next == '{'
-						stream.takeUpToAndIncludingString '}#'
-						#unless stream.hasMore()
-							# Ate up whole file!
-							# One final newline will close all indents.
-						stream.str += '\n\n'
+					#if next == '{'
+					#	stream.takeUpToAndIncludingString '}#'
+					#	#unless stream.hasMore()
+					#		# Ate up whole file!
+					#		# One final newline will close all indents.
+					#	stream.str += '\n\n'
 
-					else
-						stream.takeUpToString '\n'
-						check stream.peek() == '\n'
+					#else
+					stream.takeUpToString '\n'
+					check stream.peek() == '\n'
 					[]
 
 				when ch == '\n'

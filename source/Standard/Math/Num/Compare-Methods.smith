@@ -1,0 +1,129 @@
+use Num
+
+Num.do
+	‣override = a
+		`Object(a) instanceof Number && (this + 0) === (a + 0)`
+
+
+	‣ ≈[significant-digits~:Num] a:Num
+		doc
+			Whether two I am equal to a to within `significant-digits` digits.
+			Delegates to ≈0 when I or a are 0.
+		eg
+			✔ (1001.≈[3] 1000)
+			✔ (1001.≈[4] 1000).¬
+			✔ (0.001001.≈[3] 0.001)
+			✔ (0.001001.≈[4] 0.001).¬
+
+		∙ significant-digits
+			significant-digits~.or
+				6
+
+		zero?.?
+			a.≈0[significant-digits]
+		|
+			a.zero?.?
+				≈0[significant-digits]
+			|
+				∙ avg-mag
+					magnitude.average a.magnitude
+				∙ n-digits
+					avg-mag.log-10.round-down
+				∙ scale
+					10.^ n-digits
+				∙ scaled-me
+					÷ scale
+				∙ scaled-a
+					a.÷ scale
+				∙ scaled-diff
+					scaled-a.distance scaled-me
+				∙ epsilon
+					10.^ significant-digits.negate
+
+				scaled-diff.< epsilon
+
+	‣ ≈0[significant-digits~:Num]
+		doc
+			Whether a number is close to zero;
+			it must be 0.00... for sig-figs digits.
+		eg
+			✔ (0.00999.≈0[2])
+			✔ (0.01.≈0[2]).¬
+
+		∙ significant-digits
+			significant-digits~.or
+				6
+
+		∙ max
+			10.^ significant-digits.negate
+
+		magnitude.< max
+
+	‣ < a:Num
+		doc
+			Whether I am closer to -∞ than a.
+		eg
+			✔ (-1.< 2)
+			✔ (1.< 1).¬
+
+		`this < a`
+
+	‣ > a:Num
+		doc
+			Whether I am closer to ∞ than a.
+		eg
+			✔ (1.> -2)
+			✔ (1.> 1).¬
+
+		`this > a`
+
+	‣ ≤ a:Num
+		doc
+			Whether I am < or = a.
+		eg
+			✔ (1.≤ 1)
+
+		`this <= a`
+
+	‣ ≥ a:Num
+		doc
+			Whether I am > or = a.
+		eg
+			✔ (1.≥ 1)
+
+		`this >= a`
+
+	‣ min a:Num
+		doc
+			Lower of me and `a`.
+		eg
+			✔= 1
+				1.min 2
+		how
+			TODO: in Comparable
+
+		Global@Math.min me a
+
+	‣ max a:Num
+		doc
+			Higher of me and `a`.
+		eg
+			✔= 2
+				1.max 2
+
+		Global@Math.max me a
+
+	‣ crop min:Num max:Num
+		doc
+			Forces me in between min and max.
+		in
+			✔ (min.< max)
+		eg
+			✔= 1
+				0.crop 1 2
+			✔= 2
+				3.crop 1 2
+			✔= 1.5
+				1.5.crop 1 2
+
+		(me.min max).max min

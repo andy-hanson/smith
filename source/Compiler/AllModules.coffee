@@ -11,6 +11,7 @@ class Module
 	constructor: (@fullName, @force) ->
 		type @fullName, String
 		type @force, Boolean
+		Object.freeze @
 
 class Modules
 	constructor: ->
@@ -19,6 +20,10 @@ class Modules
 		@autoBangs = []
 
 	add: (name, fullName, force) ->
+		type name, String
+		type fullName, String
+		type force, Boolean
+		#console.log "Add #{name}; #{fullName}; #{force}"
 		@modules.add name, new Module fullName, force
 
 	addAutos: (names, kind) ->
@@ -49,8 +54,9 @@ module.exports = class AllModules
 				new Modules
 
 			for part, index in text.split '\n'
-				part = (part.split '#')[0]
-				continue if part == ''
+				part = (part.split '\\')[0] # take out comments
+				continue if part == '' # ignore empty lines
+
 				split =
 					part.split ' '
 				unexpected = ->
@@ -67,12 +73,14 @@ module.exports = class AllModules
 						check split.length == 2, unexpected
 					[ name, modulePath ] =
 						split
+					type name, String
+					type modulePath, String
 					fullName =
 						if force
 							modulePath
 						else
-							@findFullName dir, modulePath
-
+							path.join dir, @findLocal dir, modulePath
+					type fullName, String
 					modules.add name, fullName, force
 
 			@moduleses.add dir, modules
@@ -90,12 +98,11 @@ module.exports = class AllModules
 	name - module name
 
 	Returns the usage name (with '.js' left implied)
-	###
-	findFullName: (dir, name, fromGet = no) ->
+	_findFullName: (dir, name, fromGet = no) ->
 		if name.startsWith './'
-			name = path.join dir, name.withoutStart './'
+			fail#name = path.join dir, name.withoutStart './'
 		else if name.startsWith '../'
-			name = path.join dir, path.dirname name.withoutStart '../'
+			fail#name = path.join dir, path.dirname name.withoutStart '../'
 		# else name is relative to top
 
 		full = path.join @baseDir, name
@@ -120,10 +127,45 @@ module.exports = class AllModules
 				"There is no module at #{name}; tried #{mayBeModules}"
 
 		fail message
+	###
 
-	noForce: (fullName) ->
-		fullName: fullName
-		force: no
+	findLocal: (dir, name) ->
+		(@maybeFindLocal dir, name) ? fail \
+			"Can not find #{dir}{}#{name}"
+
+	###
+	dir - path relative to @baseDir
+	name - module name
+	###
+	maybeFindLocal: (dir, name) ->
+		type dir, String
+		type name, String
+
+		full = path.join @baseDir, name
+		if fs.existsSync full
+			check (io.statKindSync full) == 'directory'
+			name = path.join name, 'index'
+
+		extensions =
+			[ '.smith', '.coffee', '.js' ]
+		mayBeModules =
+			extensions.map (extension) ->
+				"#{name}#{extension}"
+
+		for mayBeModule in mayBeModules
+			full = path.join @baseDir, dir, mayBeModule
+			if fs.existsSync full
+				return name
+
+		return null
+
+	###
+
+	###
+	#_noForce: (fullName) ->
+	#	fullName: fullName
+	#	force: no
+	#	hi: "there"
 
 	autoUses: (fileName) ->
 		lookupDir = path.dirname fileName
@@ -146,6 +188,7 @@ module.exports = class AllModules
 
 	###
 	Get the module for a given name.
+	Returns the module's path relative to the access directory.
 
 	name: What follows 'use'
 	accessFile: file accessing it (relative to top)
@@ -155,16 +198,21 @@ module.exports = class AllModules
 		type pos, Pos
 		type accessFile, String
 
+		#console.log "GET #{name} #{accessFile}"
+
 		accessDir =
 			path.dirname accessFile
 
-		module =
-			if (name.startsWith './') or name.startsWith '../'
-				@noForce @findFullName accessDir, name
-			else
-				lookupDir =
-					accessDir
-				do => loop
+		maybeLocal =
+			@maybeFindLocal accessDir, name
+
+		if maybeLocal?
+			"./#{maybeLocal}"
+		else
+			lookupDir =
+				accessDir
+			module = do =>
+				loop
 					maybe =
 						(@moduleses.maybeGet lookupDir)?.modules.maybeGet name
 					if maybe?
@@ -172,20 +220,26 @@ module.exports = class AllModules
 					else
 						if lookupDir.isAny '', '.'
 							# It wasn't in modules listing, see if it's relative
-							return @noForce @findFullName accessDir, "./#{name}", yes
+							#return @_noForce @findFullName accessDir, "./#{name}", yes
+							fail "Could not find module #{name} in modules listing or locally"
 						else
 							lookupDir = path.dirname lookupDir
 
-		if module.force
-			module.fullName
-		else
-			full =
-				path.join @baseDir, module.fullName
+			if module.force
+				module.fullName
+			else
+				full =
+					path.join @baseDir, module.fullName
 
-			fullAccess =
-				path.join @baseDir, accessDir
+				fullAccess =
+					path.join @baseDir, accessDir
 
-			"./#{path.relative fullAccess, full}"
+				#console.log module
+				#console.log full
+				#console.log fullAccess
+				#console.log "./#{path.relative fullAccess, full}"
+
+				"./#{path.relative fullAccess, full}"
 
 	###
 	Load the modules listings for a directory.

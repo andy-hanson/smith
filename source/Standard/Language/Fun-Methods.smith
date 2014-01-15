@@ -8,6 +8,18 @@ Fun.do
 	‣ of ...args
 		apply () args
 
+	‣ compose b:Fun
+		doc
+			Function composition; must have only 1 argument
+		eg
+			∙ increment-then-twice
+				_twice.compose _increment
+			✔= 6
+				increment-then-twice 2
+
+		| x
+			me (b x)
+
 	alias 'of 'run!
 
 	‣ cached

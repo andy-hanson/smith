@@ -9,18 +9,28 @@ Prelude@Any.-def 'new! |name:Str value
 
 	`
 		if (global.Object.hasOwnProperty.call(this, name))
-			throw new Error(this + " already has property " + name);
-		global.Object.defineProperty(this, name, {value: value})
+			throw new global.Error(this + " already has property " + name);
+		global.Object.defineProperty(this, name, { value: value })
 
 use! Any-Class
 use! Any
+
+Any-Class.do
+	‣‣ of [super-class~:Any-Class] name:Str do-meta:Fun
+		Prelude.class name super-class~.to-nullable do-meta
+
+	‣‣ all-classes
+		Prelude.all-classes
+
 use! Language/Fun-Methods
 use! Bool
 use! Meta
 
-
 use! Language/Meta/Meta-Metas
 use! Language/Fun-Meta
+
+use! Language/Any-Class-Meta
+use! Language/Any-Meta
 
 use! Bag
 use! Error

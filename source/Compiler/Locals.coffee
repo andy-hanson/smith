@@ -32,20 +32,20 @@ module.exports = class Locals
 		last.forEach (local) =>
 			@names.delete local.name
 
+	withFrame: (fun) ->
+		@addFrame()
+		res = fun()
+		@popFrame()
+		res
+
 	withLocal: (loc, fun) ->
 		@withLocals [loc], fun
 
 	withLocals: (locals, fun) ->
-		@addFrame()
-
-		locals.forEach (local) =>
-			@addLocal local
-
-		res = fun()
-
-		@popFrame()
-
-		res
+		@withFrame =>
+			locals.forEach (local) =>
+				@addLocal local
+			fun()
 
 	get: (name) ->
 		type name, T.Name
@@ -54,7 +54,7 @@ module.exports = class Locals
 	getIt: (pos) ->
 		type pos, Pos
 		cCheck (@names.has 'it'), pos,
-			"No local 'it'"
+			"No local 'it' ('it' must be a local)"
 		@names.get 'it'
 
 	toString: ->

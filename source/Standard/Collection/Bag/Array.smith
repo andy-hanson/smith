@@ -1,34 +1,77 @@
-use ../Type
-use ../Object
-
 ∙ A
 	Global@Array.to-class
 
 A.do
-	alias 'forEach 'each
-
 	‣‣ of ...members
-		proto@slice.call members
+		members
 
-	‣ of n:Num
+	‣ of index:Num
 		in
-			✔ n.integer?
+			✔ (valid-index? index)
 
-		`this[n]`
+		`this[index]`
+
+	‣ valid-index? index:Num
+		index.natural?.∧
+			index.< size
+
+	‣ each do-with-element:Fun
+		todo
+			ArrayIterator
+		∙ size
+			size
+		∙ dwe
+			do-with-element
+		`
+			for (var index = 0; index < size; index++)
+				dwe(this[index]);
+
+	‣ collect do-with-element:Fun
+		∙ size
+			size
+		∙ dwe
+			do-with-element
+		`
+			var res = new global.Array(size);
+			for (var index = 0; index < size; index++)
+				res[index] = dwe(this[index]);
 
 	‣ size
 		@length
 
-	# TODO: inherit from Bag
 	‣ first
+		todo
+			inherit from Seq
+
 		of 0
 
 	‣ second
+		todo
+			inherit from Seq
+
 		of 1
 
-	# TODO: inherit this from Bag!
-	#‣ make-string joiner:Str
-	#	(map Str.of_).join joiner
-	#	#join " "
+	‣ copy
+		slice
+
+	‣ + em
+		∙ x
+			copy
+		x.push em
+		x
+
+	‣ ++ oth:A
+		todo
+			oth.to-array
+
+		concat oth
+
+	‣ ∋ em
+		(indexOf em).≠ -1
+
+	\ TODO: inherit this from Iterable!
+	\‣ make-string joiner:Str
+	\	(map Str.of_).join joiner
+	\	#join " "
 
 export A

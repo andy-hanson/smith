@@ -12,18 +12,22 @@ C.do
 				throw new global.Error(name+' is not a '+this+'; is '+a+'; a '+a.class());
 			return a;
 
+	-def 'export |exported
+		`
+			if (exported == null)
+				throw new global.Error('Exported nothing');
+			if (this.__exported != null)
+				throw new global.Error(this._name + ' already exported ' + this.__exported);
+			this.__exported = exported;
+
 	-def '‣ |name:Str method:Fun
 		`
 			if (this._proto[name] != null)
 				throw new global.Error(this + ' already has method ' + name)
 		-def name method
 
-	-def 'export |exported
-		`
-			this.__exported = exported;
-
 	-def 'subsumes? |a
-		`a['__is-a-id-' + this._id] == true`
+		`a['__is-a-id-' + this._id] === true`
 
 	‣ ‣override name:Str method:Fun
 		`
@@ -51,12 +55,8 @@ C.do
 
 	‣ ‣‣ name:Str method:Fun
 		new! name method
-
-	‣‣ of [super-class~:C] name:Str do-meta:Fun
-		Prelude.class name super-class~.to-nullable do-meta
-
-	‣‣ all-classes
-		Prelude.all-classes
+		\`this['_static-methods']
+		static-methods.new! name method
 
 	‣ ‣val name:Str make-val:Fun
 		me.‣‣ name make-val.cached
@@ -70,7 +70,7 @@ C.do
 				this.method(name)['meta!'](fun._meta);
 			return;
 
-	∙ maybe-meta |method-name:Str meta
+	∙ maybe-meta |method-name:Str ...meta
 		∙ mn
 			method-name
 		`
@@ -84,20 +84,20 @@ C.do
 					throw new global.Error(meta)
 			}
 
-		#(Opt.from-nullable meta).each
-		#	me.‣method-meta method-name it
+		\(Opt.from-nullable meta).each
+		\	me.‣method-meta method-name it
 
 	‣ ‣read~ name:Str ...meta
 		∙ method-name
 			"{name}~"
 		me.‣ method-name
 			property~ "_{name}"
-		maybe-meta.call me method-name meta
+		maybe-meta.call me method-name ...meta
 
 	‣ ‣read name:Str ...meta
 		me.‣ name
 			property "_{name}"
-		maybe-meta.call me name meta
+		maybe-meta.call me name ...meta
 
 	‣ ‣read/~ ...args
 		doc
@@ -111,24 +111,28 @@ C.do
 			"{name}!"
 		me.‣ method-name |mod:Fun
 			modify-property! "_{name}" mod
-		maybe-meta.call me method-name meta
+		maybe-meta.call me method-name ...meta
 
-	‣ ‣access name:Str meta
-		me.‣read name meta
-		me.‣write name meta
+	‣ ‣access name:Str ...meta
+		me.‣read name ...meta
+		me.‣write name ...meta
 
 	‣read methods
 		doc
 			Dictionary of this class' own methods.
 			Does not include inherited methods.
 
+	‣read static-methods
+		doc
+			TODO
+
 	‣read name
 		doc
 			Name of this class.
 
-	‣read super
+	‣read/~ super
 		doc
-			Super-class.
+			Super-class. Any does not have one, so you may want to use super~.
 
 	‣read proto
 		doc
@@ -138,15 +142,49 @@ C.do
 		doc
 			Unique number for this class.
 
-	‣ meta:Meta
-		Meta.from-maybe-pre (property~ '_make-meta-pre)
+	‣read traits
+		doc
+			TODO
+
+	‣read trait-of
+		doc
+			TODO
+
+	‣read super-of
+		doc
+			TODO
+
+	‣read inherits-from
+		doc
+			TODO
+
+	‣ inherits-from? class:C
+		inherits-from.∋ class
+
+	me.‣ 'trait |new-trait:C
+		traits.push new-trait
+
+		(new-trait.inherits-from.+ new-trait).each |inherit-from
+			(inherits-from? inherit-from).unless!
+				inherits-from.push inherit-from
+				inherit-from.methods.each-property |name value
+					(name.= 'class).unless!
+						proto.new! name value
+
+		inherits-from.push new-trait
+
+
+
+	‣ meta
+		(property~ '_meta).or
+			Meta.from-maybe-pre (property~ '_make-meta-pre)
 
 	‣ meta! mod:Fun
 		set-property! '_meta (mod meta)
 
 	‣ do-meta fun:Fun
 		meta!
-			meta.merge fun.meta
+			it.merge fun.meta
 		do fun
 
 	‣ test!
@@ -155,14 +193,31 @@ C.do
 		|
 			"{me}#eg"
 
-		methods.each-property |name method
-			✘.annotate
-				method.meta.test-eg![me]
-			|
-				"{me}#{name}#eg"
+		∙ f |is-static
+			|name method
+				✘.annotate
+					method.meta.test-eg![me]
+				|
+					∙ hash
+						is-static.?
+							'##
+						|
+							'#
+					"{me}{hash}{name}#eg"
 
-	‣ sub-class? class:C
-		`true` #(this === class) || ???
+
+		methods.each-property (f Bool.⊥)
+		static-methods.each-property (f Bool.⊤)
+
+
+
+	‣ instances-are? class:C
+		eg
+			✔ (Fun.instances-are? Any)
+			✔ (Fun.instances-are? Str).¬
+			✔ (Fun.instances-are? Fun)
+
+		class.subsumes? proto
 
 	‣ no-instances!
 		()
@@ -197,13 +252,14 @@ C.do
 		object‣[me] name do-to
 
 	‣ data[can-extend~:Bool] constructor:Fun
-		how
-			TODO: mangle
+		todo
+			mangle
+			move elsewhere
 
 		∙ can-extend
 			can-extend~.or
-				Bool.False
-		# arg, writable
+				Bool.⊥
+		\ arg, writable
 		∙ names-assigns
 			constructor.meta.arguments.map |arg
 				∙ writable
@@ -215,7 +271,7 @@ C.do
 						arg.name
 
 				me.‣read name
-				writable.if
+				writable.if!
 					me.‣write name
 
 				∙ assign
@@ -246,7 +302,5 @@ C.do
 		‣ construct ...args
 			define-properties.apply me args
 			constructor.unbound.apply me args
-
-
 
 export C

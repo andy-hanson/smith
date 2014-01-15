@@ -2,53 +2,108 @@
 	Global@Boolean.to-class 'Bool
 
 B.do
-	‣val True
+	‣val ⊤
+		doc
+			TODO
+
 		`true`
 
-	‣val False
+	‣val ⊥
+		doc
+			TODO
+
 		`false`
 
 	‣ ? then:Fun else:Fun
+		doc
+			TODO
+
 		`this.valueOf() ? then() : _else()`
 
 	‣ ∨ a:Fun
+		doc
+			Whether either this or `a` is true.
 		eg
-			✔= False
-				False.∨
-					False
-			✔= True
-				True.∨
-					False
+			✔= ⊥
+				⊥.∨
+					⊥
+			✔= ⊤
+				⊤.∨
+					⊥
+		how
+			TODO: make sure fun returns a Bool.
 
 		`this || a()`
 
 	‣ ∧ a:Fun
+		doc
+			TODO
+
 		`this && a()`
 
 	‣ ¬
+		doc
+			TODO
+
 		`!this`
 
 	‣ → a:Fun
+		doc
+			TODO
+
 		`!this || a()`
 
+	‣ ↔ a:Bool
+		doc
+			Same as equality.
+
+		= a
+
 	‣ ⊕ a:Bool
+		doc
+			TODO
+
 		`this ? !a : a`
 
 	‣ nor a:Bool
+		doc
+			TODO
+
 		`!(this || a)`
 
+	‣ if! then:Fun
+		doc
+			TODO
+
+		`
+			if (this)
+				then()
+			return;
+
 	‣ if then:Fun
+		doc
+			TODO
+
 		`this ? Opt().some(then()) : Opt().None()`
 
+	‣ unless! then:Fun
+		doc
+			TODO
+
+		¬.if! then
+
 	‣ unless then:Fun
+		doc
+			TODO
+
 		¬.if then
 
-	#alias '? 'if-then-else
-	#alias '∨ 'or
-	#alias '∧ 'and
-	#alias '¬ 'not
-	#alias '→ 'implies
-	#alias '⊕ 'xor
+	\alias '? 'if-then-else
+	\alias '∨ 'or
+	\alias '∧ 'and
+	\alias '¬ 'not
+	\alias '→ 'implies
+	\alias '⊕ 'xor
 
 
 export B

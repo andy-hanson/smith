@@ -6,7 +6,6 @@ doc
 
 ∙ f |
 	use! Standard
-
 	use! Main
 
 `

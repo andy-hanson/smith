@@ -10,14 +10,17 @@ eg
 		it.increment
 	✔= 3
 		ref.get
+todo
+	Uses 'data' to construct, set, get value
+
 
 use Fun
 
 ‣ construct value
-	property! 'value
+	set-property! 'value value
 
 ‣ ! setter:Fun
-	property! 'value fun
+	set-property! 'value setter.of
 
 ‣ get
 	property 'value

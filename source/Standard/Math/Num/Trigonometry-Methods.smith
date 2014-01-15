@@ -1,0 +1,75 @@
+(use Num).do
+	‣ sine
+		doc
+			If I am an angle (in radians) counter-clockwise from +x, the y-value is me.sin.
+		eg
+			✔= 0
+				0.sine
+			✔= 1
+				π/2.sine
+			✔.≈ 0
+				π.sine
+			✔= -1
+				π3/2.sine
+		Global@Math.sin me
+
+	‣ cosine
+		doc
+			If I am an angle (in radians) counter-clockwise from +x, the x-value is me.cos.
+		eg
+			✔.= 1
+				0.cosine
+			✔.≈ 0
+				π/2.cosine
+			✔.≈ -1
+				π.cosine
+			✔.≈ 0
+				π3/2.cosine
+
+		Global@Math.cos me
+
+	‣ tangent
+		doc
+			Ratio of sine to cosine.
+		eg
+			✔= 0
+				0.tangent
+			✔.≈ 0
+				π.tangent
+
+		Global@Math.tan me
+
+	‣ arc-cosine
+		doc
+			Number whose cosine I am.
+		eg
+			✔= π/2
+				0.arc-cosine
+			✔= 0
+				1.arc-cosine
+
+		Global@Math.acos me
+
+	‣ arc-sine
+		doc
+			I know it is asin to write this...
+			Number whose sin I am.
+		eg
+			✔= 0
+				0.arc-sine
+			✔= π/2
+				1.arc-sine
+		how
+			TODO - avoid NaN
+
+		Global@Math.asin me
+
+	‣ arc-tangent
+		doc
+			Number whose tangent I am.
+		eg
+			✔= 0
+				0.arc-tangent
+
+		Global@Math.atan me
+

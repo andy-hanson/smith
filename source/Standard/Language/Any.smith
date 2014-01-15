@@ -2,11 +2,11 @@
 	Prelude@Any
 
 A.do
-	‣override class
-		doc
-			if not overridden...
-
-		(property 'constructor).to-class
+	\‣override class
+	\	doc
+	\		if not overridden...
+	\
+	\	(property 'constructor).to-class
 
 	‣ has-property? name:Str
 		`Object.prototype.hasOwnProperty`.call me name
@@ -76,23 +76,31 @@ A.do
 				keys.every
 					(property it).= (a.property it)
 
-			#{`
-				var meKeys = global.Object.getOwnPropertyNames(this);
-				var aKeys = global.Object.getOwnPropertyNames(a);
-				if (meKeys.length != aKeys.length)
-					return false;
-				return meKeys.every(function(key) {
-					return this[key]['='](a[key]);
-				})
-			}#
+			\`
+			\	var meKeys = global.Object.getOwnPropertyNames(this);
+			\	var aKeys = global.Object.getOwnPropertyNames(a);
+			\	if (meKeys.length != aKeys.length)
+			\		return false;
+			\	return meKeys.every(function(key) {
+			\		return this[key]['='](a[key]);
+			\	})
 
 	‣ = a
+		doc
+			TODO
+
 		identical? a
 
 	‣ ≠ a
+		doc
+			Not =.
+
 		(= a).¬
 
 	‣ send name:Str ...args
-		`this[name].apply(this, args)`
+		doc
+			TODO
+
+		(property name).apply me args
 
 export A

@@ -1,4 +1,4 @@
-auto! Prelude
+auto Prelude
 
-Prelude Standard/Language/Smith-Prelude
+Prelude Language/Smith-Prelude
 

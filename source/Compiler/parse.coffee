@@ -24,17 +24,30 @@ class Parser
 
 		typeLocal =
 			E.Local.eager new T.Name @pos, @typeName, 'x'
-		@locals.addLocal typeLocal
-		defTypeLocal =
-			new E.DefLocal typeLocal, new E.Me @pos
 
-		[ sooper, bodyTokens ] = @readSuper tokens # TODO: don't conflict with auto
+		useTypeLocal =
+			new E.DefLocal typeLocal, E.Use.typeLocal @typeName, @fileName, @allModules
+
+		[ meta, restTokens ] =
+			@takeAllMeta tokens, [], useTypeLocal
+
+		[ sooper, bodyTokens ] =
+			@readSuper restTokens #TODO: don't conflict with auto
 		if sooper?
 			type sooper, E.Use
 			@locals.addLocalMayShadow sooper.local
 
-		fun = @argLessFun bodyTokens
-		fun.body.subs.unshift defTypeLocal
+		body =
+			@locals.withLocal typeLocal, =>
+				@block bodyTokens
+
+		thisTypeLocal =
+			new E.DefLocal typeLocal, new E.Me @pos
+
+		body.subs.unshift thisTypeLocal
+
+
+		fun = E.FunDef.plain @pos, meta, [], body
 
 		[ sooper, autoUses, fun ]
 
@@ -145,7 +158,7 @@ class Parser
 								when '@x'
 									new E.Property pop, tok0
 								when '.x_'
-									new E.BoundFunc slurped.pop(), tok0
+									new E.BoundFun pop, tok0
 								else
 									fail()
 						else if tok0.kind == '@x'
@@ -202,7 +215,7 @@ class Parser
 					when '['
 						@unexpected token
 					when '{'
-						@headLessFun token.body
+						@fun [ token ]
 					when '"'
 						@quote token
 					else
@@ -256,26 +269,9 @@ class Parser
 			else
 				no
 
-	argLessFun: (body) ->
-		[ meta, body ] =
-			@funBody body
-
-		E.FunDef.plain @pos, meta, [], body
-
-	headLessFun: (body) ->
-		args =
-			if @containsIt body
-				[ E.Local.it @pos ]
-			else
-				[ ]
-
-		@locals.withLocals args, =>
-			[ meta, body ] =
-				@funBody body
-
-			E.FunDef.plain @pos, meta, args, body
-
 	fun: (tokens) ->
+		type tokens, Array
+
 		lastToken = tokens.last()
 
 		[ before, last ] =
@@ -283,6 +279,7 @@ class Parser
 				tokens.allButAndLast()
 			else
 				[ tokens, null ]
+
 		[ returnType, argsTokens ] =
 			if T.typeName before[0]
 				[ (@get before[0]), before.tail() ]
@@ -294,17 +291,21 @@ class Parser
 		[ args, maybeRest ] =
 			@takeNewLocals restArgsTokens
 
-		newLocals = args.slice()
-		if optArgs?
-			newLocals.pushAll optArgs
-		if optRest?
-			newLocals.push optRest
-
 		[ meta, body ] =
 			if T.curlied last
-				@locals.withLocals newLocals, =>
-					@locals.addLocal maybeRest if maybeRest?
-					@funBody last.body
+				bodyTokens = last.body
+
+				if argsTokens.isEmpty() and @containsIt bodyTokens
+					args = [ E.Local.it @pos ]
+
+				newLocals = args.slice()
+				if optArgs?
+					newLocals.pushAll optArgs
+				if optRest?
+					newLocals.push optRest
+				newLocals.push maybeRest if maybeRest?
+
+				@funBody bodyTokens, newLocals
 			else
 				[ (new E.Meta @pos), null ]
 
@@ -350,12 +351,12 @@ class Parser
 		[out, rest]
 
 	###
-	Returns: [Meta, Block]
+	Returns: [ Meta, bodyTokens ]
 	###
-	funBody: (tokens) ->
+	takeAllMeta: (tokens, newLocals = [], useTypeLocal) ->
 		type tokens, Array
-
-		[ metaToks, restToks ] =
+		type newLocals, Array
+		[ metaToks, bodyToks ] =
 			tokens.takeWhile (x) ->
 				(T.nl x) or \
 					x instanceof T.MetaText or \
@@ -364,10 +365,20 @@ class Parser
 			new E.Meta @pos
 
 		metaToks.forEach (tok) =>
-			@meta meta, tok
+			@meta meta, tok, newLocals, useTypeLocal
+
+		[ meta, bodyToks ]
+
+	###
+	Returns: [ Meta, Block ]
+	###
+	funBody: (tokens, newLocals) ->
+		[ meta, bodyTokens] =
+			@takeAllMeta tokens, newLocals
 
 		body =
-			@block restToks
+			@locals.withLocals newLocals, =>
+				@block bodyTokens
 
 		[ meta, body ]
 
@@ -390,7 +401,7 @@ class Parser
 
 		E.Call.me @pos, def.name, args
 
-	meta: (meta, token) ->
+	meta: (meta, token, newLocals, useTypeLocal) ->
 		return if T.nl token
 
 		meta[token.kind] =
@@ -405,10 +416,18 @@ class Parser
 					@block curlied.body
 
 				switch token.kind
-					when 'in', 'eg'
-						getBlock()
+					when 'in'
+						@locals.withLocals newLocals, getBlock
+					when 'eg'
+						if useTypeLocal?
+							x = @locals.withLocal useTypeLocal.local, getBlock
+							x.subs.unshift useTypeLocal
+							x
+						else
+							@locals.withFrame getBlock
 					when 'out'
-						@locals.withLocal (E.Local.res @pos), getBlock
+						@locals.withLocals newLocals, =>
+							@locals.withLocal (E.Local.res @pos), getBlock
 					else
 						fail()
 
@@ -489,8 +508,5 @@ class Parser
 ###
 Returns: [ sooper, autoUses, fun ]
 ###
-parse = (tokens, typeName, fileName, allModules) ->
+module.exports = (tokens, typeName, fileName, allModules) ->
 	(new Parser typeName, fileName, allModules).all tokens
-
-module.exports = parse
-

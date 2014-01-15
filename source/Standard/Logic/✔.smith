@@ -16,11 +16,16 @@ no-instances!
 
 		fails
 			fails
-				# doesn't fail
+				\doesn't fail
+			Console.log! 0
 
-	✘.try
+	✘.catch
 		fun.run!
-		✘ 「did not fail」
+
+‣‣  fail-message message:Str fun:Fun
+	✔= message
+		✘.catch-message
+			fun.run!
 
 ‣‣ rel relation-name:Str a make-b
 	∙ b

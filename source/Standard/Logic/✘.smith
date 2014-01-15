@@ -12,17 +12,32 @@ no-instances!
 
 	(Error message).throw!
 
+‣‣ catch~ try:Fun
+	try-catch
+		try.run!
+		Opt.None
+	|
+		Opt.some it
+
+‣‣ catch try:Fun
+	(catch~ try).force[「Expected to throw an error.」]
+
+‣‣ catch-message try:Fun
+	(catch try)@message
+
 ‣‣ try try:Fun
 	doc
 		If an error occurs in `try`, ignores it and returns None.
 		Else, returns Some of the result.
 	eg
-		✔= (Opt.some 'success)
-			try
-				'success
+		\✔= (Opt.some 'success)
+		\	try
+		\		'success
 		✔= Opt.None
 			try
 				✘ 'fail
+	todo
+		Requires Some = Some
 
 	try-catch
 		Opt.some try.of
@@ -42,8 +57,8 @@ no-instances!
 		✔= 'fail
 			try-catch
 				✘ 'fail
-			|error
-				error@message
+			|
+				it@message
 
 	try-catch-finally try catch { }
 
@@ -59,9 +74,10 @@ no-instances!
 			try-catch-finally
 				✘ 'fail
 			|
-				error.message
+				it@message
 			|
-				ref.! 'set
+				ref.!
+					'set
 		✔= 'set
 			ref.get
 
@@ -82,11 +98,11 @@ no-instances!
 	doc
 		If an error happens in `try`, prepend new text to its message and throw it again.
 	eg
-		✔= 「4: fail」
+		✔.fail-message 「4: fail」
 			annotate
 				✘ 'fail
-			|error
-				error@message@length
+			|
+				it@message@length
 
 	try-catch try |error
 		∙ annotation

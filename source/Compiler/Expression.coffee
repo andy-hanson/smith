@@ -2,6 +2,7 @@
 T = require './Token'
 Pos = require './Pos'
 mangle = require './mangle'
+{ metaTextKeywords } = require './keywords'
 
 tab = (indent) ->
 	"\t#{indent}"
@@ -36,7 +37,7 @@ class Expression
 trait = (use) ->
 	type use, Use
 	{ local, pos } = use
-	verb = new T.Name pos, 'trait'
+	verb = 'trait'#new T.Name pos, 'trait', 'x'
 	value = Call.me pos, verb, [ use ]
 	new DefLocal local, value
 
@@ -194,7 +195,7 @@ class Call extends Expression
 		hasMany = (xx) ->
 			xx.containsWhere (x) ->
 				x instanceof ManyArgs
-		if hasMany @args or hasMany @optionArgs
+		if (hasMany @args) or hasMany @optionArgs
 			renderArgs = (args) ->
 				parts =
 					args.map (arg) ->
@@ -202,7 +203,7 @@ class Call extends Expression
 							# TODO - to-array
 							arg.value.toNode fileName, newIndent
 						else
-							[ '[', (arg.value.toNode fileName, newIndent), ']' ]
+							[ '[', (arg.toNode fileName, newIndent), ']' ]
 				[ '[', (parts.interleave ', '), ']' ]
 			[ '_call(', subject, ", '", @verb.text, "', ",
 				(renderArgs @optionArgs), ', ', (renderArgs @args), ')' ]
@@ -254,7 +255,7 @@ class Meta extends Expression
 		type @pos, Pos
 
 	@all =
-		[ 'doc', 'eg', 'how' ]
+		[ 'eg' ].concat metaTextKeywords
 
 	make: (fun, fileName, indent) ->
 		newIndent = tab indent
@@ -266,13 +267,10 @@ class Meta extends Expression
 				@[name]
 			if val?
 				part =
-					switch name
-						when 'doc', 'how'
-							val.toNode fileName, indent
-						when 'eg'
-							(FunDef.body val).toNode fileName, newIndent
-						else
-							fail()
+					if name == 'eg'
+						(FunDef.body val).toNode fileName, newIndent
+					else
+						val.toNode fileName, indent
 
 				parts.push [ '_', name, ': ', part ]
 
@@ -465,6 +463,8 @@ func_
 ###
 class BoundFun extends Expression
 	constructor: (@subject, @name) ->
+		type @subject, Expression
+		type @name, T.Name
 		{ @pos } = @name
 
 	compile: (fileName, indent) ->
@@ -597,6 +597,11 @@ class Use extends Expression
 				"require('#{@fullName}')", 'special'
 
 		val.compile fileName, indent
+
+	# used in type-level eg
+	@typeLocal = (typeName, fileName, allModules) ->
+		x = new T.Use Pos.start, typeName, 'use!'
+		new Use x, fileName, allModules
 
 
 class Null extends Expression

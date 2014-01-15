@@ -2,6 +2,7 @@ T = require '../Token'
 Stream = require './Stream'
 GroupPre = require './GroupPre'
 { cFail, cCheck } = require '../CompileError'
+{ metaTextKeywords } = require '../keywords'
 
 module.exports = (quoteType, stream, oldIndent) ->
 	type quoteType, String
@@ -51,7 +52,9 @@ module.exports = (quoteType, stream, oldIndent) ->
 				out.push literal
 				new T.Group startPos, stream.pos, '"', out
 
-		quote =
+		if metaTextKeywords.contains quoteType
+			new T.MetaText startPos, quoteType, getInterpolatedGroup()
+		else
 			switch quoteType
 				when '"'
 					getInterpolatedGroup()
@@ -61,12 +64,10 @@ module.exports = (quoteType, stream, oldIndent) ->
 					new T.JavascriptLiteral startPos, text, kind
 				when '「'
 					new T.StringLiteral startPos, text
-				when 'doc', 'how'
-					new T.MetaText startPos, quoteType, getInterpolatedGroup()
 				else
 					fail()
 
-		quote
+
 
 	loop
 		ch = stream.readChar()

@@ -1,4 +1,3 @@
-use! ./Bag
 use! Array
 
-export Bag
+export (use Bag)

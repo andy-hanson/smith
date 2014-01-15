@@ -23,11 +23,14 @@ patterns:
   match: \.[^\.\s]+
 
 - name: comment
-  begin: \#\{
-  end: \}\#
+  match: \\.*
 
-- name: comment
-  match: \#.*\n
+- name: string
+  begin: (\"|「)\n
+  end: ^$ # end on blank line
+  patterns:
+  - name: constant.other.placeholder.py # you heard me
+    match: \{[^\}]*\}
 
 - name: string
   begin: \"
@@ -40,6 +43,9 @@ patterns:
   begin: 「
   end: 」
 
+- name: string
+  match: \'\S*
+
 - name: constant.numeric
   match: \d+(\.\d+)*
 
@@ -50,7 +56,7 @@ patterns:
   comment:
     We expect it to be followed by another meta,
     or by a blank line.
-  begin: ^\s*(doc|how)
+  begin: ^\s*(doc|how|todo)
   beginCaptures:
     '1':
       name: meta.tag
@@ -60,7 +66,7 @@ patterns:
       name: meta.tag
   patterns:
   - name: meta.text
-    begin: (how)
+    begin: (doc|how|todo)
     beginCaptures:
       '1':
         name: meta.tag
@@ -70,7 +76,7 @@ patterns:
   match: ^\s*(in|out|eg)$
 
 - name: keyword
-  match: \b(me|it)\b
+  match: \b(me|res|it)\b
 
 - name: local.define.dot
   match: (∙\s+)([^:]+)

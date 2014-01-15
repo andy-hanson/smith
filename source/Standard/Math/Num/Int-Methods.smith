@@ -1,0 +1,208 @@
+use Num
+
+Num.do
+	‣ round-towards-0
+		doc
+			Rounds down if positive, rounds up if negative.
+		eg
+			✔= 0
+				-0.5.round-towards-0
+			✔= 0
+				0.5.round-towards-0
+
+		binary-or 0
+
+	‣ round
+		doc
+			Nearest integer to me.
+			Rounds up when halfway between two integers.
+		eg
+			✔= 0
+				-0.5.round
+			✔= 1
+				0.5.round
+
+		Global@Math.round me
+
+	‣ round-down
+		doc
+			Highest integer lower than me.
+		eg
+			✔= -1
+				-0.5.round-down
+			✔= 0
+				0.5.round-down
+
+		Global@Math.floor me
+
+	‣ round-up
+		doc
+			Lowest integer higher than me.
+		eg
+			✔= 0
+				-0.5.round-up
+			✔= 1
+				0.5.round-up
+
+		Global@Math.ceil me
+
+	‣ remainder divisor:Num
+		doc
+			Remainder after division.
+		eg
+			✔= 1
+				3.remainder 2
+
+		`this % divisor`
+
+	‣ natural?
+		doc
+			Am I a non-negative integer?
+		eg
+			✔ 0.natural?
+			✔ -1.natural?.¬
+
+		integer?.∧
+			negative?.¬
+
+	‣ integer?
+		doc
+			Do I have no fractional parts?
+		eg
+			✔ 42.integer?
+			✔ 0.5.integer?.¬
+			✔ ∞.integer?.¬
+			✔ Not-A-Number.integer?.¬
+		how
+			TODO: Number.isInteger
+
+		finite?.∧
+			(> -9007199254740992).∧
+				(< 9007199254740992).∧
+					= round-down
+
+	‣ divisible? divisor:Num
+		doc
+			Whether an ingeger number of divisor can add up to me.
+		eg
+			✔ (4.divisible? 2)
+			✔ (4.divisible? -2)
+			✔ (3.divisible? 2).¬
+
+		(remainder divisor).zero?
+
+	‣ decrement
+		doc
+			One less than me.
+		eg
+			✔= 1.5
+				2.5.decrement
+		- 1
+
+	‣ increment
+		doc
+			One more than me.
+		eg
+			✔= 2.5
+				1.5.increment
+		+ 1
+
+	‣ factorial
+		doc
+			Product of all integers up to me.
+		in
+			✔ natural?
+		eg
+			✔= 6
+				3.factorial
+			✔= 1
+				0.factorial
+			✔.fails
+				-1.factorial
+			✔.fails
+				0.5.factorial
+		how
+			TODO: (Range.int 1 inc).fold _×
+
+		(< 2).?
+			1
+		|
+			× decrement.factorial
+
+	‣ greatest-common-divisor a:Num
+		doc
+			Highest integer that both I and `a` are divisible by.
+		in
+			✔ natural?
+			✔ a.natural?
+		eg
+			✔= 6
+				12.greatest-common-divisor 18
+		out
+			res.divisible? me
+			res.divisible? a
+
+		(a.= 0).?
+			me
+		|
+			a.greatest-common-divisor (remainder a)
+
+	‣ least-common-multiple a:Num
+		doc
+			Lowest integer that both I and `a` are factors of.
+		in
+			✔ natural?
+			✔ a.natural?
+		out
+			me.divisible? res
+			a.divisible? res
+		eg
+			✔= 18
+				6.least-common-multiple 9
+
+		(× a).÷ (greatest-common-divisor a)
+
+	‣ whole-÷ divisor:Num
+		doc
+			Like ÷, but any fractional part is rounded down. _Not_ necessarily rounded towards 0.
+		eg
+			✔= 1
+				3.whole-÷ 2
+			✔= -2
+				3.whole-÷ -2
+
+		(÷ divisor).round-down
+
+	‣ divide-evenly~ divisor:Num
+		doc
+			If possible, an integer which × divisor is me.
+		eg
+			✔= Opt.None
+				3.divide-evenly~ 2
+			\✔= (Opt.some 2)
+			\	4.divide-evenly~ 2
+		how
+			TODO: Some equality
+
+		Opt.filter (÷ divisor) _integer?
+
+	‣ binary-or n:Num
+		`this | n`
+
+	‣ binary-and n:Num
+		`this & n`
+
+	‣ binary-xor n:Num
+		`this ^ n`
+
+	‣ binary-not
+		`~this`
+
+	‣ binary-shift-left n:Num
+		`this << n`
+
+	‣ binary-shift-right-signed n:Num
+		`this >> n`
+
+	‣ binary-shift-right-unsigned n:Num
+		`this >>> n`

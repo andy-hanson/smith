@@ -1,15 +1,14 @@
 Prelude@Opt.do
-
 	‣‣ Some
 		Prelude@Some
 
 	‣‣ None
 		Prelude@None
 
-	Some.do #‣sub-class Some
-		# TODO
-		#data |value
-		#	()
+	Some.do \‣sub-class Some
+		\ TODO
+		\data |value
+		\	()
 
 		‣read value
 
@@ -19,9 +18,12 @@ Prelude@Opt.do
 		‣ or else:Fun
 			value
 
-		‣ each fun:Fun
-			fun value
+		‣ each do-with-element:Fun
+			do-with-element value
 			()
+
+		‣ collect do-with-element:Fun
+			Some (do-with-element value)
 
 		‣ ~ if-some:Fun if-none:Fun
 			if-some value
@@ -33,15 +35,21 @@ Prelude@Opt.do
 			"(Some {value})"
 
 
-	None.class.do #‣sub-object None
-		‣ force
-			✘ 「Tried to force None.」
+	None.class.do \‣sub-object None
+		‣ force[message~:Str]
+			∙ message
+				message~.or
+					「Tried to force None.」
+			✘ message
 
 		‣ or else:Fun
 			else.of
 
-		‣ each fun:Fun
+		‣ each do-with-element:Fun
 			()
+
+		‣ collect do-with-element:Fun
+			None
 
 		‣ ~ if-some:Fun if-none:Fun
 			if-none ()
@@ -53,7 +61,7 @@ Prelude@Opt.do
 			"None"
 
 	‣‣ some value:Any
-		(Some) value
+		Some.of value
 
 	‣‣ filter value:Any condition:Fun
 		(condition value).if

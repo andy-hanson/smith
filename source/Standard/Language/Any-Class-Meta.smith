@@ -1,0 +1,15 @@
+Any-Class.do-meta
+	doc
+		DOC
+	eg
+		✔ (Any-Class.is-a Any-Class)
+		✔ (Any-Class.super.identical? Any)
+
+		Any-Class 'Sample-Class
+			export 3
+			✔= 3
+				@__exported
+			✔.fails
+				export 4
+	todo
+		defs in eg

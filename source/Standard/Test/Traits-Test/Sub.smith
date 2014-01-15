@@ -1,0 +1,13 @@
+eg
+	Console.log! 'a123
+	Console.log! (Sub.of).x
+
+
+super Super
+trait Trait-A
+
+‣ construct
+	()
+
+‣ x
+	"{soup} {trait-a}"

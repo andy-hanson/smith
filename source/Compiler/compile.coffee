@@ -7,10 +7,10 @@ path = require 'path'
 shortName = (fullName) ->
 	(fullName.split '/').pop()
 
+###
+Produces the output { code, map }.
+###
 module.exports = (string, inName, outName, opts) ->
-	###
-	Produces the output { code, map }.
-	###
 	type string, String
 	type inName, String
 	check (inName.endsWith '.smith'), ->

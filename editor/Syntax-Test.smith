@@ -6,12 +6,7 @@ use! More-Junk
 lowercase-name
 Capitalized-Name
 
-
-# comment
-
-#{
-multi-line comment
-}#
+\ comment
 
 object.method.method!.method
 method
@@ -19,6 +14,13 @@ method!
 
 「string」
 "{interpolated} string"
+'string
+block "
+	bla{interpolated}h
+	blah
+
+block 「
+	blah blah
 
 1.23
 
@@ -32,7 +34,7 @@ doc
 in
 	✔ 1.> 0
 out
-	✔ 0.< 1
+	✔ res.< 1
 eg
 	blah
 how
@@ -45,6 +47,7 @@ it
 	x
 ∘ lazy-local:Type
 	x
+∙
 
 blah |x:X y:Y
 	x

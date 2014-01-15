@@ -31,7 +31,7 @@ Number.prototype.times = (act) ->
 		act()
 		count -= 1
 
-Array.prototype.last = ->
+Array.prototype.last = String.prototype.last = ->
 	@[@length - 1]
 
 Array.prototype.allButLast = ->

@@ -11,8 +11,10 @@
 		"test": "nada"
 	},
 	"dependencies": {
+		"coffeelint": ">=1.0.3",
 		"coffee-script": ">=1.6.3",
 		"just-the-job": ">=0.0.0",
+		"jshint": ">=2.4.1",
 		"optimist": ">=0.6.0",
 		"source-map": ">=0.1.31",
 		"source-map-support": ">=0.2.5",

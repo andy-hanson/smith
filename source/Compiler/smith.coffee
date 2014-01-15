@@ -19,7 +19,7 @@ class Smith
 		type @outDir, String
 		type @watch, Boolean
 		type @quiet, Boolean
-		type @just, String if @just
+		type @just, String if @just?
 		type @printModuleDefines, Boolean
 
 	log: (text) ->
@@ -73,21 +73,24 @@ class Smith
 			throw error
 
 	outNames: (inFile) ->
-		[ name, ext ] =
-			io.extensionSplit inFile
+		if (path.basename inFile) == 'modules'
+			[ ]
+		else
+			[ name, ext ] =
+				io.extensionSplit inFile
 
-		switch ext
-			when 'smith'
-				[ "#{name}.js", "#{name}.js.map", "#{name}.smith" ]
-			when 'js'
-				[ name ]
-			when 'coffee'
-				[ "#{name}.js" ]
-			when '.kate-swp'
-				[ ]
-			else
-				@log "Ignoring #{inFile}"
-				[ ]
+			switch ext
+				when 'smith'
+					[ "#{name}.js", "#{name}.js.map", "#{name}.smith" ]
+				when 'js'
+					[ name ]
+				when 'coffee'
+					[ "#{name}.js" ]
+				when '.kate-swp'
+					[ ]
+				else
+					@log "Ignoring #{inFile}"
+					[ ]
 
 	compilable: (inName) ->
 		if @just?

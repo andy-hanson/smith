@@ -2,15 +2,47 @@
 	Prelude@Meta
 
 M.do
+	\(Bag 'doc 'in 'out 'eg 'how 'todo 'rest-argument 'rest).each
+	\	me.‣read/~ it
 	‣read/~ doc
+		doc
+			TODO
+
 	‣read/~ in
+		doc
+			TODO
+
 	‣read/~ out
+		doc
+			TODO
+
 	‣read/~ eg
+		doc
+			TODO
+
 	‣read/~ how
+		doc
+			TODO
+
+	‣read/~ todo
+		doc
+			TODO
+
 	‣read arguments
+		doc
+			TODO
+
 	‣read~ rest-argument
+		doc
+			TODO
+
 	‣read options
+		doc
+			TODO
+
 	‣read~ rest-option
+		doc
+			TODO
 
 	‣ test-eg![caller~]
 		eg~.each |egg
@@ -33,19 +65,25 @@ M.do
 			TODO: write in Smith
 
 		`
-			var me = this;
+			if (this === other)
+				throw new global.Error('Can not merge with self');
+
 			var m = {};
-			['_doc', '_in', '_out', '_eg', '_how'].forEach(function(met) {
-				if (me[met] != null) {
-					if (other[met])
-						throw new global.Error("Can not merge " + me + " and " + other);
-					m[met] = me[met];
-				}
-				else if (other[met] != null) {
-					m[met] = other[met];
-				}
-			})
-			var res = M.of(m);
+
+			function f(a, b) {
+				Object.getOwnPropertyNames(a).forEach(function(key) {
+					if (b[key] != null)
+						throw new global.Error(
+							'Can not merge on key ' + key + '; has values "'
+								+ a[key] + '" and "' + b[key] + '"');
+					m[key] = a[key];
+				});
+			}
+
+			f(this, other);
+			f(other, this);
+
+			return M.of(m);
 
 	‣override toString
 		show-properties

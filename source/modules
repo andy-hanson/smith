@@ -12,7 +12,7 @@ Any-Class Standard/Language/Any-Class
 Array Standard/Collection/Bag/Array
 Bag Standard/Collection/Bag/index
 Bool Standard/Logic/Bool
-Console Standard/Console
+Console Standard/IO/Console
 Error Standard/Logic/Error
 Fun Standard/Language/Fun
 Global Standard/Language/Global

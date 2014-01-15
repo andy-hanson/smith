@@ -1,0 +1,51 @@
+use Num
+
+Num.do
+	‣val E
+		Global@Math@E
+
+	‣val Golden-Ratio
+		5.square-root.inc.half
+
+	‣val Not-A-Number
+		doc
+			A number which is not a number.
+			It's not even equal to itself.
+			I hate everything.
+		eg
+			✔ Not-A-Number.finite?
+			✔ Not-A-Number.positive?
+			✔ Not-A-Number.negative?
+			✔ Not-A-Number.zero?
+
+		Global@NaN
+
+	‣val ∞
+		Global@Infinity
+
+	‣val -∞
+		∞.negate
+
+	‣val π/2
+		doc
+			A right angle, in radians.
+
+		π.÷ 2
+
+	‣val π
+		doc
+			Halfway around a circle, in radians.
+
+		Global@Math@PI
+
+	‣val π3/2
+		doc
+			3/4 of a circle, in radians.
+
+		π.+ π/2
+
+	‣val π2
+		doc
+			A full circle, in radians.
+
+		π.twice

@@ -20,12 +20,11 @@ Str.do-meta
 	‣ ++ a:Str
 		`this + a`
 
-	#{
-	+index-of-substring~ |needle
-		. js-index-of
-			`this.indexOf(needle)`
-		(Some `this.indexOf(needle)`).filterOut -1.=_
-	}#
+	\‣ index-of-substring~ |needle
+	\	. js-index-of
+	\		`this.indexOf(needle)`
+	\	(Some `this.indexOf(needle)`).filter-not -1.=_
+
 
 	alias 'toUpperCase 'to-upper-case
 	alias 'toLowerCase 'to-lower-case
@@ -39,8 +38,10 @@ Str.do-meta
 	‣ char-at n:Num
 		`this[n]`
 
-	# TODO: from seq
 	‣ tail
+		how
+			TODO - inherit from Seq
+
 		slice 1
 
-	# Iterator?
+	\ Iterator

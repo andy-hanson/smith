@@ -1,0 +1,108 @@
+(use Num).do
+	‣ not-a-number?
+		Global@Number.isNaN me
+
+	‣ forbid-NaN
+		not-a-number?.?
+			✘ 「Not a Number」
+		|
+			me
+
+	‣ sign
+		doc
+			1, -1, 0, -0, or `Num.Not-A-Number`.
+		eg
+			(Bag 1 -1 0 -0).each |n
+				✔= n
+					n.sign
+			✔ Not-A-Number.sign.not-a-number?
+
+		how
+			TODO: use Math.sign
+
+		positive?.?
+			1
+		|
+			negative?.?
+				-1
+			|
+				positive-zero?.?
+					0
+				|
+					negative-zero?.?
+						-0
+					|
+						✔ not-a-number?
+						Num.Not-A-Number
+
+	‣ positive-zero?
+		doc
+			Whether I am +0 and not -0.
+			If you need this info, I don't envy you.
+		eg
+			✔ 0.positive-zero?
+			✔ -0.positive-zero?.¬
+
+		zero?.∧
+			inverse.= Num.∞
+
+	‣ negative-zero?
+		doc
+			Whether I am -0 and not +0.
+			If you need this info, I don't envy you.
+		eg
+			✔ -0.negative-zero?
+			✔ 0.negative-zero?.¬
+
+		zero?.∧
+			inverse.= Num.-∞
+
+	‣ positive?
+		doc
+			Whether this number is > 0.
+			All numbers are are one of `positive?`, `negative?`, `zero?`
+		eg
+			✔ 1.positive?
+			✔ 0.positive?.¬
+			✔ -1.positive?.¬
+
+		> 0
+
+	‣ negative?
+		doc
+			Whether this number is < 0.
+			All numbers are are one of `positive?`, `negative?`, `zero?`
+		eg
+			✔ 1.negative?.¬
+			✔ 0.negative?.¬
+			✔ -1.negative?
+		< 0
+
+	‣ zero?
+		doc
+			Whether this number is 0.
+			(Then it is `positive-zero?` or `negative-zero?`.)
+		eg
+			✔ 0.zero?
+			✔ -0.zero?
+			✔ 42.zero?.¬
+
+		= 0
+
+	‣ finite?
+		doc
+			Am I any number other than `Num.∞` or `Num.-∞`?
+		eg
+			✔ 42.finite?
+
+		Global@Number.isFinite me
+
+	‣ infinite?
+		doc
+			`Num.∞` or `Num.-∞`.
+		eg
+			✔ ∞.infinite?
+			✔ -∞.infinite?
+
+		finite?.¬
+

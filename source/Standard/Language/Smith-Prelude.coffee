@@ -1,7 +1,7 @@
 Function.prototype.unbound = ->
 	if @_unbound?
-		if @_meta?
-			@_unbound._meta = @_meta
+		if @['_make-meta-pre']?
+			@_unbound['_make-meta-pre'] = @['_make-meta-pre']
 		@_unbound
 	else
 		@
@@ -17,8 +17,21 @@ allClasses = []
 
 Any = null
 
+
+
+
+# call with a class as 'this'
 def = (name, method) ->
-	this._proto[name] = this._methods[name] = method.unbound()
+	unbound = method.unbound()
+	imm @_methods, name, unbound
+
+	defInherit = (inheritor) ->
+		# not immutable - may be overridden
+		inheritor._proto[name] = unbound
+		inheritor['_trait-of'].forEach defInherit
+
+	defInherit @
+
 
 imm = (object, name, value) ->
 	global.Object.defineProperty object, name,
@@ -28,21 +41,19 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 	unless (Object name) instanceof String
 		throw new Error "In makeAnyClass: name is not a String; is #{name}"
 
-	superClass = superMetaClass = metaClass = clazz = null
+	superClass = metaClass = clazz = null
 
 	isAny =
 		maybeProto == Object.prototype
 
 	if isAny
 		# superClass is null
-		# not super-meta, but Any-Class is Any.
-		superMetaClass = null
 		# Any-Class is a Any-Class.
-		metaClassProto = Object.create Object.prototype
+		metaClassProto = { }
+		# metaClass is Any-Class
 		metaClass = Object.create metaClassProto
 		imm metaClass, '_proto', metaClassProto
-		imm metaClass, '_is', metaClass
-		# metaClass._proto is made when constructing AnyClass
+		#imm metaClass, '_super', metaClass #TODO: Any-Class --super-> Any
 	else
 		superClass =
 			maybeIs ? Any
@@ -51,9 +62,13 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 		metaClass = Object.create superMetaClass._proto
 		imm metaClass, '_proto', Object.create superMetaClass._proto
 
-		imm metaClass, '_is', superMetaClass
+		#imm metaClass, '_super', superMetaClass
 
 	clazz = Object.create metaClass._proto
+
+	imm clazz, '_super', superClass if superClass?
+	imm metaClass, '_super',
+		if isAny then clazz else superMetaClass
 
 	imm clazz, '_proto',
 		maybeProto ? Object.create superClass._proto
@@ -63,8 +78,24 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 	imm clazz, '_name',
 		name
 
-	imm clazz, '_is',
-		superClass
+	imm metaClass, '_traits', []
+	imm clazz, '_traits', []
+
+	imm metaClass, '_super-of', []
+	imm clazz, '_super-of', []
+	imm metaClass, '_trait-of', []
+	imm clazz, '_trait-of', []
+
+	imm clazz, '_inherits-from',
+		if clazz.super?
+			clazz._super['_inherits-from'].concat clazz._super
+		else
+			[]
+	imm metaClass, '_inherits-from',
+		metaClass._super['_inherits-from'].concat metaClass._super
+
+	metaClass._super['_super-of'].push metaClass
+	clazz._super['_super-of'].push clazz if clazz._super?
 
 	imm metaClass, '_id', nextClassID
 	imm clazz, '_id', nextClassID + 1
@@ -72,6 +103,8 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 
 	imm metaClass, '_methods', {}
 	imm clazz, '_methods', {}
+	imm metaClass, '_static-methods', {}
+	imm clazz, '_static-methods', {}
 
 	(Object.getOwnPropertyNames clazz._proto).forEach (name) ->
 		value = clazz._proto[name]
@@ -131,24 +164,20 @@ bind = (object, name) ->
 	fun = object[name]
 
 	if fun instanceof Function
-		x.unbound().bind object
+		fun.unbound().bind object
+	else if fun?
+		throw new Error "Member #{name} of #{object} is not a Fun."
 	else
-		if fun?
-			throw new Error "Member #{name} of #{object} is not a Fun."
-		else
-			throw new Error "Object #{object} has no method #{name}."
+		throw new Error "Object #{object} has no method #{name}."
 
 clazz = (name, maybeIs, fun) ->
 	cls =
 		makeAnyClass name, maybeIs
+	cls['_make-meta-pre'] = fun['_make-meta-pre']
 
 	fun.unbound().call cls
 
-	if cls.__exported?
-		cls.__exported
-	else
-		cls['_make-meta-pre'] = fun['_make-meta-pre']
-		cls
+	cls.__exported ? cls
 
 string = ->
 	Array.prototype.join.call arguments, ''
