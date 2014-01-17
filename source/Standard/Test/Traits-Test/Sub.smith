@@ -1,13 +1,20 @@
 eg
-	Console.log! 'a123
-	Console.log! (Sub.of).x
+	use Super
+	use Trait-A
 
+	✔ (Super.super-of? Sub)
+	✔ (Trait-A.trait-of? Sub)
+	✔ (Sub.sub-class? Super)
+	✔ (Sub.sub-class? Trait-A)
+	∙ sub
+		Sub.of
+	✔= 'super
+		sub.super-method
+	✔= 'trait
+		sub.trait-method
 
 super Super
 trait Trait-A
 
 ‣ construct
 	()
-
-‣ x
-	"{soup} {trait-a}"

@@ -1,3 +1,8 @@
+doc
+	TODO
+author
+	Andy Hanson
+
 Prelude@Any.-def 'do |fun
 	fun.unbound.call `this`
 
@@ -33,6 +38,7 @@ use! Language/Any-Class-Meta
 use! Language/Any-Meta
 
 use! Bag
+use! Collection
 use! Error
 use! Math
 use! Str-Methods

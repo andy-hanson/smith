@@ -5,19 +5,31 @@ class.do
 	doc
 		All Iterable types have these methods.
 
-	‣ iterator do-to
+	‣ iterator iterator-class-body:Fun
 		doc
-			DOC ME SO HARD
+			TODO
 
-		type‣ 'Iterator Iterator
-			do do-to
+		∙ iterator-class
+			Any-Class Iterator
+				do iterator-class-body
 
 		‣ iterator
-			(class.Iterator) me
+			Console.log! "?"
+			iterator-class me
 
+\ Can't use normal Array, doesn't exist yet
+delegate-many (Global@Array 'each 'fold)
+	iterator
+
+\‣delegate each
+\	iterator
+
+\‣delegate fold
+\	iterator
 
 ‣ make-string
 	(map String.of_).join " "
 
-‣override toString
-	"({type.name} {make-string})"
+
+\‣override toString
+\	"({type.name} {make-string})"

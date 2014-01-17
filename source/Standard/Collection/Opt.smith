@@ -18,12 +18,12 @@ Prelude@Opt.do
 		‣ or else:Fun
 			value
 
-		‣ each do-with-element:Fun
-			do-with-element value
+		‣ each do:Fun
+			do value
 			()
 
-		‣ collect do-with-element:Fun
-			Some (do-with-element value)
+		‣ collect of:Fun
+			Some (of value)
 
 		‣ ~ if-some:Fun if-none:Fun
 			if-some value
@@ -45,10 +45,10 @@ Prelude@Opt.do
 		‣ or else:Fun
 			else.of
 
-		‣ each do-with-element:Fun
+		‣ each do:Fun
 			()
 
-		‣ collect do-with-element:Fun
+		‣ collect of:Fun
 			None
 
 		‣ ~ if-some:Fun if-none:Fun

@@ -3,10 +3,11 @@ no-instances!
 ‣‣ of condition:Bool ...args
 	condition.unless
 		∙ message
-			args@length.positive?.?
-				(args 0).of
-			|
-				「Check failed.」
+			`(args.length > 0) ? args[0]() : 'Check failed.'`
+			\args@length.positive?.?
+			\	(args 0).of
+			\|
+			\	「Check failed.」
 		✘ message
 
 ‣‣ fails fun:Fun

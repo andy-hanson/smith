@@ -14,8 +14,10 @@ doc
 			method.meta.todo~.each
 				Console.log! "{class}##{name}: {it}"
 
-(use Standard/Test/Traits-Test/Sub).meta.eg.run!
+\(use Standard/Test/Traits-Test/Sub).meta.eg.run!
 
 \show-all-todo
 
-\Test.all!
+Test.all!
+
+\(Array 1 2 3).iterator.each Console.log!_

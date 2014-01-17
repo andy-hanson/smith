@@ -1,0 +1,81 @@
+use Array-Like-Iterator
+
+Array.do
+	doc
+		TODO
+
+	‣ copy
+		slice
+
+	‣ ∋ em
+		todo
+			Call '=' at each element
+
+		(indexOf em).≠ -1
+
+	‣ + em
+		∙ x
+			copy
+		x.push em
+		x
+
+	trait Bag
+
+	‣override each do:Fun
+		∙ size
+			size
+		`
+			for (var index = 0; index < size; index++)
+				_do(this[index]);
+
+	‣ iterator
+		Array-Like-Iterator me 0
+
+	‣‣ of ...members
+		members
+
+	‣ of index:Num
+		in
+			✔ (valid-index? index)
+
+		`this[index]`
+
+	‣ valid-index? index:Num
+		index.natural?.∧
+			index.< size
+
+	‣ collect do-with-element:Fun
+		∙ size
+			size
+		∙ dwe
+			do-with-element
+		`
+			var res = new global.Array(size);
+			for (var index = 0; index < size; index++)
+				res[index] = dwe(this[index]);
+
+	‣ size
+		@length
+
+	‣ first
+		todo
+			inherit from Seq
+
+		of 0
+
+	‣ second
+		todo
+			inherit from Seq
+
+		of 1
+
+	‣ ++ oth:Array
+		todo
+			oth.to-array
+
+		concat oth
+
+	\ TODO: inherit this from Iterable!
+	\‣ make-string joiner:Str
+	\	(map Str.of_).join joiner
+	\	#join " "

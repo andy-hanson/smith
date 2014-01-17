@@ -9,19 +9,33 @@ A.do
 	\	(property 'constructor).to-class
 
 	‣ has-property? name:Str
+		doc
+			TODO
+
 		`Object.prototype.hasOwnProperty`.call me name
 
+	‣ proto-property name:Str
+		doc
+			TODO
+
+		`this[name]`
+
 	‣ property name:Str
+		doc
+			TODO
 		how
 			must be in JS because fundamental methods depend on this.
 
 		`
-			if (Object.prototype.hasOwnProperty.call(this, name))
+			if (global.Object.prototype.hasOwnProperty.call(this, name))
 				return this[name];
 			else
 				throw new global.Error("" + this + " does not have property " + name);
 
 	‣ property~ name:Str
+		doc
+			TODO
+
 		(has-property? name).if
 			∙ h
 				`this[name]`
@@ -30,9 +44,15 @@ A.do
 			h
 
 	‣ property-names
+		doc
+			TODO
+
 		Global@Object.getOwnPropertyNames me
 
 	‣ show-properties
+		doc
+			TODO
+
 		`
 			var s = "{", me = this;
 			Object.getOwnPropertyNames(this).forEach(function(key) {
@@ -41,20 +61,43 @@ A.do
 			return s + "}";
 
 	‣‣ exists? a
+		doc
+			TODO
+
 		`a != null`
 
 	‣ each-property fun:Fun
-		property-names.each |name
+		doc
+			TODO
+
+		\ must use forEach because defining Array requires this
+		property-names.forEach |name
 			fun name (property name)
 
 	‣ new-mutable! name:Str value
+		doc
+			TODO
+
 		✔ (has-property? name).¬
 		set-property! name value
 
 	‣ set-property! name:Str value
+		doc
+			TODO
+
 		`this[name] = value`
 
+	‣ new-unless-exists! name:Str make-value:Fun
+		doc
+			TODO
+
+		(has-property? name).unless!
+			new! name make-value.of
+
 	‣ modify-property! name:Str mod:Fun
+		doc
+			TODO
+
 		∙ old
 			property name
 		∙ new
@@ -62,12 +105,21 @@ A.do
 		set-property! name new
 
 	‣ is-a class:Any-Class
+		doc
+			TODO
+
 		class.subsumes? me
 
 	‣ identical? a
+		doc
+			TODO
+
 		`this === a`
 
 	‣ structural-= a
+		doc
+			TODO
+
 		(class.= a.class).∧
 			∙ keys
 				property-names
@@ -101,6 +153,6 @@ A.do
 		doc
 			TODO
 
-		(property name).apply me args
+		(proto-property name).apply me args
 
 export A

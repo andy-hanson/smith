@@ -16,13 +16,13 @@ iterator
 		set-property '_current range.min
 
 	‣read range
-	‣read current
+	‣access current
 
 	‣ next
 		(current.< range.max).?
 			∙ was
 				current
-			property! '_current _inc
+			current! _inc
 			was
 		|
 			stop

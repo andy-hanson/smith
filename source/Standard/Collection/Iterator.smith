@@ -1,18 +1,110 @@
 doc
 	Must have 'next'
+todo
+	collect (Collect-Iterator)
+	++ (++-Iterator)
+	keep (Keep-Iterator)
+	delete (opposite of keep)
+	reverse: (Array.from me).reverse
+	take (Take-Iterator)
+	slice (drop then take)
+	sort: (Array.from me).reverse
+	flatten (Flatten-Iterator)
+	unique f:Fun (keeps only values with unique evals of f)
+	zip (Zip-Iterator)
+	∋
 
 ‣ stop
+	doc
+		TODO
+
 	✘ 'StopIteration
 
 ‣ each do:Fun
+	doc
+		TODO
+
 	`
+		while (true) {
+			var x;
+			try {
+				x = this.next();
+			}
+			catch (error) {
+				if (error.message == 'StopIteration')
+					break;
+				else
+					throw error;
+			}
+			_do(x);
+		}
+		return;
+
+
+‣ fold[initial] combine:Fun
+	doc
+		TODO
+	eg
+		✔= 10
+			(Bag 1 2 3).fold[4] _+
+		✔= 6
+			(Bag 1 2 3).fold _+
+
+	∙ init
+		initial.or
+			next
+
+	`
+		var res = init;
+
+		while (true) {
+			var x;
+			try {
+				x = this.next();
+			}
+			catch (error) {
+				if (error.message == 'StopIteration')
+					break;
+				else
+					throw error;
+			}
+			res = combine(res, x);
+		}
+
+‣ of index:Num
+	doc
+		TODO
+
+	`
+		for (var i = 0; i < index; i++)
+			this.next();
+		return this.next();
+
+‣ first
+	of 0
+
+‣ last
+	`
+		var last;
 		try {
 			while (true)
-				_do(this.next())
+				last = this.next();
 		}
 		catch (error) {
 			if (error.message == 'StopIteration')
-				return null;
+				return last;
 			else
 				throw error;
 		}
+
+
+‣ drop n:Num
+	doc
+		TODO
+
+‣ empty?
+	✘.throws? next_
+
+
+
+\‣ count

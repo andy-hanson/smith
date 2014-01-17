@@ -462,7 +462,7 @@ class Parser
 			cCheck use.kind != 'super', @pos, 'is must be at top of file'
 			@locals.addLocalMayShadow use.local
 			if use.kind == 'trait'
-				E.trait use
+				new E.Trait use
 			else
 				new E.DefLocal use.local, use
 

@@ -9,35 +9,54 @@ doc
 	use! Main
 
 `
-	try {
-		f();
+	var FANCY_ERROR = true;
+
+	if (FANCY_ERROR) {
+		try {
+			f();
+		}
+		catch (error) {
+			//eg: at Object.<anonymous> (/home/andy/programming/source/Main.smith:19:1)
+
+			error.stack.split('\n').forEach(function(line) {
+				var rgx =
+					/\s*at (\S*)\s*(\[as (.*)\])?\s*\((.*)\)/;
+					//at not-whitespace whitespace [optionally 'as'] whitespace (rest)
+				var match =
+					line.match(rgx);
+
+				if (match == null) {
+					console.log(line);
+				}
+				else {
+					var declareName =
+						match[1];
+					// match[2] is [as {callName}]
+					var callName =
+						match[3];
+					if (callName == null)
+						callName = '';
+					else
+						callName += ' ';
+					var remove =
+						'/home/andy/programming/'
+					var sourceLocation =
+						false ?//(match[4].indexOf(remove) == 0) ?
+							match[4].slice(remove.length)
+						:
+							match[4];
+
+					//console.log(callName+'at '+sourceLocation+' ('+declareName + ')');
+					//if (sourceLocation != '')
+					//	console.log(sourceLocation);
+					//else
+						console.log(line);
+				}
+			});
+			//throw error;
+		}
 	}
-	catch (error) {
-		error.stack.split('\n').forEach(function(line) {
-			var rgx =
-				/at (\S*)\s*(\[as (.*)\])?\s*\((.*)\)/;
-			var match =
-				line.match(rgx);
-
-			if (match == null) {
-				console.log(line);
-			}
-			else {
-				var declareName =
-					match[1];
-				// match[2] is [as {callName}]
-				var callName =
-					match[3];
-				if (callName == null)
-					callName = '';
-				else
-					callName += ' ';
-				var sourceLocation =
-					match[4].slice('/home/andy/programming/smith/'.length);
-
-				console.log(callName+'at '+sourceLocation+' ('+declareName + ')');
-			}
-		});
-		//throw error;
+	else {
+		f();
 	}
 	return;

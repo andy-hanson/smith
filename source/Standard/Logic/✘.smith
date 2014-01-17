@@ -94,6 +94,17 @@ no-instances!
 		}
 		return res;
 
+‣‣ throws? try:Fun
+	doc
+		Whether `try` has an error.
+
+	try-catch
+		try.run!
+		Bool.⊥
+	|
+		Bool.⊤
+
+
 ‣‣ annotate try:Fun make-annotation:Fun
 	doc
 		If an error happens in `try`, prepend new text to its message and throw it again.

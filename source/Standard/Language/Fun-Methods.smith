@@ -22,6 +22,12 @@ Fun.do
 
 	alias 'of 'run!
 
+	\‣ be-override!
+	\	new! '_is-override Bool.⊤
+
+	\‣ is-override?
+	\	has-property? '_is-override
+
 	‣ cached
 		`
 			var me = this;

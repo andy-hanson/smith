@@ -1,6 +1,6 @@
 module.exports =
 	metaTextKeywords:
-		[ 'doc', 'how', 'todo' ]
+		[ 'doc', 'how', 'todo', 'author' ]
 	keywords:
 		[ 'use', 'use!', 'super', 'trait',
 			'me', 'it', '∙', '∘',

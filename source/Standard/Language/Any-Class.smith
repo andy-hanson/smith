@@ -158,22 +158,44 @@ C.do
 		doc
 			TODO
 
+	‣ super-of? class:C
+		doc
+			TODO
+
+		super-of.∋ class
+
+	‣ trait-of? class:C
+		doc
+			TODO
+
+		trait-of.∋ class
+
 	‣ inherits-from? class:C
-		inherits-from.∋ class
+		doc
+			TODO
+
+		\ can't use ∋ because Array needs to inherit it using trait
+		(inherits-from.indexOf class).≠ -1
 
 	me.‣ 'trait |new-trait:C
+		in
+			✔ (inherits-from? new-trait).¬
+				"{me} already has trait {new-trait}"
+
+		new-trait.trait-of.push me
 		traits.push new-trait
 
-		(new-trait.inherits-from.+ new-trait).each |inherit-from
+		\ must use forEach because Array neads a trait to get each
+		(new-trait.inherits-from.+ new-trait).forEach |inherit-from
 			(inherits-from? inherit-from).unless!
+				proto.new-unless-exists! "__is-a-id-{new-trait.id}"
+					Bool.⊤
 				inherits-from.push inherit-from
 				inherit-from.methods.each-property |name value
 					(name.= 'class).unless!
+						✔ (proto.has-property? name).¬
+							"{me} already has method {name}, can't inherit from {inherit-from}"
 						proto.new! name value
-
-		inherits-from.push new-trait
-
-
 
 	‣ meta
 		(property~ '_meta).or
@@ -210,12 +232,13 @@ C.do
 		static-methods.each-property (f Bool.⊤)
 
 
-
-	‣ instances-are? class:C
+	‣ sub-class? class:C
+		doc
+			TODO
 		eg
-			✔ (Fun.instances-are? Any)
-			✔ (Fun.instances-are? Str).¬
-			✔ (Fun.instances-are? Fun)
+			✔ (Fun.sub-class? Any)
+			✔ (Fun.sub-class? Str).¬
+			✔ (Fun.sub-class? Fun)
 
 		class.subsumes? proto
 
@@ -302,5 +325,22 @@ C.do
 		‣ construct ...args
 			define-properties.apply me args
 			constructor.unbound.apply me args
+
+	‣ ‣delegate name:Str delegate-to:Fun
+		doc
+			TODO
+
+		∙ dt
+			delegate-to.unbound
+		me.‣ name |...args
+			∙ delegated
+				dt.call me
+			\delegated.send name ...args
+			`_call(delegated, name, [], [args])`
+		\(method name).meta! delegate-to.meta
+
+	‣ delegate-many names:Array delegate-to:Fun
+		names.forEach |name
+			me.‣delegate name delegate-to
 
 export C

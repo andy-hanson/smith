@@ -3,24 +3,15 @@ doc
 eg
 	∙ ref
 		Ref 1
-	ref.! 2
+	ref.!
+		2
 	✔= 2
 		ref.get
-	ref.!
-		it.increment
+	ref.! _increment
 	✔= 3
 		ref.get
-todo
-	Uses 'data' to construct, set, get value
 
+data |!get
+	()
 
-use Fun
-
-‣ construct value
-	set-property! 'value value
-
-‣ ! setter:Fun
-	set-property! 'value setter.of
-
-‣ get
-	property 'value
+alias 'get! '!

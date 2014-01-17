@@ -1,3 +1,5 @@
+trait Iterable
+
 ‣‣ of ...members
 	Array ...members
 

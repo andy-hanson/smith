@@ -34,12 +34,15 @@ class Expression
 
 		@nodeWrap chunk, fileName
 
-trait = (use) ->
-	type use, Use
-	{ local, pos } = use
-	verb = 'trait'#new T.Name pos, 'trait', 'x'
-	value = Call.me pos, verb, [ use ]
-	new DefLocal local, value
+class Trait
+	constructor: (@use) ->
+		type use, Use
+		{ @pos } = use
+
+	toNode: (fileName, indent) ->
+		def = new DefLocal @use.local, @use
+		trait = Call.me @pos, 'trait', [ @use.local ]
+		[ (def.toNode fileName, indent), '\n', indent, (trait.toNode fileName, indent) ]
 
 class DefLocal extends Expression
 	constructor: (@local, @value) ->
@@ -325,7 +328,7 @@ class FunDef extends Expression
 					jsLiteral @pos,
 						"global.Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
 				def =
-					new DefLocal maybeRest, get
+					new DefLocal @maybeRest, get
 				def.toNode fileName, indent
 			else
 				# TODO
@@ -654,6 +657,6 @@ module.exports =
 	Use: Use
 	Null: Null
 	Parend: Parend
-	trait: trait
+	Trait: Trait
 	jsLiteral: jsLiteral
 	ManyArgs: ManyArgs

@@ -17,7 +17,7 @@ F.do
 			|
 				Meta.Empty
 
-	-def 'meta! |meta:Meta
-		set-property! '_meta (me.meta.merge meta)
+	\-def 'meta! |meta:Meta
+	\	set-property! '_meta (me.meta.merge meta)
 
 export F
