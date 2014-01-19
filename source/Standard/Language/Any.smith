@@ -20,6 +20,12 @@ A.do
 
 		`this[name]`
 
+	‣ unsafe-property name:Str
+		doc
+			May return undefined.
+
+		`this[name]`
+
 	‣ property name:Str
 		doc
 			TODO
@@ -43,13 +49,15 @@ A.do
 				"Object has key {name} but no value"
 			h
 
-	‣ property-names
+	‣ property-names:Array
 		doc
 			TODO
+		err
+			TypeError if I'm a value type.
 
 		Global@Object.getOwnPropertyNames me
 
-	‣ show-properties
+	‣ show-properties:Str
 		doc
 			TODO
 
@@ -60,7 +68,7 @@ A.do
 			});
 			return s + "}";
 
-	‣‣ exists? a
+	‣‣ exists?:Bool a
 		doc
 			TODO
 
@@ -69,9 +77,11 @@ A.do
 	‣ each-property fun:Fun
 		doc
 			TODO
+		todo
+			property-iterator
 
 		\ must use forEach because defining Array requires this
-		property-names.forEach |name
+		property-names.forEach |name ...ignore
 			fun name (property name)
 
 	‣ new-mutable! name:Str value
@@ -104,54 +114,73 @@ A.do
 			mod old
 		set-property! name new
 
-	‣ is-a class:Any-Class
-		doc
-			TODO
+	\‣ is-a?:Bool class:Any-Class
+	\	doc
+	\		TODO
 
-		class.subsumes? me
+	\	class.subsumes? me
 
-	‣ identical? a
+	‣ identical?:Bool a
 		doc
-			TODO
+			Whether I and a are the very same object, at the same place in memory.
+			For testing whether we are the same in every respect, use `structual-=`.
+		eg
+			∙ a
+				Opt.some 1
+			✔ (a.identical? a)
+			✔ (a.identical? (Opt.some 3)).¬
+			✔ ("123".identical? "123")
 
 		`this === a`
 
-	‣ structural-= a
+	‣ structural-=:Bool a
 		doc
-			TODO
+			Whether I and `a` have equal (by calling `=`) properties and are of the same class.
+		eg
+			∙ a
+				Opt.some 1
+			✔ (a.structural-= (Opt.some 1))
+			✔ (a.structural-= (Opt.some 2)).¬
+			✔ (a.structural-= `{ _value: 1 }`).¬
 
 		(class.= a.class).∧
 			∙ keys
 				property-names
 
-			(keys.size.= a.property-names.size).∧
-				keys.every
-					(property it).= (a.property it)
+			keys.∀ |key
+				(a.has-property? key).∧
+					(property key).= (a.property key)
 
-			\`
-			\	var meKeys = global.Object.getOwnPropertyNames(this);
-			\	var aKeys = global.Object.getOwnPropertyNames(a);
-			\	if (meKeys.length != aKeys.length)
-			\		return false;
-			\	return meKeys.every(function(key) {
-			\		return this[key]['='](a[key]);
-			\	})
+		\`
+		\	if (this.class() !== a.class())
+		\		return false;
+		\	var meKeys = global.Object.getOwnPropertyNames(this);
+		\	var aKeys = global.Object.getOwnPropertyNames(a);
+		\	if (meKeys.length != aKeys.length)
+		\		return false;
+		\	return meKeys.every(function(key) {
+		\		return this[key]['='](a[key]);
+		\	})
 
-	‣ = a
+	‣ =:Bool a
 		doc
 			TODO
 
-		identical? a
+		(identical? a).∨
+			structural-= a
 
 	‣ ≠ a
 		doc
-			Not =.
+			Not `=`.
 
 		(= a).¬
 
 	‣ send name:Str ...args
 		doc
-			TODO
+			Calls the method of the name on the arguments.
+		eg
+			✔= 3
+				1.send '+ 2
 
 		(proto-property name).apply me args
 

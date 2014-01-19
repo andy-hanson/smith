@@ -30,9 +30,9 @@ no-instances!
 		If an error occurs in `try`, ignores it and returns None.
 		Else, returns Some of the result.
 	eg
-		\✔= (Opt.some 'success)
-		\	try
-		\		'success
+		✔= (Opt.some 'success)
+			try
+				'success
 		✔= Opt.None
 			try
 				✘ 'fail
@@ -69,16 +69,15 @@ no-instances!
 		`finally` is called before returning the result.
 	eg
 		∙ ref
-			Ref ()
+			Ref 0
 		✔= 'fail
 			try-catch-finally
 				✘ 'fail
 			|
 				it@message
 			|
-				ref.!
-					'set
-		✔= 'set
+				ref.! _increment
+		✔= 1
 			ref.get
 
 	`

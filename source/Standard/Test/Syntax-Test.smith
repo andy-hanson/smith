@@ -1,4 +1,4 @@
-use ./Test
+use Test
 
 Test "Optional Arguments"
 	∙ fun |[x~] y
@@ -11,15 +11,15 @@ Test "Optional Arguments"
 		fun 1
 	✔= 3
 		fun[2] 1
-	\✔.fails
-	fun[1 2] 1
+	✔.fails
+		fun[1]
 
 Test "Many Arguments"
 	∙ fun |[a ...b] c ...d
-		\ TODO - needs Bag equality to work...
-		\✔= b (Opt.some (Array 2 3))
-		\✔= d
-		\	(Array 5 6)
+		✔= b
+			Opt.some (Array 2 3)
+		✔= d
+			(Array 5 6)
 
 	fun[1 2 3] 4 5 6
 

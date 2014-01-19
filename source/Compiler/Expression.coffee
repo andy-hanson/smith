@@ -326,18 +326,20 @@ class FunDef extends Expression
 
 
 	assignArgs: (fileName, indent) ->
-		getRest = (maybeRest, argsRendered, nArgs, ignoreOpts) =>
-			if @maybeRest?
+		someOpen =
+			'_prelude.Some.of('
+
+		getRest = (rest, argsRendered, nArgs, isOpts = no) =>
+			if rest?
+				getArray =
+					"global.Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
 				get =
 					jsLiteral @pos,
-						"global.Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
+						if isOpts then "#{someOpen}#{getArray})" else getArray
 				def =
-					new DefLocal @maybeRest, get
+					new DefLocal rest, get
 				def.toNode fileName, indent
 			else
-				# TODO
-				#if ignoreOpts
-					# skip first 2
 				"_nArgs(#{argsRendered}, #{nArgs})"
 
 
@@ -353,7 +355,7 @@ class FunDef extends Expression
 						".check('#{arg.name}', #{val})"
 					]
 				if isOpt
-					val = [ '_prelude.Some.of(', val, ')' ]
+					val =  [ someOpen, val, ')' ]
 
 				[ "var #{arg.toNode fileName, indent} = ", val ]
 
@@ -389,7 +391,7 @@ class FunDef extends Expression
 					snl,
 					(getOpts.interleavePlus snl),
 					(getArgsIfOpts.interleavePlus snl),
-					(getRest @optRest, '_opts', nOpts), snl,
+					(getRest @optRest, '_opts', nOpts, yes), snl,
 					(getRest @maybeRest, 'arguments', @args.length + 2),
 				';\n', indent, '} else {', nl,
 					(getNoOpts.interleavePlus snl),

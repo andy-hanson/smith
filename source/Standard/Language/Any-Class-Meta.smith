@@ -2,7 +2,7 @@ Any-Class.do-meta
 	doc
 		DOC
 	eg
-		✔ (Any-Class.is-a Any-Class)
+		✔ (Any-Class.subsumes? Any-Class)
 		✔ (Any-Class.super.identical? Any)
 
 		Any-Class 'Sample-Class

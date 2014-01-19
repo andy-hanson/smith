@@ -2,7 +2,7 @@
 	✘.annotate
 		do.run!
 	|
-		"Testing {name}"
+		"Test '{name}'"
 
 ‣‣ all!
 	Any-Class.all-classes.each _test!

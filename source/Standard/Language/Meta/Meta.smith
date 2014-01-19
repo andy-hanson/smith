@@ -52,7 +52,7 @@ M.do
 				egg.run!
 
 	‣val Empty
-		of `{}`
+		of `{ }`
 
 	‣‣ from-maybe-pre maybe-make-meta-pre:Opt
 		maybe-make-meta-pre.~ |make-pre:Fun

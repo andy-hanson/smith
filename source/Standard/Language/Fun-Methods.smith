@@ -28,14 +28,30 @@ Fun.do
 	\‣ is-override?
 	\	has-property? '_is-override
 
-	‣ cached
+	‣ cache
+		doc
+			This function must have 0 arguments.
+			Returns a Fun which lazily produces my result.
+		eg
+			∙ r
+				Ref 0
+			∙ make-3 |
+				r.! _increment
+				3
+			∙ cached
+				make-3.cache
+			✔= 3
+				cached.run!
+			✔= 3
+				cached.run!
+			✔= 1
+				r.get
+
 		`
 			var me = this;
 			var get = function() {
-				var made = me()
-				get = function() {
-					return made;
-				}
-				return made;
+				var got = me();
+				get = function() { return got; }
+				return got;
 			}
-			return get;
+			return function() { return get(); };

@@ -99,6 +99,9 @@ class Parser
 	valueExpression: (tokens) ->
 		@expression tokens, yes
 
+	###
+	isValue is whether the expression *must* be a value, such as anything in parentheses.
+	###
 	expression: (tokens, isValue = no) ->
 		type tokens, Array
 		type isValue, Boolean
@@ -120,7 +123,7 @@ class Parser
 				e0
 			else if e0 instanceof E.ManyArgs
 				@unexpected e0
-			else if tail.isEmpty()
+			else if tail.isEmpty() and opts.isEmpty()
 				e0
 			else
 				new E.Call.of e0, opts, tail

@@ -28,9 +28,15 @@ no-instances!
 		✘.catch-message
 			fun.run!
 
-‣‣ rel relation-name:Str a make-b
+‣‣ rel relation-name:Str a make-b:Fun
+
 	∙ b
 		make-b.of
+
+	✔ (Any.exists? a)
+		"First argument undefined"
+	✔ (Any.exists? b)
+		"Second argument undefined"
 	✔ (a.send relation-name b)
 		"Expected {a}.{relation-name} {b}"
 

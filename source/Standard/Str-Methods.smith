@@ -17,6 +17,9 @@ Str.do-meta
 					return a.toString();
 			}
 
+	‣override = a
+		identical? a
+
 	‣ ++ a:Str
 		`this + a`
 

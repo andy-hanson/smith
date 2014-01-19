@@ -17,7 +17,7 @@
 		doc
 			If I am an angle (in radians) counter-clockwise from +x, the x-value is me.cos.
 		eg
-			✔.= 1
+			✔= 1
 				0.cosine
 			✔.≈ 0
 				π/2.cosine

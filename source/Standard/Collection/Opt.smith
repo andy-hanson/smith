@@ -12,15 +12,14 @@ Prelude@Opt.do
 
 		‣read value
 
-		‣ force
+		‣ force[message~:Str]
 			value
 
 		‣ or else:Fun
 			value
 
 		‣ each do:Fun
-			do value
-			()
+			do.run! value
 
 		‣ collect of:Fun
 			Some (of value)
@@ -52,7 +51,7 @@ Prelude@Opt.do
 			None
 
 		‣ ~ if-some:Fun if-none:Fun
-			if-none ()
+			if-none.of
 
 		‣ to-nullable
 			()

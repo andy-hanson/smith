@@ -221,8 +221,8 @@ itMethod = (name) ->
 checkNumberOfArguments = (args, expectedNumber) ->
 	if args.length < expectedNumber
 		throw new global.Error \
-			"Expected #{expectedNumber} arguments, only got [" +
-			(Array.prototype.join.call args, ', ') + ']'
+			"Expected #{expectedNumber} arguments, got #{args.length} " +
+			"(#{Array.prototype.join.call args, '; '})"
 
 call = (subject, verb, optionses, argumentses) ->
 	# optionses and argumentses are arrays of arrays

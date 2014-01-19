@@ -50,16 +50,23 @@ C.do
 	‣ alias old-name:Str new-name:Str
 		∙ old
 			old-name
-		me.‣ new-name
-			`this[old].apply(this, arguments)`
+		me.‣ new-name |...args
+			`this[old].apply(this, args)`
 
 	‣ ‣‣ name:Str method:Fun
+		doc
+			Defines a method just for this class.
+			Added to `static-methods` too.
+			Not used by sub-classes.
+
 		new! name method
-		\`this['_static-methods']
 		static-methods.new! name method
 
 	‣ ‣val name:Str make-val:Fun
-		me.‣‣ name make-val.cached
+		doc
+			Defines a lazy value on this class.
+
+		me.‣‣ name make-val.cache
 
 	‣ ‣method-meta name:Str fun:Fun
 		how
@@ -186,13 +193,13 @@ C.do
 		traits.push new-trait
 
 		\ must use forEach because Array neads a trait to get each
-		(new-trait.inherits-from.+ new-trait).forEach |inherit-from
+		(new-trait.inherits-from.+ new-trait).forEach |inherit-from ...ignore
 			(inherits-from? inherit-from).unless!
 				proto.new-unless-exists! "__is-a-id-{new-trait.id}"
 					Bool.⊤
 				inherits-from.push inherit-from
 				inherit-from.methods.each-property |name value
-					(name.= 'class).unless!
+					(name.identical? 'class).unless!
 						✔ (proto.has-property? name).¬
 							"{me} already has method {name}, can't inherit from {inherit-from}"
 						proto.set-property! name value
@@ -210,12 +217,16 @@ C.do
 		do fun
 
 	‣ test!
+		doc
+			Runs the `eg` of all of my static and instance methods.
+			I am used as the delegate in the `eg`.
+
 		✘.annotate
 			meta.test-eg![me]
 		|
 			"{me}#eg"
 
-		∙ f |is-static
+		∙ test |is-static
 			|name method
 				✘.annotate
 					method.meta.test-eg![me]
@@ -228,13 +239,13 @@ C.do
 					"{me}{hash}{name}#eg"
 
 
-		methods.each-property (f Bool.⊥)
-		static-methods.each-property (f Bool.⊤)
+		methods.each-property (test Bool.⊥)
+		static-methods.each-property (test Bool.⊤)
 
 
 	‣ sub-class? class:C
 		doc
-			TODO
+			Whether `class` inherits from me.
 		eg
 			✔ (Fun.sub-class? Any)
 			✔ (Fun.sub-class? Str).¬
@@ -288,9 +299,9 @@ C.do
 		∙ assigns
 			Global@Array.of
 		∙ names-assigns
-			constructor.meta.arguments.map |arg
+			constructor.meta.arguments.map |arg ...ignore
 				∙ writable
-					(arg.name.charAt 0).= '!
+					(arg.name.charAt 0).identical? '!
 				∙ name
 					writable.?
 						arg.name.slice 1
@@ -346,7 +357,7 @@ C.do
 		\(method name).meta! delegate-to.meta
 
 	‣ delegate-many names:Array delegate-to:Fun
-		names.forEach |name
+		names.forEach |name ...ignore
 			me.‣delegate name delegate-to
 
 export C
