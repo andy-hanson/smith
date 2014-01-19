@@ -47,9 +47,9 @@ doc
 							match[4];
 
 					//console.log(callName+'at '+sourceLocation+' ('+declareName + ')');
-					//if (sourceLocation != '')
-					//	console.log(sourceLocation);
-					//else
+					if (sourceLocation != '')
+						console.log(sourceLocation);
+					else
 						console.log(line);
 				}
 			});

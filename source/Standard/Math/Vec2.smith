@@ -1,0 +1,150 @@
+data |x:Num y:Num
+	()
+
+‣override = a
+	todo
+		This for all immutables (data with no !)
+
+	structural-= a
+
+‣override toString
+	"<#{x} #{y}>"
+
+‣ +:Vec2 v:Vec2
+	doc
+		Translates by `v`.
+	eg
+		✔= (Vec2 4 6)
+			(Vec2 1 2).+ (Vec2 3 4)
+
+	Vec2 (x.+ v.x) (y.+ v.y)
+
+‣ -:Vec2 v:Vec2
+	doc
+		Translates by the opposite of `v`.
+	eg
+		✔= (Vec2 1 3)
+			(Vec2 3 4).- (Vec2 2 1)
+
+	+ v.negate
+
+‣ negate-x:Vec2
+	doc
+		Flips me around x-axis.
+	eg
+		✔= →
+			←.negate-x
+
+	Vec2 x.negate y
+
+‣ negate-y:Vec2
+	doc
+		Flips me around y-axis.
+	eg
+		✔= ↑
+			↓.negate-y
+
+	Vec2 x y.negate
+
+‣ negate:Vec2
+	doc
+		Opposite vector. Our sum is 0.
+	eg
+		✔= ↖
+			↘.negate
+
+	negate-x.negate-y
+
+‣ length^2:Num
+	x.square.+ y.square
+
+‣ length:Num
+	length^2.square-root
+
+‣val zero
+	Vec2 0 0
+
+‣ zero?
+	x.zero?.∧
+		y.zero?
+
+‣ ↺:Vec2 amount:Num
+	TODO
+
+‣ ↻:Vec2 amount:Num
+	TODO
+
+‣ ← amount:Num
+	Vec2 (x.- amount) y
+
+‣ → amount:Num
+	Vec2 (x.+ amount) y
+
+‣ ↓ amount:Num
+	Vec2 x (y.- amount)
+
+‣ ↑ amount:Num
+	Vec2 x (y.+ amount)
+
+‣ ←?
+	doc
+		Whether I lean left.
+	eg
+		✔ ↖.←?
+		✔ ↗.←?.¬
+
+	x.negative?
+
+‣ →?
+	doc
+		Whether I lean right.
+	eg
+		✔ ↖.→?.¬
+		✔ ↗.→?
+
+	x.positive?
+
+‣ ↓?
+	doc
+		Whether I lean down.
+	eg
+		✔ ↖.↓?.¬
+		✔ ↙.↓?
+
+	y.negative?
+
+‣ ↑?
+	doc
+		Whether I lean up.
+	eg
+		✔ ↖.↑?
+		✔ ↙.↑?.¬
+
+	y.positive?
+
+
+‣val ←
+	Vec2 -1 0
+
+‣val →
+	Vec2 1 0
+
+‣val ↓
+	Vec2 0 -1
+
+‣val ↑
+	Vec2 0 1
+
+‣val ↗
+	Vec2 2.square-root 2.square-root
+
+‣val ↖
+	↗.negate-x
+
+‣val ↘
+	↗.negate-y
+
+‣val ↙
+	↗.negate
+
+

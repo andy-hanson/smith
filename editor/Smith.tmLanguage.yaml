@@ -56,24 +56,24 @@ patterns:
   comment:
     We expect it to be followed by another meta,
     or by a blank line.
-  begin: ^\s*(doc|how|todo|author)
+  begin: ^\s*(doc|how|todo|err|author)
   beginCaptures:
     '1':
       name: meta.tag
-  end: ^\s*(in|out|eg)?$
+  end: ^\s*(in|out|eg|sub-eg)?$
   endCaptures:
     '1':
       name: meta.tag
   patterns:
   - name: meta.text
-    begin: (doc|how|todo|author)
+    begin: (doc|how|todo|err|author)
     beginCaptures:
       '1':
         name: meta.tag
     end: ^$
 
 - name: meta.tag
-  match: ^\s*(in|out|eg)$
+  match: ^\s*(in|out|eg|sub-eg)$
 
 - name: keyword
   match: \b(me|res|it)\b

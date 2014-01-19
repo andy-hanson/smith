@@ -1,7 +1,16 @@
+local = [ '∙', '∘' ]
+specialVar = [ 'me', 'it' ]
+
 module.exports =
-	metaTextKeywords:
-		[ 'doc', 'how', 'todo', 'author' ]
-	keywords:
-		[ 'use', 'use!', 'super', 'trait',
-			'me', 'it', '∙', '∘',
-			'in', 'out', 'eg' ]#.concat metaTextKeywords
+	metaText:
+		[ 'doc', 'how', 'todo', 'author', 'err' ]
+	metaFun:
+		[ 'in', 'out', 'eg', 'sub-eg' ]
+	useLike:
+		[ 'use', 'use!', 'super', 'trait' ]
+	local:
+		local
+	specialVar:
+		specialVar
+	special:
+		local.concat specialVar

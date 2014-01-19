@@ -1,0 +1,17 @@
+doc
+	Flow methods
+
+‣‣ returning value do-after:Fun
+	doc
+		Performs do-after, then returns the value.
+	eg
+		∙ r
+			Ref 0
+		✔= 'returned
+			◆.returning 'returned
+				r.! _increment
+		✔= 1
+			r.get
+
+	do-after.run!
+	value

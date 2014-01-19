@@ -131,7 +131,7 @@ module.exports = class AllModules
 
 	findLocal: (dir, name) ->
 		(@maybeFindLocal dir, name) ? fail \
-			"Can not find #{dir}{}#{name}"
+			"Can not find #{dir}/#{name}"
 
 	###
 	dir - path relative to @baseDir

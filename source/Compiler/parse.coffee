@@ -17,7 +17,7 @@ class Parser
 			Pos.start
 
 	###
-	Returns: [ super, autoUses, fun ]
+	Returns: [ superAccess, autoUses, fun ]
 	###
 	all: (tokens) ->
 		autoUses = @autoUses()
@@ -33,9 +33,16 @@ class Parser
 
 		[ sooper, bodyTokens ] =
 			@readSuper restTokens #TODO: don't conflict with auto
+		superAccess =
+			if sooper?
+				type sooper, E.DefLocal
+				@locals.addLocalMayShadow sooper.local
+				new E.LocalAccess Pos.start, sooper.local
+			else
+				new E.Null Pos.start, 0
+
 		if sooper?
-			type sooper, E.Use
-			@locals.addLocalMayShadow sooper.local
+			autoUses.push sooper
 
 		body =
 			@locals.withLocal typeLocal, =>
@@ -49,7 +56,7 @@ class Parser
 
 		fun = E.FunDef.plain @pos, meta, [], body
 
-		[ sooper, autoUses, fun ]
+		[ superAccess, autoUses, fun ]
 
 	autoUses: ->
 		noUseMe =
@@ -58,7 +65,7 @@ class Parser
 		autoUses =
 			noUseMe.map (use) =>
 				@locals.addLocal use.local
-				new E.DefLocal use.local, use
+				new E.DefLocal.fromUse use
 
 		autoUses
 
@@ -67,7 +74,9 @@ class Parser
 	###
 	readSuper: (tokens) ->
 		if T.super tokens[0]
-			[ (new E.Use tokens[0], @fileName, @allModules), tokens.tail() ]
+			use =
+				new E.Use tokens[0], @fileName, @allModules
+			[ (E.DefLocal.fromUse use), tokens.tail() ]
 		else
 			[ null, tokens ]
 
@@ -418,7 +427,7 @@ class Parser
 				switch token.kind
 					when 'in'
 						@locals.withLocals newLocals, getBlock
-					when 'eg'
+					when 'eg', 'sub-eg'
 						if useTypeLocal?
 							x = @locals.withLocal useTypeLocal.local, getBlock
 							x.subs.unshift useTypeLocal
@@ -464,7 +473,7 @@ class Parser
 			if use.kind == 'trait'
 				new E.Trait use
 			else
-				new E.DefLocal use.local, use
+				new E.DefLocal.fromUse use
 
 	defLocal: (tokens, lazy) ->
 		type tokens, Array
@@ -506,7 +515,7 @@ class Parser
 
 
 ###
-Returns: [ sooper, autoUses, fun ]
+Returns: [ sooperAccess, autoUses, fun ]
 ###
 module.exports = (tokens, typeName, fileName, allModules) ->
 	(new Parser typeName, fileName, allModules).all tokens

@@ -1,17 +1,18 @@
-use Array-Like-Iterator
+use! Array-Like-Iterator
 
 Array.do
 	doc
 		TODO
 
+	‣‣ from iterator:Iterator
+		∙ x
+			Array.of
+		iterator.each x.push_
+		x
+
 	‣ copy
 		slice
 
-	‣ ∋ em
-		todo
-			Call '=' at each element
-
-		(indexOf em).≠ -1
 
 	‣ + em
 		∙ x
@@ -21,20 +22,29 @@ Array.do
 
 	trait Bag
 
-	‣override each do:Fun
-		∙ size
-			size
-		`
-			for (var index = 0; index < size; index++)
-				_do(this[index]);
+	\‣ ∋ em
+	\	todo
+	\		Call '=' at each element
+	\
+	\	(indexOf em).≠ -1
 
-	‣ iterator
-		Array-Like-Iterator me 0
+	‣override size
+		@length
 
 	‣‣ of ...members
 		members
 
-	‣ of index:Num
+	‣ iterator
+		Array-Like-Iterator me 0
+
+	\‣override each do:Fun
+	\	∙ size
+	\		size
+	\	`
+	\		for (var index = 0; index < size; index++)
+	\			_do(this[index]);
+
+	‣override of index:Num
 		in
 			✔ (valid-index? index)
 
@@ -54,20 +64,6 @@ Array.do
 			for (var index = 0; index < size; index++)
 				res[index] = dwe(this[index]);
 
-	‣ size
-		@length
-
-	‣ first
-		todo
-			inherit from Seq
-
-		of 0
-
-	‣ second
-		todo
-			inherit from Seq
-
-		of 1
 
 	‣ ++ oth:Array
 		todo

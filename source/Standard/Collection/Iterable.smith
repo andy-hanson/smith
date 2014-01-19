@@ -18,17 +18,8 @@ class.do
 			iterator-class me
 
 \ Can't use normal Array, doesn't exist yet
-delegate-many (Global@Array 'each 'fold)
+delegate-many (Global@Array '∃ '∀ 'of 'drop 'each 'empty? 'fold 'first 'last 'make-string 'size)
 	iterator
-
-\‣delegate each
-\	iterator
-
-\‣delegate fold
-\	iterator
-
-‣ make-string
-	(map String.of_).join " "
 
 
 \‣override toString

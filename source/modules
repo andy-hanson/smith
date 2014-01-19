@@ -1,4 +1,4 @@
-auto ↺ ✔ ✔= ✘ Any Any-Class Array Bag Bool Console Error Fun
+auto ↺ ✔ ✔= ✘ ◆ Any Any-Class Array Bag Bool Console Error Fun
 auto Global Iterable Iterator Meta Num Opt Ref Str Test
 
 Standard Standard/index
@@ -7,6 +7,7 @@ Standard Standard/index
 ✔ Standard/Logic/✔
 ✔= Standard/Logic/✔=
 ✘ Standard/Logic/✘
+◆ Standard/Logic/◆
 Any Standard/Language/Any
 Any-Class Standard/Language/Any-Class
 Array Standard/Collection/Bag/Array
@@ -23,6 +24,7 @@ Math Standard/Math/index
 Meta Standard/Language/Meta
 Num Standard/Math/Num
 Opt Standard/Collection/Opt
+Vec2 Standard/Math/Vec2
 Random Standard/Math/Random
 Ref Standard/Language/Ref
 Smith-Prelude Standard/Language/Smith-Prelude

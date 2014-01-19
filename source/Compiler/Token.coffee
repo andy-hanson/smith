@@ -1,6 +1,6 @@
 Pos = require './Pos'
 { cCheck } = require './CompileError'
-{ metaTextKeywords } = require './keywords'
+keywords = require './keywords'
 
 class Token
 	toString: ->
@@ -130,7 +130,7 @@ class Use extends Token
 class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
 		type @pos, Pos
-		check metaTextKeywords.contains @kind
+		check keywords.metaText.contains @kind
 		type @text, Token # string literal or interpolated group
 
 	show: ->
@@ -175,7 +175,7 @@ module.exports =
 	square: (token) ->
 		token instanceof Group and token.kind == '['
 	metaGroup: (token) ->
-		token instanceof Group and token.kind.isAny 'in', 'out', 'eg'
+		token instanceof Group and keywords.metaFun.contains token.kind
 	indentedJS: (token) ->
 		token instanceof JavascriptLiteral and token.kind == 'indented'
 	defLocal: (token) ->

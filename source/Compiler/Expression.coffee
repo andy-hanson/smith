@@ -2,7 +2,7 @@
 T = require './Token'
 Pos = require './Pos'
 mangle = require './mangle'
-{ metaTextKeywords } = require './keywords'
+keywords = require './keywords'
 
 tab = (indent) ->
 	"\t#{indent}"
@@ -42,7 +42,9 @@ class Trait
 	toNode: (fileName, indent) ->
 		def = new DefLocal @use.local, @use
 		trait = Call.me @pos, 'trait', [ @use.local ]
-		[ (def.toNode fileName, indent), '\n', indent, (trait.toNode fileName, indent) ]
+		[	(def.toNode fileName, indent),
+			'\n', indent,
+			(trait.toNode fileName, indent) ]
 
 class DefLocal extends Expression
 	constructor: (@local, @value) ->
@@ -88,6 +90,8 @@ class DefLocal extends Expression
 
 		[ 'var ', name, ' =\n', newIndent, val, check ]
 
+	@fromUse = (use) ->
+		new DefLocal use.local, use
 
 class Block extends Expression
 	constructor: (@pos, @subs) ->
@@ -258,7 +262,7 @@ class Meta extends Expression
 		type @pos, Pos
 
 	@all =
-		[ 'eg' ].concat metaTextKeywords
+		[ 'eg', 'sub-eg' ].concat keywords.metaText
 
 	make: (fun, fileName, indent) ->
 		newIndent = tab indent
@@ -270,12 +274,12 @@ class Meta extends Expression
 				@[name]
 			if val?
 				part =
-					if name == 'eg'
+					if keywords.metaFun.contains name
 						(FunDef.body val).toNode fileName, newIndent
 					else
 						val.toNode fileName, indent
 
-				parts.push [ '_', name, ': ', part ]
+				parts.push [ "'_", name, "': ", part ]
 
 		arg = (x) ->
 			type x, Local
@@ -299,13 +303,13 @@ class Meta extends Expression
 
 
 	toString: ->
-		"doc: #{@doc}; eg: #{@eg}; how: #{@how}"
+		"doc: #{@doc}; eg: #{@eg}; how: #{@how}; sub-eg: #{@['sub-eg']}"
 
 class FunDef extends Expression
 	constructor: (@pos, @meta, @tipe, @optArgs, \
 			   @optRest, @args, @maybeRest, @body) ->
 		type @pos, Pos
-		type @meta, Meta
+		type @meta, Meta if @meta?
 		type @tipe, Expression if @tipe?
 		type @optArgs, Array if @optArgs?
 		type @optRest, Local if @optRest?
@@ -428,7 +432,10 @@ class FunDef extends Expression
 				Local.res @pos, @tipe
 			loc.typeCheck fileName, newIndent
 		meta =
-			@meta.make @, fileName, indent
+			if @meta?
+				@meta.make @, fileName, indent
+			else
+				''
 
 		[ '_f(this, function(', argNames, ') {',
 			'\n', newIndent,
@@ -446,8 +453,11 @@ class FunDef extends Expression
 	@plain = (pos, meta, args, body) ->
 		new FunDef pos, meta, null, null, null, args, null, body
 
+	###
+	Just the body, no meta, no args
+	###
 	@body = (body) ->
-		@plain body.pos, (new Meta body.pos), [], body
+		@plain body.pos, null, [], body
 
 ###
 _func

@@ -1,0 +1,10 @@
+super Iterator
+
+data |original:Iterator collector:Fun
+	()
+
+‣ next
+	original.if-next
+		(collector) it
+	|
+		stop

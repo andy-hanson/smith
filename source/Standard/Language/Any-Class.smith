@@ -195,7 +195,7 @@ C.do
 					(name.= 'class).unless!
 						✔ (proto.has-property? name).¬
 							"{me} already has method {name}, can't inherit from {inherit-from}"
-						proto.new! name value
+						proto.set-property! name value
 
 	‣ meta
 		(property~ '_meta).or
@@ -283,13 +283,17 @@ C.do
 			can-extend~.or
 				Bool.⊥
 		\ arg, writable
+		∙ names
+			Global@Array.of
+		∙ assigns
+			Global@Array.of
 		∙ names-assigns
 			constructor.meta.arguments.map |arg
 				∙ writable
-					(arg.name.char-at 0).= '!
+					(arg.name.charAt 0).= '!
 				∙ name
 					writable.?
-						arg.name.tail
+						arg.name.slice 1
 					|
 						arg.name
 
@@ -300,11 +304,13 @@ C.do
 				∙ assign
 					"'_{name}': \{ value: {name}, writable: {writable} \}"
 
-				(Bag name assign)
-		∙ names
-			names-assigns.map _first
-		∙ assigns
-			names-assigns.map _second
+				\(Global@Array name assign)
+				names.push name
+				assigns.push assign
+		\∙ names
+		\	names-assigns.map
+		\∙ assigns
+		\	names-assigns.map _second
 		∙ assigns-str
 			assigns.join ",\n\t"
 		∙ maybe-no-extend

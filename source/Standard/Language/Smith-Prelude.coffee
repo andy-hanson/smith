@@ -24,13 +24,14 @@ Any = null
 def = (name, method) ->
 	unbound = method.unbound()
 	imm @_methods, name, unbound
+	imm @_proto, name, unbound
 
 	defInherit = (inheritor) ->
 		# not immutable - may be overridden
 		inheritor._proto[name] = unbound
 		inheritor['_trait-of'].forEach defInherit
 
-	defInherit @
+	@['_trait-of'].forEach defInherit
 
 
 imm = (object, name, value) ->
@@ -40,6 +41,14 @@ imm = (object, name, value) ->
 makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 	unless (Object name) instanceof String
 		throw new Error "In makeAnyClass: name is not a String; is #{name}"
+	if maybeIs?
+		unless AnyClass._id == 0
+			throw new Error '?'
+		unless maybeIs['__is-a-id-0']?
+			throw new Error "super of #{name} must be a Any-Class, not #{maybeIs}"
+	#if maybeProto?
+	#	unless typeof maybeProto == 'object'
+	#		throw new Error "YYY"
 
 	superClass = metaClass = clazz = null
 
@@ -230,7 +239,7 @@ call = (subject, verb, optionses, argumentses) ->
 
 	op = subject[verb]
 	unless op?
-		throw new Error "#{subject} has no method #{verb}"
+		throw new Error "#{subject} of class #{subject.class()} has no method #{verb}"
 
 	if opts.length == 0
 		op.apply subject, args

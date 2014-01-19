@@ -3,6 +3,8 @@ parse = require './parse'
 AllModules = require './AllModules'
 Pos = require './Pos'
 path = require 'path'
+E = require './Expression'
+
 
 shortName = (fullName) ->
 	(fullName.split '/').pop()
@@ -28,6 +30,9 @@ module.exports = (string, inName, outName, opts) ->
 		lex string
 	[ sooper, autoUses, fun ] =
 		parse tokens, typeName, inName, allModules
+	type sooper, E.Expression
+	type autoUses, Array
+	type fun, E.Expression
 
 	prelude =
 		allModules. get 'Smith-Prelude', Pos.start, inName
@@ -42,7 +47,7 @@ module.exports = (string, inName, outName, opts) ->
 		x.toNode sourceMapRel, ''
 
 	superNode =
-		if sooper then toNode sooper else 'null'
+		toNode sooper
 
 	autos =
 		(autoUses.map toNode).interleavePlus ';\n'

@@ -5,6 +5,7 @@ lexQuote = require './lexQuote'
 GroupPre = require './GroupPre'
 { cCheck, cFail } = require '../CompileError'
 Pos = require '../Pos'
+keywords = require '../keywords'
 
 checkSpaces = (str) ->
 	for line, lineNumber in str.split '\n'
@@ -20,38 +21,49 @@ joinGroups = (tokens) ->
 	current = [] # Tokens to form this body
 	opens = [] # GroupPres
 
-	new_level = (open) ->
+	newLevel = (open) ->
 		type open, GroupPre
 		opens.push open
 		stack.push current
 		current = []
 
-	finish_level = (result) ->
+	finishLevel = (result) ->
 		current = stack.pop()
 		current.push result
+
+	specialOpenKinds =
+		[ '|', 'in', 'out', 'eg', 'sub-eg' ]
+	openKinds =
+		[ '(', '[', '{', '→', '|' ].concat keywords.metaFun
+	blockCloseKinds =
+		[ '}', '←' ]
+	closeKinds =
+		[ ')', ']' ].concat blockCloseKinds
+
 
 	for tok in tokens
 		if tok instanceof GroupPre
 			{ pos, kind } = tok
-			switch kind
-				when '(', '[', '{', '→', '|', 'in', 'out', 'eg'
-					new_level tok
-				when ')', ']', '}', '←'
-					cCheck not opens.isEmpty(), pos, ->
-						"Unexpected closing #{kind}"
-					open = opens.pop()
+			if openKinds.contains kind
+				newLevel tok
+			else if closeKinds.contains kind
+				cCheck not opens.isEmpty(), pos, ->
+					"Unexpected closing #{kind}"
+				open = opens.pop()
 
-					cCheck T.Group.match[open.kind] == kind, tok.pos, ->
-						"#{open} does not match #{tok}"
+				cCheck T.Group.match[open.kind] == kind, tok.pos, ->
+					"#{open} does not match #{tok}"
 
-					finish_level new T.Group \
-						open.pos, tok.pos, open.kind, current
+				finishLevel new T.Group \
+					open.pos, tok.pos, open.kind, current
 
-					if kind.isAny '}', '←'
-						if opens.last()?.kind?.isAny '|', 'in', 'out', 'eg'
-							open = opens.pop()
-							finish_level new T.Group \
-								open.pos, tok.pos, open.kind, current
+				if kind.isAny '}', '←'
+					if specialOpenKinds.contains opens.last()?.kind
+						open = opens.pop()
+						finishLevel new T.Group \
+							open.pos, tok.pos, open.kind, current
+			else
+				fail()
 
 		else
 			if tok instanceof T.Group # From Quotes

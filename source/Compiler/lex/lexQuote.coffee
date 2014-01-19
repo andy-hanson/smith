@@ -2,7 +2,7 @@ T = require '../Token'
 Stream = require './Stream'
 GroupPre = require './GroupPre'
 { cFail, cCheck } = require '../CompileError'
-{ metaTextKeywords } = require '../keywords'
+keywords = require '../keywords'
 
 module.exports = (quoteType, stream, oldIndent) ->
 	type quoteType, String
@@ -52,7 +52,7 @@ module.exports = (quoteType, stream, oldIndent) ->
 				out.push literal
 				new T.Group startPos, stream.pos, '"', out
 
-		if metaTextKeywords.contains quoteType
+		if keywords.metaText.contains quoteType
 			new T.MetaText startPos, quoteType, getInterpolatedGroup()
 		else
 			switch quoteType

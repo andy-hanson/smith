@@ -1,16 +1,15 @@
 doc
-	TODO
+	Users should have fast 'size' and 'of'.
+	Holes are not allowed; array must be defined at every index up to size.
 
 super Iterator
 
-data |array !index
+data |array:Array !index:Num
 	()
 
 ‣ next
 	(index.< array.size).?
-		∙ x
-			(array) index
-		index! _increment
-		x
+		◆.returning ((array) index)
+			index! _increment
 	|
 		stop

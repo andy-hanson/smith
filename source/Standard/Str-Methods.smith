@@ -35,8 +35,8 @@ Str.do-meta
 	‣ size
 		`this.length`
 
-	‣ char-at n:Num
-		`this[n]`
+	\‣ char-at n:Num
+	\	`this[n]`
 
 	‣ tail
 		how

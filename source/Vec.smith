@@ -1,4 +1,0 @@
-
-data |x y
-	new! 'z 38
-	Console.log! (property 'z)

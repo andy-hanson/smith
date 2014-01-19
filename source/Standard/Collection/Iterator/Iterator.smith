@@ -1,0 +1,244 @@
+doc
+	Must have 'next', which steps the iterator to the next step.
+	Iterators should define a 'sample' containing 1, 2, and 3 (in that order) for tests to run on.
+	Every operation on an Iterator changes it;
+	So:
+		iter.of 3
+		iter.of 1
+	Returns element 3, then element 4.
+	And operations such as each leave the iterator empty.
+todo
+	++ (++-Iterator)
+	keep (Keep-Iterator)
+	delete (opposite of keep)
+	reverse: (Array.from me).reverse
+	take (Take-Iterator)
+	slice (drop then take)
+	sort: (Array.from me).reverse
+	flatten (Flatten-Iterator)
+	unique f:Fun (keeps only values with unique evals of f)
+	zip (Zip-Iterator)
+
+use Collect-Iterator
+
+‣ if-next a:Fun b:Fun
+	doc
+		If there is a next element, calls a on it.
+		Else calls b.
+
+	`
+		var x;
+		try {
+			x = this.next();
+			return a(x);
+		}
+		catch (error) {
+			if (error.message == 'StopIteration')
+				return b();
+			else
+				throw error;
+		}
+
+‣ next~
+	if-next Opt.some_ Opt.None_
+
+‣‣ sample
+	todo
+		delete me, use abstract
+
+	(Bag 1 2 3).iterator
+
+\abstract
+
+‣ stop
+	doc
+		TODO
+	err
+		StopIteration
+	todo
+		Use native StopIteration
+
+	✘ 'StopIteration
+
+‣ of index:Num
+	doc
+		TODO
+	err
+		StopIteration if index.< size
+	how
+		Steps through every previous value. Slow!
+
+	`
+		for (var i = 0; i < index; i++)
+			this.next();
+		return this.next();
+
+‣ ∃:Bool condition:Fun
+	doc
+		TODO
+	sub-eg
+		✔ (sample.∃ _even?)
+		✔ (sample.∃ _negative?).¬
+
+	∙ none
+		∀
+			(condition it).¬
+	none.¬
+
+‣ ∀:Bool condition:Fun
+	doc
+		TODO
+	sub-eg
+		✔ (sample.∀ _natural?)
+		✔ (sample.∀ _odd?).¬
+
+	`
+		var all = true;
+		var over = false;
+		while (!over)
+			over = this['if-next'](function(next) {
+				all = condition(next);
+				Bool().check('condition-result', all);
+				return !all;
+			}, function() {
+				return true;
+			});
+		return all;
+
+
+‣ ∋ value
+	doc
+		Whether I contain the value.
+	sub-eg
+		✔ (sample.∋ 3)
+
+	∃ em.=_
+
+‣ collect collector:Fun
+	Collect-Iterator me collector
+
+‣ count:Num condition:Fun
+	doc
+		How many elements satisfy the condition.
+	sub-eg
+		✔= 2
+			sample.count _odd?
+
+	fold 0 |count em
+		(condition em).?
+			count.increment
+		|
+			count
+
+‣ drop n:Num
+	doc
+		TODO
+	sub-eg
+		TODO
+
+	TODO
+
+‣ each do:Fun
+	doc
+		TODO
+	sub-eg
+		∙ r
+			Ref 0
+		sample.each
+			r.! it.+_
+		✔ 6
+			r.get
+
+	∀
+		do it
+		Bool.⊤
+	()
+
+‣ empty?
+	sub-eg
+		✔ sample.empty?.¬
+
+
+	✘.throws? next_
+
+\‣ fold-while combine:Fun
+\	eg
+\		✔= 10
+\			sample.fold-while |so-far next
+\				Opt.filter (next.< 3)
+\					so-far.+ next
+\
+\	TODO
+
+
+
+
+‣ fold[initial] combine:Fun
+	doc
+		TODO
+	eg
+		✔= 10
+			sample.fold[4] _+
+		✔= 6
+			sample.fold _+
+	todo
+		fold-while |acc next
+			Opt.some (combine acc next)
+
+	∙ init
+		initial.or
+			next
+
+
+	`
+		var res = init;
+		var over = false;
+		while (!over)
+			over = this['if-next'](function(next) {
+				res = combine(res, next);
+				return false;
+			}, function() {
+				return true;
+			});
+
+‣ first
+	eg
+		✔= 1
+			sample.first
+
+	of 0
+
+‣ last
+	eg
+		✔= 3
+			sample.last
+
+	`
+		var last;
+		try {
+			while (true)
+				last = this.next();
+		}
+		catch (error) {
+			if (error.message == 'StopIteration')
+				return last;
+			else
+				throw error;
+		}
+
+‣ make-string:Str[joiner~:Str]
+	doc
+		TODO
+	eg
+		✔= "1 2 3"
+			sample.make-string
+		✔= "1+2+3"
+			sample.make-string['+]
+
+	∙ joiner
+		joiner~.or
+			" "
+	∙ as-strings
+		collect Str.of_
+
+	(Array.from as-strings).join joiner

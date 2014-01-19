@@ -1,18 +1,20 @@
 doc
 	Here's my nifty program.
 
-‣‣ show-all-todo
-	todo
-		Put this somewhere!
-	Any-Class.all-classes.each |class
-		class.meta.todo~.each
-			Console.log! "{class}: {it}"
-		class.methods.each-property |name method
-			method.meta.todo~.each
-				Console.log! "{class}#{name}: {it}"
-		class.static-methods.each-property |name method
-			method.meta.todo~.each
-				Console.log! "{class}##{name}: {it}"
+use! Vec2
+
+\‣‣ show-all-todo
+\	todo
+\		Put this somewhere!
+\	Any-Class.all-classes.each |class
+\		class.meta.todo~.each
+\			Console.log! "{class}: {it}"
+\		class.methods.each-property |name method
+\			method.meta.todo~.each
+\				Console.log! "{class}#{name}: {it}"
+\		class.static-methods.each-property |name method
+\			method.meta.todo~.each
+\				Console.log! "{class}##{name}: {it}"
 
 \(use Standard/Test/Traits-Test/Sub).meta.eg.run!
 

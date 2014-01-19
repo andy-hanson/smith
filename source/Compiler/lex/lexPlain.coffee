@@ -3,8 +3,7 @@ Stream = require './Stream'
 GroupPre = require './GroupPre'
 lexQuote = require './lexQuote'
 { cFail, cCheck } = require '../CompileError'
-{ keywords, metaTextKeywords } = require '../keywords'
-
+keywords = require '../keywords'
 
 module.exports = (stream, inQuote) ->
 	type stream, Stream
@@ -85,18 +84,16 @@ module.exports = (stream, inQuote) ->
 					name = takeName()
 					if stream.maybeTake '_'
 						new T.Name pos, name, 'x_'
-					else if metaTextKeywords.contains name
+					else if keywords.metaText.contains name
 						lexQuote name, stream, indent
-					else if keywords.contains name
-						switch name
-							when 'use', 'use!', 'super', 'trait'
-								stream.takeMatching space
-								used = stream.takeMatching usedChar
-								new T.Use pos, used, name
-							when 'in', 'out', 'eg'
-								new GroupPre pos, name
-							else
-								new T.Special pos, name
+					else if keywords.metaFun.contains name
+						new GroupPre pos, name
+					else if keywords.useLike.contains name
+						stream.takeMatching space
+						used = stream.takeMatching usedChar
+						new T.Use pos, used, name
+					else if keywords.special.contains name
+						new T.Special pos, name
 					else if name.startsWith '‣'
 						stream.takeMatching space
 						name2 = takeName()

@@ -1,7 +1,7 @@
 (require 'source-map-support').install()
 
-try
-	(require './smith').main()
-catch error
-	console.log error.stack
-	process.exit 1
+#try
+(require './smith').main()
+#catch error
+#	console.log error.stack
+#	process.exit 1
