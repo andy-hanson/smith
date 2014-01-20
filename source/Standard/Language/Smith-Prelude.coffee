@@ -73,6 +73,8 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 
 		#imm metaClass, '_super', superMetaClass
 
+	metaClass['_is-meta'] = yes
+
 	clazz = Object.create metaClass._proto
 
 	imm clazz, '_super', superClass if superClass?
@@ -141,24 +143,6 @@ AnyClass = Any.class()
 def.call AnyClass, '-def', def
 
 AnyClass['-def'] 'construct', makeAnyClass
-
-AnyClass['-def'] 'of', ->
-	if @['_is_meta']
-		throw up
-
-	obj =
-		Object.create @_proto
-	constructor =
-		@_proto.construct
-	unless constructor instanceof Function
-		message =
-			if constructor?
-				"#{@} has bad constructor #{constructor}"
-			else
-				"#{@} has no constructor"
-		throw new Error message
-	constructor.apply obj, Array.prototype.slice.call arguments
-	obj
 
 Meta =
 	makeAnyClass 'Meta'

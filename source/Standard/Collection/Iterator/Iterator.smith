@@ -8,6 +8,7 @@ doc
 	Returns element 3, then element 4.
 	And operations such as each leave the iterator empty.
 todo
+	fold-while
 	++ (++-Iterator)
 	keep (Keep-Iterator)
 	delete (opposite of keep)
@@ -20,6 +21,10 @@ todo
 	zip (Zip-Iterator)
 
 use Collect-Iterator
+
+abstract!
+
+
 
 ‣ if-next a:Fun b:Fun
 	doc
@@ -76,7 +81,7 @@ use Collect-Iterator
 ‣ ∃:Bool condition:Fun
 	doc
 		TODO
-	sub-eg
+	eg
 		✔ (sample.∃ _even?)
 		✔ (sample.∃ _negative?).¬
 
@@ -88,7 +93,7 @@ use Collect-Iterator
 ‣ ∀:Bool condition:Fun
 	doc
 		TODO
-	sub-eg
+	eg
 		✔ (sample.∀ _natural?)
 		✔ (sample.∀ _odd?).¬
 
@@ -109,10 +114,10 @@ use Collect-Iterator
 ‣ ∋ value
 	doc
 		Whether I contain the value.
-	sub-eg
+	eg
 		✔ (sample.∋ 3)
 
-	∃ em.=_
+	∃ value.=_
 
 ‣ collect collector:Fun
 	Collect-Iterator me collector
@@ -120,11 +125,11 @@ use Collect-Iterator
 ‣ count:Num condition:Fun
 	doc
 		How many elements satisfy the condition.
-	sub-eg
+	eg
 		✔= 2
 			sample.count _odd?
 
-	fold 0 |count em
+	fold[0] |count em
 		(condition em).?
 			count.increment
 		|
@@ -133,20 +138,23 @@ use Collect-Iterator
 ‣ drop n:Num
 	doc
 		TODO
-	sub-eg
-		TODO
+	eg
+		✔= 3
+			(sample.drop 2).fold _+
 
-	TODO
+	↺.times n
+		next
+	me
 
 ‣ each do:Fun
 	doc
 		TODO
-	sub-eg
+	eg
 		∙ r
 			Ref 0
 		sample.each
 			r.! it.+_
-		✔ 6
+		✔= 6
 			r.get
 
 	∀
@@ -155,9 +163,11 @@ use Collect-Iterator
 	()
 
 ‣ empty?
-	sub-eg
+	doc
+		Whether I contain no elements.
+		AKA, whether `next` will fail.
+	eg
 		✔ sample.empty?.¬
-
 
 	✘.throws? next_
 

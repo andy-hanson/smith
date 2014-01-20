@@ -18,6 +18,8 @@ doc
 		catch (error) {
 			//eg: at Object.<anonymous> (/home/andy/programming/source/Main.smith:19:1)
 
+			if (error.stack == null)
+				throw error;
 			error.stack.split('\n').forEach(function(line) {
 				var rgx =
 					/\s*at (\S*)\s*(\[as (.*)\])?\s*\((.*)\)/;

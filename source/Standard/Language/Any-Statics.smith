@@ -1,0 +1,6 @@
+Any.do
+	‣‣ exists?:Bool a
+		doc
+			TODO
+
+		`a != null`

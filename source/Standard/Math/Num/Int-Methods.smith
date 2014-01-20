@@ -1,6 +1,7 @@
 use Num
 
 Num.do
+
 	‣ round-towards-0
 		doc
 			Rounds down if positive, rounds up if negative.
@@ -90,6 +91,12 @@ Num.do
 			✔ (3.divisible? 2).¬
 
 		(remainder divisor).zero?
+
+	‣ even?
+		divisible? 2
+
+	‣ odd?
+		even?.¬
 
 	‣ decrement
 		doc

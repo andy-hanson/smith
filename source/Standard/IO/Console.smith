@@ -1,5 +1,12 @@
-‣‣ log! ...args
+‣‣ log!:Void ...args
+	doc
+		Immediately prints arguments to the console, separated by spaces, followed by a new-line.
+
 	todo
 		args.make-string
-	Global@console.log (args.join 「 」)
+
+	Global@console.log ...args
+
+
+	\Global@console.log (args.join 「 」)
 

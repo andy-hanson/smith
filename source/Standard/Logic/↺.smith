@@ -1,53 +1,92 @@
 use Ref
 
-‣‣ loop fun:Fun
+static!
+
+‣‣ times n:Num do:Fun
+	doc
+		Runs `do` `n` times.
+	in
+		✔ n.natural?
+	eg
+		∙ r
+			Ref 0
+		times 3
+			r.! _increment
+		✔= 3
+			r.get
+
+	`
+		for (var i = n; i > 0; i--)
+			_do();
+
+‣‣ loop do:Fun
 	doc
 		Keep running fun until it returns Some.
 		Then return the value in that Some.
+	eg
+		∙ a
+			Ref 3
+		∙ b
+			Ref 0
+		✔= 3
+			loop
+				a.! _decrement
+				b.! _increment
+				a.get.positive?.unless
+					b.get
+	err
+		Infinite loop if Some never returned.
 
 	`
 		while (true) {
-			var result = body();
-			if (Option.Some['subsumes?'](body))
-				return body.value;
+			var result = _do();
+			if (Opt().Some()['subsumes?'](result))
+				return result.value();
 		}
 
-‣‣ while condition:Fun body:Fun
+‣‣ while condition:Fun do:Fun
 	doc
-		Run `body` as long as `condition` holds.
+		Run `do` as long as `condition` holds.
 	eg
 		∙ a
 			Ref 3
 		∙ b
 			Ref 0
 		while
-			a.positive?
+			a.get.positive?
 		|
 			a.! _decrement
 			b.! _increment
 		✔= 0
-			a
+			a.get
 		✔= 3
-			b
+			b.get
 
-	loop
-		condition.of.?
-			do.of
-			None
-		|
-			Some 0
+	`
+		while (condition())
+			_do();
 
 ‣‣ do-while do:Fun condition:Fun
 	doc
 		Run `body`, then keep running it as long as `condition` holds.
 	eg
 		∙ a
-			Ref ()
-		do-while Bool.False
-			a.! 1
+			Ref 0
+		do-while
+			a.! _increment
+		|
+			Bool.⊥
+		✔.fails
+			do-while
+				1
+			|
+				2
 		✔= 1
 			a.get
 
-	loop
-		(Some do.of).filter condition.of
+	`
+		do {
+			_do();
+		}
+		while (Bool().check('condition', condition()));
 

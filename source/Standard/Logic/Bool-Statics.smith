@@ -1,0 +1,12 @@
+Bool.do
+	‣val ⊤
+		doc
+			TODO
+
+		`true`
+
+	‣val ⊥
+		doc
+			TODO
+
+		`false`

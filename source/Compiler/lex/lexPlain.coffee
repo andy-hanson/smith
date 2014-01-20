@@ -82,8 +82,8 @@ module.exports = (stream, inQuote) ->
 
 				when match nameChar
 					name = takeName()
-					if stream.maybeTake '_'
-						new T.Name pos, name, 'x_'
+					if name.endsWith '_'
+						new T.Name pos, (name.withoutEnd '_'), 'x_'
 					else if keywords.metaText.contains name
 						lexQuote name, stream, indent
 					else if keywords.metaFun.contains name

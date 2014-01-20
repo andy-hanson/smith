@@ -6,10 +6,12 @@ C.do
 		`
 			if (!(global.Object(name) instanceof String))
 				throw new global.Error("First argument of 'check' must be a string");
-			if (a == null)
-				throw new global.Error("Undefined "+name+":"+this._name);
-			if (!this['subsumes?'](a))
-				throw new global.Error(name+' is not a '+this+'; is '+a+'; a '+a.class());
+			if (!this['subsumes?'](a)) {
+				if (a == null)
+					throw new global.Error("Undefined "+name+":"+this._name);
+				else
+					throw new global.Error(name+' is not a '+this+'; is '+a+'; a '+a.class());
+			}
 			return a;
 
 	-def 'export |exported
@@ -20,47 +22,89 @@ C.do
 				throw new global.Error(this._name + ' already exported ' + this.__exported);
 			this.__exported = exported;
 
-	-def '‣ |name:Str method:Fun
-		`
-			if (this._proto[name] != null)
-				throw new global.Error(this + ' already has method ' + name)
-		-def name method
-
 	-def 'subsumes? |a
-		`a['__is-a-id-' + this._id] === true`
+		`a != null && a['__is-a-id-' + this._id] === true`
+
+	-def '‣ |name:Str method:Fun
+		doc
+			TODO
+		in
+			`
+				if (this._proto[name] != null)
+					throw new global.Error(this + ' already has method ' + name)
+
+		-def name method
 
 	‣ ‣override name:Str method:Fun
-		`
-			if (this._proto[name] == null)
-				throw new global.Error('No need to override ' + name + ' in ' + this)
+		doc
+			TODO
+		in
+			`
+				if (this._proto[name] == null)
+					throw new global.Error('No need to override ' + name + ' in ' + this)
+
 		-def name method
 
+	‣ of ...args
+		doc
+			TODO
+		in
+			✔ (has-property? '_is-meta).¬
+
+		∙ new
+			Global@Object.create proto
+		new.construct ...args
+		new
+
 	‣override toString
+		doc
+			TODO
 		how
 			TODO: name
 
 		`this._name`
 
-	‣ to-class
-		me
-
 	‣ method name:Str
+		doc
+			This class' method of the given name.
+			Does not include inherited methods.
+
 		methods.property name
 
 	‣ alias old-name:Str new-name:Str
+		doc
+			TODO
+
 		∙ old
 			old-name
 		me.‣ new-name |...args
 			`this[old].apply(this, args)`
+
+	‣ ‣‣-maybe-override name:Str method:Fun
+		doc
+			TODO
+
+		new! name method
+		static-methods.new! name method
+
 
 	‣ ‣‣ name:Str method:Fun
 		doc
 			Defines a method just for this class.
 			Added to `static-methods` too.
 			Not used by sub-classes.
+		in
+			✔ (has-proto-property? name).¬
+				"{me.name}.{name} already defined, use ‣‣override"
 
-		new! name method
-		static-methods.new! name method
+		me.‣‣-maybe-override name method
+
+	‣ ‣‣override name:Str method:Fun
+		in
+			✔ (has-proto-property? name)
+				"{me.name}.{name} not defined, no need to override"
+
+		me.‣‣-maybe-override name method
 
 	‣ ‣val name:Str make-val:Fun
 		doc
@@ -94,26 +138,35 @@ C.do
 		\(Opt.from-nullable meta).each
 		\	me.‣method-meta method-name it
 
+	‣ ‣read name:Str ...meta
+		doc
+			TODO
+
+		me.‣ name
+			property "_{name}"
+		maybe-meta.call me name ...meta
+
 	‣ ‣read~ name:Str ...meta
+		doc
+			TODO
+
 		∙ method-name
 			"{name}~"
 		me.‣ method-name
 			property~ "_{name}"
 		maybe-meta.call me method-name ...meta
 
-	‣ ‣read name:Str ...meta
-		me.‣ name
-			property "_{name}"
-		maybe-meta.call me name ...meta
-
 	‣ ‣read/~ ...args
 		doc
-			Both optional and forcing versions of a reader.
+			Both `read` and `read~`.
 
 		me.‣read ...args
 		me.‣read~ ...args
 
 	‣ ‣write name:Str ...meta
+		doc
+			TODO
+
 		∙ method-name
 			"{name}!"
 		me.‣ method-name |mod:Fun
@@ -121,8 +174,49 @@ C.do
 		maybe-meta.call me method-name ...meta
 
 	‣ ‣access name:Str ...meta
+		doc
+			TODO
+
 		me.‣read name ...meta
 		me.‣write name ...meta
+
+	‣ ‣⚐ name:Str ...meta
+		doc
+			TODO
+
+		me.‣ "{name}!"
+			new! name 0
+		maybe-meta.call me name ...meta
+		me.‣ "not-{name}!"
+			delete-property-if-exists! name
+		me.‣ "{name}?"
+			has-property? "_{name}"
+		maybe-meta.call me "{name}?" ...meta
+
+	\ by default classes are instantiable and non-extensible.
+
+	‣⚐ instance-less
+
+	‣⚐ extensible
+		doc
+			Whether I can have sub-classes.
+
+	\‣ instantiable?
+	\	doc
+	\		Whether I can directly have instances.
+	\		Sub-classes could be instantiable; if you want no sub-classes, use `static`.
+	\	non-instantiable?.¬
+
+	‣ abstract!
+		instance-less!
+		extensible!
+
+	‣ static!
+		doc
+			Makes me non-instantiable and non-extensible.
+
+		instance-less!
+		not-extensible!
 
 	‣read methods
 		doc
@@ -252,9 +346,6 @@ C.do
 			✔ (Fun.sub-class? Fun)
 
 		class.subsumes? proto
-
-	‣ no-instances!
-		()
 
 	‣ ‣class[super-class~:C] name:Str do-meta:Fun
 		∙ args

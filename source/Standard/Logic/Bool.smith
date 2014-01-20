@@ -2,17 +2,8 @@
 	Global@Boolean.to-class 'Bool
 
 B.do
-	‣val ⊤
-		doc
-			TODO
-
-		`true`
-
-	‣val ⊥
-		doc
-			TODO
-
-		`false`
+	∙ call
+		`function(f) { return B.check('a', f()); }`
 
 	‣ ? then:Fun else:Fun
 		doc
@@ -20,9 +11,9 @@ B.do
 
 		`this.valueOf() ? then() : _else()`
 
-	‣ ∨ a:Fun
+	‣ ∨:B a:Fun
 		doc
-			Whether either this or `a` is true.
+			Whether either this or `a` is ⊤.
 		eg
 			✔= ⊥
 				⊥.∨
@@ -30,80 +21,111 @@ B.do
 			✔= ⊤
 				⊤.∨
 					⊥
-		how
-			TODO: make sure fun returns a Bool.
 
-		`this || a()`
+		`this || call(a)`
 
-	‣ ∧ a:Fun
+	‣ ∧:B a:Fun
+		doc
+			Whether both I and the result of `a` are ⊤.
+		eg
+			✔= ⊤
+				⊤.∧
+					⊤
+			✔= ⊥
+				⊤.∧
+					⊥
+
+		`this && call(a)`
+
+	‣ ¬:B
 		doc
 			TODO
-
-		`this && a()`
-
-	‣ ¬
-		doc
-			TODO
+		eg
+			✔= ⊥
+				⊤.¬
+			✔= ⊤
+				⊥.¬
 
 		`!this`
 
-	‣ → a:Fun
+	‣ →:B a:Fun
 		doc
-			TODO
+			Whether this is ⊥ or the result of `a` is ⊤.
+		eg
+			✔= ⊤
+				⊤.→
+					⊤
+			✔= ⊤
+				⊥.→
+					⊥
+			✔= ⊥
+				⊤.→
+					⊥
 
-		`!this || a()`
+		`!this || call(a)`
 
-	‣ ↔ a:Bool
+	‣ ↔ a:B
 		doc
-			Same as equality.
+			Same as =, but for Bools only.
 
 		= a
 
-	‣ ⊕ a:Bool
+	‣ ⊕ a:B
 		doc
-			TODO
+			Same as ≠, but for Bools only.
 
-		`this ? !a : a`
+		≠ a
 
-	‣ nor a:Bool
+	‣ nor a:B
 		doc
-			TODO
+			Whether I and `a` are both ⊥.
+		eg
+			✔= ⊤
+				⊥.nor ⊥
 
 		`!(this || a)`
 
 	‣ if! then:Fun
 		doc
-			TODO
+			Runs `then` if I am ⊤.
 
 		`
 			if (this)
 				then()
 			return;
 
-	‣ if then:Fun
+	‣ if:Opt then:Fun
 		doc
-			TODO
+			If I am ⊤, returns Some of the result of `then`.
+			Else, returns None.
+		eg
+			✔= (Opt.some 1)
+				⊤.if
+					1
+			✔= Opt.None
+				⊥.if
+					1
 
 		`this ? Opt().some(then()) : Opt().None()`
 
 	‣ unless! then:Fun
 		doc
-			TODO
+			Opposite of `if!`.
 
 		¬.if! then
 
-	‣ unless then:Fun
+	‣ unless:Opt then:Fun
 		doc
-			TODO
+			Opposite of `if`.
 
 		¬.if then
 
-	\alias '? 'if-then-else
 	\alias '∨ 'or
 	\alias '∧ 'and
 	\alias '¬ 'not
 	\alias '→ 'implies
 	\alias '⊕ 'xor
+
 
 
 export B

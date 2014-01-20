@@ -1,6 +1,4 @@
 Fun.do
-	‣‣ from-JS ...arguments-and-body
-		Global@Function.apply () arguments-and-body
 
 	‣ new-bound-of new-bound-to ...arguments
 		unbound.apply new-bound-to arguments

@@ -1,0 +1,20 @@
+Any-Class.do
+	‣‣override of [super-class~:Any-Class] name:Str do-meta:Fun
+		Prelude.class name super-class~.to-nullable do-meta
+
+	‣‣ all-classes
+		Prelude.all-classes
+
+	‣‣ show-all-todo
+		todo
+			Put this somewhere!
+
+		Any-Class.all-classes.each |class
+			class.meta.todo~.each
+				Console.log! "{class}: {it}"
+			class.methods.each-property |name method
+				method.meta.todo~.each
+					Console.log! "{class}#{name}: {it}"
+			class.static-methods.each-property |name method
+				method.meta.todo~.each
+					Console.log! "{class}##{name}: {it}"

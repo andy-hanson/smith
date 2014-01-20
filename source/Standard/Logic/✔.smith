@@ -1,64 +1,8 @@
-no-instances!
+static!
 
-‣‣ of condition:Bool ...args
-	condition.unless
-		∙ message
-			`(args.length > 0) ? args[0]() : 'Check failed.'`
-			\args@length.positive?.?
-			\	(args 0).of
-			\|
-			\	「Check failed.」
-		✘ message
+\ I know this won't override anything, but ‣‣ relies on ✔.of.
+‣‣-maybe-override of condition:Bool ...args
+	condition.unless!
+		`
+			throw new global.Error((args.length > 0) ? args[0]() : 'Check failed.');
 
-‣‣ fails fun:Fun
-	eg
-		fails
-			✘ 「whoops」
-
-		fails
-			fails
-				\doesn't fail
-			Console.log! 0
-
-	✘.catch
-		fun.run!
-
-‣‣  fail-message message:Str fun:Fun
-	✔= message
-		✘.catch-message
-			fun.run!
-
-‣‣ rel relation-name:Str a make-b:Fun
-
-	∙ b
-		make-b.of
-
-	✔ (Any.exists? a)
-		"First argument undefined"
-	✔ (Any.exists? b)
-		"Second argument undefined"
-	✔ (a.send relation-name b)
-		"Expected {a}.{relation-name} {b}"
-
-‣‣ ≈ [significant-digits~] a make-b
-	∙ significant-digits
-		significant-digits~.or
-			6
-	∙ b
-		make-b.of
-	∙ close
-		a.≈ [significant-digits] b
-	✔ close
-		"{a} not ≈ {b} (to {significant-digits} digits)"
-
-‣‣ < a make-b
-	rel '< a make-b
-
-‣‣ > a make-b
-	rel '< a make-b
-
-‣‣ ≤ a make-b
-	rel '≤ a make-b
-
-‣‣ ≥ a make-b
-	rel '≥ a make-b

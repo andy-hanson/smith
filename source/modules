@@ -1,5 +1,5 @@
 auto ↺ ✔ ✔= ✘ ◆ Any Any-Class Array Bag Bool Console Error Fun
-auto Global Iterable Iterator Meta Num Opt Ref Str Test
+auto Global Iterable Iterator Meta Num Opt Ref Str Test Vec2 Void
 
 Standard Standard/index
 
@@ -30,6 +30,8 @@ Ref Standard/Language/Ref
 Smith-Prelude Standard/Language/Smith-Prelude
 Str Standard/Str
 Test Standard/Test
+Vec2 Standard/Math/Vec2
+Void Standard/Void
 
 Source-Map-Support source-map-support FORCE
 

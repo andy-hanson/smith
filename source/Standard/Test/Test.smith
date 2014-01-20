@@ -1,4 +1,4 @@
-‣‣ of name:Str do:Fun
+‣‣override of name:Str do:Fun
 	✘.annotate
 		do.run!
 	|

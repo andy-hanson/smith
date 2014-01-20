@@ -1,9 +1,9 @@
-no-instances!
+static!
 
 ‣‣ TODO
 	✘ 'TODO
 
-‣‣ of message:Str
+‣‣override of message:Str
 	doc
 		Throw a new Error with the given message.
 	eg

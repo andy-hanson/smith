@@ -31,7 +31,7 @@ Array.do
 	‣override size
 		@length
 
-	‣‣ of ...members
+	‣‣override of ...members
 		members
 
 	‣ iterator

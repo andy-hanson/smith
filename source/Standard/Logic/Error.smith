@@ -2,7 +2,7 @@
 	Global@Error.to-class
 
 E.do
-	‣‣ of message
+	‣‣override of message
 		how
 			For some reason, `New Global@Error message` won't work.
 

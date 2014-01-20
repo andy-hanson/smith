@@ -4,7 +4,7 @@ Str.do-meta
 	doc
 		...
 
-	‣‣ of a
+	‣‣override of a
 		`
 			switch (typeof a) {
 				case 'undefined':

@@ -100,7 +100,8 @@ class Parser
 		@expression tokens, yes
 
 	###
-	isValue is whether the expression *must* be a value, such as anything in parentheses.
+	isValue is whether the expression *must* be a value.
+	Use expressions in parentheses must be values.
 	###
 	expression: (tokens, isValue = no) ->
 		type tokens, Array
