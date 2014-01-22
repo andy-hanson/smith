@@ -1,5 +1,5 @@
 auto ↺ ✔ ✔= ✘ ◆ Any Any-Class Array Bag Bool Console Error Fun
-auto Global Iterable Iterator Meta Num Opt Ref Str Test Vec2 Void
+auto Global Iterable Iterator Meta New Num Opt Queue Range Ref Seq Str Test Vec2 Void
 
 Standard Standard/index
 
@@ -10,7 +10,7 @@ Standard Standard/index
 ◆ Standard/Logic/◆
 Any Standard/Language/Any
 Any-Class Standard/Language/Any-Class
-Array Standard/Collection/Bag/Array
+Array Standard/Collection/Bag/Seq/Array
 Bag Standard/Collection/Bag/index
 Bool Standard/Logic/Bool
 Collection Standard/Collection
@@ -22,12 +22,15 @@ Iterable Standard/Collection/Iterable
 Iterator Standard/Collection/Iterator
 Math Standard/Math/index
 Meta Standard/Language/Meta
+New Standard/Language/New
 Num Standard/Math/Num
 Opt Standard/Collection/Opt
-Vec2 Standard/Math/Vec2
+Queue Standard/Collection/Bag/Seq/Queue
 Random Standard/Math/Random
+Range Standard/Collection/Range
 Ref Standard/Language/Ref
 Smith-Prelude Standard/Language/Smith-Prelude
+Seq Standard/Collection/Bag/Seq
 Str Standard/Str
 Test Standard/Test
 Vec2 Standard/Math/Vec2

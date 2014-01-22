@@ -1,0 +1,111 @@
+doc
+	TODO
+eg
+	Deque.of.do
+		\print!
+		«! 2
+		\print!
+		»! 3
+		\print!
+		«! 1
+		\print!
+		✔= 3
+			un-»!
+		✔= 2
+			un-»!
+		✔= 1
+			un-»!
+		✔ empty?
+
+super Seq
+
+‣‣override of ...members
+	todo
+		inherit from Bag (builder)
+
+	members.size.zero?.?
+		new (Array.of-capacity 8) 0 0
+	|
+		new members 0 members.size.decrement
+
+\ end is non-inclusive, front is
+data |!data:Array !front:Num !end:Num
+	()
+
+‣ print!
+	Console.log! "{data} {front} {end}"
+
+‣override size
+	end.- front
+
+‣override empty?
+	front.= end
+
+‣ -loop index:Num
+	(data.size.+ index).remainder data.size
+
+‣ »! value
+	-maybe-expand!
+	data.! end value
+	end!
+		-loop it.increment
+
+‣ «! value
+	-maybe-expand!
+	front!
+		-loop it.decrement
+	data.! front value
+
+‣override first:Any
+	(data) front
+
+‣override last:Any
+	(data) end.decrement
+
+‣ un-«!
+	◆.returning first
+		front!
+			-loop it.increment
+
+‣ un-»!
+	end!
+		-loop it.decrement
+	(data) end
+
+‣ -maybe-expand!
+	doc
+		Puts the data in the middle of a new array twice as big.
+
+	(front.= end.increment).if!
+		∙ new-data
+			Array.of-capacity data.size.twice
+		∙ offset
+			data.size.half
+		front!
+			offset
+		end!
+			(offset.+ data.size)
+		new-data.splice front end ...data
+
+
+iterator
+	‣‣override of deque
+		new deque deque.front
+
+	data |deque:Deque !index:Num
+		()
+
+	‣ next
+		(index.= deque.end).?
+			stop
+		|
+			◆.returning (deque.data index)
+				index!
+					deque.-loop it.increment
+
+
+
+
+
+
+

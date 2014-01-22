@@ -1,0 +1,77 @@
+doc
+	TODO
+eg
+	Queue.of.do
+		add! 1
+		add! 2
+		✔= 1
+			next!
+		✔= 2
+			next!
+		✔.fails
+			next!
+
+super Seq
+
+‣ iterator
+	Iterator.slice data left right
+
+‣‣override of ...args
+	new 0 args.size args
+
+data |!left:Num !right:Num data:Array
+	()
+
+‣override empty?:Bool
+	left.= right
+
+‣ add!:Void value
+	doc
+		Adds a value to the end of the queue.
+
+	data.! right value
+	right! _increment
+
+‣ next
+	doc
+		Retrieves the next value without removing it.
+	eg
+		(Queue 1 2).do
+			✔= 1
+				next
+			✔= 1
+				next
+
+
+	(data) left
+
+‣ next!
+	doc
+		Removes a value from the front of the queue.
+
+	◆.returning next
+		left! _increment
+		(left.> right.half).if!
+			compress!
+
+‣ next~:Opt
+	doc
+		If there is a next value, `next`.
+
+	empty?.unless
+		next
+
+‣ next~!:Opt
+	doc
+		If there is a next value, `next!`.
+
+	empty?.unless
+		next!
+
+
+‣ compress!:Void
+	doc
+		Makes internal data as small as possible.
+
+	data.splice left (right.- left)
+	()

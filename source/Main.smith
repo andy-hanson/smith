@@ -1,5 +1,8 @@
-\doc
-\	Here's my nifty program.
+doc
+	Here's my nifty program.
+
+
+use! require-all
 
 \use! Vec2
 \(use Standard/Test/Traits-Test/Sub).meta.eg.run!
@@ -7,5 +10,3 @@
 \show-all-todo
 
 Test.all!
-
-\(Array 1 2 3).iterator.each Console.log!_

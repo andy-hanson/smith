@@ -4,11 +4,13 @@ doc
 
 super Iterator
 
-data |array:Array !index:Num
+data |array:Array !index:Num end:Num
+	in
+		index.< end
 	()
 
 ‣ next
-	(index.< array.size).?
+	(index.< end).?
 		◆.returning ((array) index)
 			index! _increment
 	|

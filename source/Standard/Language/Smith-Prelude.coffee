@@ -23,6 +23,7 @@ Any = null
 # call with a class as 'this'
 def = (name, method) ->
 	unbound = method.unbound()
+	unbound._class = this
 	imm @_methods, name, unbound
 	imm @_proto, name, unbound
 
@@ -157,7 +158,11 @@ bind = (object, name) ->
 	fun = object[name]
 
 	if fun instanceof Function
-		fun.unbound().bind object
+		unbound = fun.unbound()
+		boundd = unbound.bind object
+		boundd['_make-meta-pre'] = unbound['_make-meta-pre']
+		boundd._unbound = unbound
+		boundd
 	else if fun?
 		throw new Error "Member #{name} of #{object} is not a Fun."
 	else

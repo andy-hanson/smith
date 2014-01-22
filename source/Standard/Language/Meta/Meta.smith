@@ -72,11 +72,15 @@ M.do
 
 			function f(a, b) {
 				Object.getOwnPropertyNames(a).forEach(function(key) {
-					if (b[key] != null)
-						throw new global.Error(
-							'Can not merge on key ' + key + '; has values "'
-								+ a[key] + '" and "' + b[key] + '"');
-					m[key] = a[key];
+					if (key == '_arguments')
+						m[key] = a[key];
+					else {
+						if (b[key] != null)
+							throw new global.Error(
+								'Can not merge on key ' + key + '; has values "'
+									+ a[key] + '" and "' + b[key] + '"');
+						m[key] = a[key];
+					}
 				});
 			}
 

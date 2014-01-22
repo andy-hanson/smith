@@ -1,0 +1,10 @@
+doc
+	Contains an iterator over iterators, flattening them.
+
+super Iterator
+
+data |iterators:Array
+	()
+
+‣ next
+	iterators.collect _next

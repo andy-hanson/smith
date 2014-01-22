@@ -75,9 +75,7 @@ recurseDirectoryFilesSync = (inDir, filter, callBack) ->
 				readTextSync fileName
 			callBack rel, text
 
-###
-TODO: use recurseDirectorySync!
-###
+
 
 processDirectorySync = (inDir, outDir, filter, callBack) ->
 	ensureDir outDir
@@ -87,7 +85,9 @@ processDirectorySync = (inDir, outDir, filter, callBack) ->
 callBack takes dir (relative to inDir) and text.
 ###
 processDirectorySyncRecurse = (origInDir, inDir, outDir, filter, callBack) ->
-	(fs.readdirSync inDir).forEach (file) ->
+	x = fs.readdirSync inDir
+
+	x.forEach (file) ->
 		full = "#{inDir}/#{file}"
 		stats = fs.statSync full
 		rel =
@@ -99,6 +99,8 @@ processDirectorySyncRecurse = (origInDir, inDir, outDir, filter, callBack) ->
 					fs.readFileSync full, 'utf8'
 				toWrites =
 					callBack rel, text
+
+				type toWrites, Array
 
 				toWrites.forEach (toWrite) ->
 					[ shortName, content ] = toWrite
@@ -118,3 +120,4 @@ module.exports =
 	processDirectorySync: processDirectorySync
 	readFilesNamedSync: readFilesNamedSync
 	statKindSync: statKindSync
+	recurseDirectoryFilesSync: recurseDirectoryFilesSync

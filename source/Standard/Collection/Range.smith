@@ -1,28 +1,32 @@
-is Iterable
+super Iterable
 
-‣ construct min:Num max:Num
+
+‣‣override of[step~] min:Num max:Num
+	∙ step
+		step~.or
+			1
+
+	new min max step
+
+
+data |min:Num max:Num step:Num
 	in
 		✔ (min.< max)
-
-	set-property '_min min
-	set-property '_max max
-
-‣read min
-‣read max
+		✔ step.positive?
 
 iterator
-	‣ construct range:Range
-		set-property '_range range
-		set-property '_current range.min
+	‣‣override of range
+		new range range.min
 
-	‣read range
-	‣access current
+	data |range:Range !current:Num
+		()
 
 	‣ next
 		(current.< range.max).?
-			∙ was
-				current
-			current! _inc
-			was
+			◆.returning current
+				current! range.step.+_
 		|
 			stop
+
+‣override toString
+	"<{min}..{max} by {step}>"

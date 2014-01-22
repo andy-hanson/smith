@@ -99,9 +99,22 @@ class Smith
 			not (@outNames inName).isEmpty()
 
 	compileAll: ->
-		filter =
-			@bound 'compilable'
-		io.processDirectorySync @inDir, @outDir, filter, @bound 'compile'
+		io.processDirectorySync @inDir, @outDir,
+			(@bound 'compilable'), @bound 'compile'
+
+		@writeAll()
+
+	writeAll: ->
+		all = []
+		io.recurseDirectoryFilesSync @inDir, (@bound 'compilable'), (inFile) =>
+			#Array.prototype.push.apply all, @outNames inFile
+			x = inFile.withoutEnd path.extname inFile
+			all.push "#{x}.js"
+
+		requires = all.map (module) ->
+			"require('./#{module}');"
+		out = requires.join '\n'
+		fs.writeFileSync (path.join @outDir, 'require-all.js'), out
 
 
 	watch: ->

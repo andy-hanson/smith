@@ -1,0 +1,15 @@
+doc
+	Contains an iterator over iterators, flattening them.
+
+super Iterator
+
+data |!current:Iterator rest:Iterator
+	()
+
+‣ next
+	current.next~.~
+		it
+	|
+		current!
+			rest.next
+		next

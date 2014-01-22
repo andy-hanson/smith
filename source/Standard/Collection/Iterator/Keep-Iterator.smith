@@ -1,0 +1,12 @@
+super Iterator
+
+data |original:Iterator condition:Fun
+	()
+
+‣ next
+	∙ possible-next
+		original.next
+	(condition possible-next).?
+		possible-next
+	|
+		next

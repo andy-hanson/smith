@@ -1,0 +1,98 @@
+Array.do
+	doc
+		TODO
+
+	‣‣ of-capacity n:Num
+		err
+			RangeError if n isn't natural
+
+		Global@Array n
+
+	‣‣ from-iterator:Array iterator:Iterator
+		∙ x
+			Array.of
+		iterator.each x.push_
+		x
+
+	‣ copy:Array
+		slice
+
+	‣ »!:Void value
+		push value
+		()
+
+	‣ »:Array value
+		◆.returning copy
+			it.»! value
+
+	\ This goes down here because `trait` needs '+'
+	trait Seq
+
+	‣ «!:Void value
+		unshift value
+		()
+
+	‣ «:Array value
+		◆.returning copy
+			it.«! value
+
+	\‣ ∋ em
+	\	todo
+	\		Call '=' at each element
+	\
+	\	(indexOf em).≠ -1
+
+	‣override size
+		@length
+
+	‣‣override of ...members
+		members
+
+	‣ iterator
+		Iterator.slice me 0 size
+
+	\‣override each do:Fun
+	\	∙ size
+	\		size
+	\	`
+	\		for (var index = 0; index < size; index++)
+	\			_do(this[index]);
+
+	‣override of:Any index:Num
+		in
+			✔ (valid-index? index)
+				"Invalid index {index} of array of size {size}"
+
+		`this[index]`
+
+	‣ !:Void index:Num value
+		`
+			this[index] = value;
+			return;
+
+	‣ valid-index?:Bool index:Num
+		index.natural?.∧
+			index.< size
+
+
+	‣ collect!:Void collector:Fun
+		∙ size
+			size
+		`
+			for (var index = 0; index < size; index++)
+				this[index] = collector(this[index]);
+
+	‣override collect:Array collector:Fun
+		◆.returning copy
+			it.collect! collector
+
+	‣override ++ oth:Array
+		todo
+			oth.to-array
+
+		concat oth
+
+	\ TODO: inherit this from Iterable!
+	\‣ make-string joiner:Str
+	\	(map Str.of_).join joiner
+	\	#join " "

@@ -30,8 +30,13 @@ C.do
 			TODO
 		in
 			`
-				if (this._proto[name] != null)
-					throw new global.Error(this + ' already has method ' + name)
+				if (this._proto[name] != null) {
+					var from =
+						this._proto[name]._class;
+					var fromStr =
+						(from == null) ? '(from javascript code)' : ' from ' + from;
+					throw new global.Error(this + ' already has method ' + name + fromStr);
+				}
 
 		-def name method
 
@@ -45,7 +50,7 @@ C.do
 
 		-def name method
 
-	‣ of ...args
+	‣ new ...args
 		doc
 			TODO
 		in
@@ -79,6 +84,8 @@ C.do
 			old-name
 		me.‣ new-name |...args
 			`this[old].apply(this, args)`
+
+	alias 'new 'of
 
 	‣ ‣‣-maybe-override name:Str method:Fun
 		doc
@@ -167,11 +174,12 @@ C.do
 		doc
 			TODO
 
-		∙ method-name
-			"{name}!"
-		me.‣ method-name |mod:Fun
+		me.‣ "{name}!" |mod:Fun
 			modify-property! "_{name}" mod
-		maybe-meta.call me method-name ...meta
+		maybe-meta.call me "{name}!" ...meta
+		me.‣ "set-{name}!" |new-value
+			set-property! "_{name}" new-value
+		maybe-meta.call me "set-{name}!" ...meta
 
 	‣ ‣access name:Str ...meta
 		doc
@@ -287,7 +295,7 @@ C.do
 		traits.push new-trait
 
 		\ must use forEach because Array neads a trait to get each
-		(new-trait.inherits-from.+ new-trait).forEach |inherit-from ...ignore
+		(new-trait.inherits-from.» new-trait).forEach |inherit-from ...ignore
 			(inherits-from? inherit-from).unless!
 				proto.new-unless-exists! "__is-a-id-{new-trait.id}"
 					Bool.⊤
@@ -318,19 +326,19 @@ C.do
 		✘.annotate
 			meta.test-eg![me]
 		|
-			"{me}#eg"
+			name
 
 		∙ test |is-static
 			|name method
 				✘.annotate
 					method.meta.test-eg![me]
 				|
-					∙ hash
+					∙ def
 						is-static.?
-							'##
+							'‣‣
 						|
-							'#
-					"{me}{hash}{name}#eg"
+							'‣
+					"{me}{def}{name}"
 
 
 		methods.each-property (test Bool.⊥)
@@ -357,24 +365,23 @@ C.do
 
 		class
 
-	‣ object‣ [super-class~:C] name:Str do-meta:Fun
+	‣ export-singleton[super-class~:C] do-meta:Fun
+		∙ s
+			super-class~.or
+				Any-Class
+		export (C.Singleton[s] name do-meta)
+
+	‣ ‣object[super-class~:C] name:Str do-meta:Fun
 		∙ args
 			`arguments`
-		∙ class
-			me.‣class ...args
-		∙ instance
-			Global@Object.create class.proto
-		class.‣‣ 'instance
-			instance
-		class.‣ constructor
-			fail "Singleton class!"
-		class.instance
+		me.‣val name
+			C.Singleton ...args
 
 	‣ ‣sub-class name:Str do-to:Fun
 		me.‣class[me] name do-to
 
 	‣ ‣sub-object name:Str do-to:Fun
-		object‣[me] name do-to
+		me.‣object[me] name do-to
 
 	‣ data[can-extend~:Bool] constructor:Fun
 		todo
@@ -443,7 +450,6 @@ C.do
 		me.‣ name |...args
 			∙ delegated
 				dt.call me
-			\delegated.send name ...args
 			`_call(delegated, name, [], [args])`
 		\(method name).meta! delegate-to.meta
 

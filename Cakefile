@@ -28,7 +28,7 @@ require('just-the-job') ->
 		['lint-coffee', 'lint-JS']
 	@task 'compile-compiler',
 		'Compile the compiler',
-		'coffee --compile --bare --map --output compiler-js source/Compiler'
+		'coffee --compile --bare --map --output compiler-js compiler-source'
 	@task 'compile',
 		'Compile all code in source',
 		['compile-compiler'],

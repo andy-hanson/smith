@@ -35,8 +35,11 @@ use! Language/Fun-Meta
 use! Language/Any-Class-Meta
 use! Language/Any-Meta
 
-use! Bag
-use! Collection
+use! Num
+
+use! Seq
+\use! Bag
+\use! Collection
 use! Error
 use! Math
 use! Str-Methods

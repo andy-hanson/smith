@@ -1,5 +1,18 @@
-trait Iterable
+doc
+	Blah blah Builder.
+
+super Iterable
 
 ‣‣override of ...members
 	members
 
+\‣override to-bag
+\	me
+
+
+
+\‣override collect collector:Fun
+\	∙ builder
+\		class.builder
+\	each |value
+\		builder.+! (collector value)

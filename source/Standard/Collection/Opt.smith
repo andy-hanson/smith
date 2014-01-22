@@ -34,7 +34,7 @@ Prelude@Opt.do
 			"(Some {value})"
 
 
-	None.class.do \‣sub-object None
+	None.class.do
 		‣ force[message~:Str]
 			∙ message
 				message~.or
@@ -65,7 +65,6 @@ Prelude@Opt.do
 	‣‣ filter value:Any condition:Fun
 		(condition value).if
 			value
-
 
 	‣‣ from-nullable a
 		`a != null`.if

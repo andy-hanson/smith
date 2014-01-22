@@ -159,14 +159,10 @@ module.exports = class AllModules
 
 		return null
 
-	###
 
 	###
-	#_noForce: (fullName) ->
-	#	fullName: fullName
-	#	force: no
-	#	hi: "there"
-
+	Returns a list of every automatic use for a given file.
+	###
 	autoUses: (fileName) ->
 		lookupDir = path.dirname fileName
 		uses = []
@@ -234,11 +230,6 @@ module.exports = class AllModules
 				fullAccess =
 					path.join @baseDir, accessDir
 
-				#console.log module
-				#console.log full
-				#console.log fullAccess
-				#console.log "./#{path.relative fullAccess, full}"
-
 				"./#{path.relative fullAccess, full}"
 
 	###
@@ -251,5 +242,7 @@ module.exports = class AllModules
 			new AllModules dir
 
 		io.readFilesNamedSync dir, 'modules', allModules.bound 'parse'
+
+		(allModules.moduleses.get '.').add 'require-all', 'require-all', no
 
 		allModules

@@ -3,7 +3,7 @@ doc
 
 ‣‣ returning value do-after:Fun
 	doc
-		Performs do-after, then returns the value.
+		Calls do-after on the value, then returns the value.
 	eg
 		∙ r
 			Ref 0
@@ -13,5 +13,5 @@ doc
 		✔= 1
 			r.get
 
-	do-after.run!
+	do-after.run! value
 	value

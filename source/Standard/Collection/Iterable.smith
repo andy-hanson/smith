@@ -10,15 +10,20 @@ class.do
 			TODO
 
 		∙ iterator-class
-			Any-Class Iterator
+			Any-Class[Iterator] "{name}-Iterator"
 				do iterator-class-body
 
 		‣ iterator
-			Console.log! "?"
 			iterator-class me
 
+∙ methods
+	(Global@Array.of).do
+		push '++ '∃ '∀ '∋ 'count 'collect 'drop 'each 'empty?
+		push 'fold 'first 'keep 'last 'make-string 'of 'size 'to-bag 'zip
+		me
+
 \ Can't use normal Array, doesn't exist yet
-delegate-many (Global@Array '∃ '∀ 'of 'drop 'each 'empty? 'fold 'first 'last 'make-string 'size)
+delegate-many methods
 	iterator
 
 

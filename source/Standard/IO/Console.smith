@@ -5,8 +5,6 @@
 	todo
 		args.make-string
 
-	Global@console.log ...args
-
-
-	\Global@console.log (args.join 「 」)
+	\Global@console.log ...args
+	Global@console.log (args.join 「 」)
 

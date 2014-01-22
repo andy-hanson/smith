@@ -91,11 +91,13 @@ A.do
 		✔ (has-property? name).¬
 		set-property! name value
 
-	‣ set-property! name:Str value
+	‣ set-property!:Void name:Str value
 		doc
 			TODO
 
-		`this[name] = value`
+		`
+			this[name] = value;
+			return;
 
 	‣ delete-property! name:Str
 		in

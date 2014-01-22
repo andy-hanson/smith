@@ -4,7 +4,6 @@ Num.do
 	‣override = a
 		`Object(a) instanceof Number && (this + 0) === (a + 0)`
 
-
 	‣ ≈[significant-digits~:Num] a:Num
 		doc
 			Whether two I am equal to a to within `significant-digits` digits.

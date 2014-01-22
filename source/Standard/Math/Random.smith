@@ -1,16 +1,38 @@
-+in-0-1
+doc
+	Generates random numbers.
+
+static!
+
+‣‣ in-0-1
+	doc
+		Random fraction.
+
 	Global@Math.random
 
-+in-range |min max
+‣‣override of:Num min max
+	doc
+		Random number from (exclusive) min to max.
+	in
+		✔ (min.≤ max)
+
 	∙ size
 		max.- min
 	∙ offset
-		in-0-1.* diff
+		in-0-1.× size
 	min.+ offset
 
-+int-in-range |min max
-	(in-range min max).round-down
+‣‣ int:Num min:Num max:Num
+	doc
+		Random integer from (exclusive) min to max.
+	eg
+		∙ x
+			int 3 8
+		✔ x.integer?
+		✔ (x.≥ 3)
+		✔ (x.≤ 8)
 
-+bool
+	(of min max).round-down
+
+‣‣ bool:Bool
 	in-0-1.< 0.5
 

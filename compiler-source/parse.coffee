@@ -35,18 +35,22 @@ class Parser
 			@readSuper restTokens #TODO: don't conflict with auto
 		superAccess =
 			if sooper?
-				type sooper, E.DefLocal
+				type sooper, E.Use
 				@locals.addLocalMayShadow sooper.local
-				new E.LocalAccess Pos.start, sooper.local
+				sooper
+				#new E.LocalAccess Pos.start, sooper.local
 			else
 				new E.Null Pos.start, 0
 
-		if sooper?
-			autoUses.push sooper
+		#if sooper?
+		#	autoUses.push sooper
 
 		body =
 			@locals.withLocal typeLocal, =>
 				@block bodyTokens
+
+		if sooper?
+			body.subs.unshift E.DefLocal.fromUse sooper
 
 		thisTypeLocal =
 			new E.DefLocal typeLocal, new E.Me @pos
@@ -74,9 +78,7 @@ class Parser
 	###
 	readSuper: (tokens) ->
 		if T.super tokens[0]
-			use =
-				new E.Use tokens[0], @fileName, @allModules
-			[ (E.DefLocal.fromUse use), tokens.tail() ]
+			[ (new E.Use tokens[0], @fileName, @allModules), tokens.tail() ]
 		else
 			[ null, tokens ]
 
