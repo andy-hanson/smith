@@ -58,6 +58,13 @@ Num.do
 
 		magnitude.< max
 
+	‣ in-range min max
+		todo
+			Move to Comparable
+
+		(≥ min).∧
+			(< max)
+
 	‣ < a:Num
 		doc
 			Whether I am closer to -∞ than a.

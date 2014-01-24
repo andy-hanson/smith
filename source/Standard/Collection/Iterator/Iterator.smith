@@ -13,8 +13,9 @@ todo
 	slice (drop then take)
 	unique f:Fun (keeps only values with unique evals of f)
 
-use Collect-Iterator
 use ++-Iterator
+use Collect-Iterator
+use Group-Iterator
 use Keep-Iterator
 use Slice-Iterator
 use Zip-Iterator
@@ -180,7 +181,6 @@ abstract!
 		initial.or
 			next
 
-
 	`
 		var res = init;
 		var over = false;
@@ -191,6 +191,7 @@ abstract!
 			}, function() {
 				return true;
 			});
+		return res;
 
 ‣ first
 	eg
@@ -198,6 +199,9 @@ abstract!
 			sample.first
 
 	of 0
+
+‣ group group-size:Num
+	Group-Iterator me group-size
 
 ‣ if-next a:Fun b:Fun
 	doc

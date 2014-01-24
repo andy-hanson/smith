@@ -3,24 +3,23 @@ require './helpers'
 io = require './io'
 fs = require 'fs'
 path = require 'path'
-optimist = require 'optimist'
+nopt = require 'nopt'
 smithCompile = require './compile'
 coffee = require 'coffee-script'
 watch = require 'watch'
-AllModules = require './AllModules'
+Options = require './Options'
 
 class Smith
-	constructor: (argv) ->
-		@inDir = argv.in
-		@outDir = argv.out
-		@printModuleDefines = argv['print-module-defines']
-		{ @watch, @quiet, @just } = argv
+	constructor: (opts) ->
+		@inDir = opts.in
+		@outDir = opts.out
+		{ @watch, @quiet, @just } = opts
+		@options = new Options opts.checks, opts.meta, opts['print-module-defines'], @inDir
 		type @inDir, String
 		type @outDir, String
 		type @watch, Boolean
 		type @quiet, Boolean
 		type @just, String if @just?
-		type @printModuleDefines, Boolean
 
 	log: (text) ->
 		unless @quiet
@@ -46,7 +45,7 @@ class Smith
 					out =
 						"#{name}.js"
 					{ code, map } =
-						smithCompile text, inFile, out, @
+						smithCompile text, inFile, out, @options
 
 					[	[ out, code ],
 						[ "#{out}.map", map.toString() ] ]
@@ -159,9 +158,6 @@ class Smith
 				@log "Wrote to #{outFile}"
 
 	main: ->
-		@allModules =
-			AllModules.load @inDir
-
 		@compileAll()
 
 		if @watch
@@ -170,41 +166,29 @@ class Smith
 
 
 main = ->
-	argv =
-		optimist
-		.usage('I am usage string')
-		.options
-			i:
-				alias: 'in'
-				describe: 'Source files top-level directory'
-				default: 'source'
-			o:
-				alias: 'out'
-				describe: 'Compiled output directory'
-				default: 'js'
-			w:
-				alias: 'watch'
-				describe: 'Wait to respond to changes in source directory'
-				default: no
-			q:
-				alias: 'quiet'
-				describe:' Disables logging'
-				default: no
-			j:
-				alias: 'just'
-				describe: 'Only compile this file'
-				default: null
-			p:
-				alias: 'print-module-defines'
-				describe: 'Print whenever a module starts/finishes being defined'
-				default: no
-		.argv
+	opts = nopt
+		'checks': Boolean
+		'in': String
+		out: String
+		'help': Boolean
+		'meta': Boolean
+		'just': String
+		'print-module-defines': Boolean
+		'quiet': Boolean
+		'watch': Boolean
 
-	unless argv.help
-		unless argv._.isEmpty()
-			throw new Error "Unexpected #{argv._}"
+	opts.checks ?= yes
+	opts.in ?= 'source'
+	opts.out ?= 'js'
+	opts.meta ?= yes
+	opts['print-module-defines'] ?= no
+	opts.quiet ?= yes
+	opts.watch ?= no
 
-		(new Smith argv).main()
+	if opts.help?
+		console.log "Help yourself!"
+	else
+		(new Smith opts).main()
 
 module.exports =
 	parse: require './parse'

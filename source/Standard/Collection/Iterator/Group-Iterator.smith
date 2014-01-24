@@ -1,0 +1,15 @@
+super Iterator
+
+data |original:Iterator group-size:Num
+	in
+		✔ group-size.natural?
+		✔ group-size.positive?
+
+	()
+
+‣ next
+	◆.returning (Array.of) |group
+		group-size.times
+			group.»! original.next
+
+

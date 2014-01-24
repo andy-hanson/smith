@@ -2,13 +2,16 @@
 	Prelude@Any.class
 
 C.do
+	`
+		var ass = console.assert;
+
 	-def 'check |name a
 		`
-			if (!(global.Object(name) instanceof String))
-				throw new global.Error("First argument of 'check' must be a string");
-			if (!this['subsumes?'](a)) {
-				if (a == null)
-					throw new global.Error("Undefined "+name+":"+this._name);
+			if (a == null)
+				throw new global.Error("Undefined "+name+":"+this._name);
+			if (!a[this['-id-check']]) {
+				if (!(global.Object(name) instanceof String))
+					throw new global.Error("First argument of 'check' must be a string");
 				else
 					throw new global.Error(name+' is not a '+this+'; is '+a+'; a '+a.class());
 			}
@@ -23,7 +26,7 @@ C.do
 			this.__exported = exported;
 
 	-def 'subsumes? |a
-		`a != null && a['__is-a-id-' + this._id] === true`
+		`a != null && a[this['-id-check']] === true`
 
 	-def '‣ |name:Str method:Fun
 		doc
@@ -318,6 +321,9 @@ C.do
 			it.merge fun.meta
 		do fun
 
+	‣ test-method! name:Str
+		(method name).meta.test-eg![me]
+
 	‣ test!
 		doc
 			Runs the `eg` of all of my static and instance methods.
@@ -357,7 +363,7 @@ C.do
 
 	‣ ‣class[super-class~:C] name:Str do-meta:Fun
 		∙ args
-			`arguments`
+			Array.proto@slice.call `arguments`
 		∙ class
 			C.of ...args
 		me.‣val name
@@ -373,7 +379,7 @@ C.do
 
 	‣ ‣object[super-class~:C] name:Str do-meta:Fun
 		∙ args
-			`arguments`
+			Array.proto@slice.call `arguments`
 		me.‣val name
 			C.Singleton ...args
 
@@ -396,30 +402,46 @@ C.do
 			Global@Array.of
 		∙ assigns
 			Global@Array.of
-		∙ names-assigns
-			constructor.meta.arguments.map |arg ...ignore
-				∙ writable
-					(arg.name.charAt 0).identical? '!
-				∙ name
-					writable.?
-						arg.name.slice 1
-					|
-						arg.name
+		∙ mangled
+			Global@Array.of
 
-				me.‣read name
-				writable.if!
-					me.‣write name
+		∙  ctrArgs
+			constructor.meta.arguments
 
-				∙ assign
-					"'_{name}': \{ value: {name}, writable: {writable} \}"
+		∙ useIndex |index
+			∙ arg
+				ctrArgs index
+			∙ writable
+				(arg.name.charAt 0).identical? '!
+			∙ name
+				writable.?
+					arg.name.slice 1
+				|
+					arg.name
+			∙ mangle
+				Global@String.fromCharCode (('a.charCodeAt).+ index)
 
-				\(Global@Array name assign)
-				names.push name
-				assigns.push assign
+			me.‣read name
+			writable.if!
+				me.‣write name
+
+			∙ assign
+				"'_{name}': \{ value: {mangle}, writable: {writable} \}"
+
+			\(Global@Array name assign)
+			names.push name
+			assigns.push assign
+			mangled.push mangle
+
+		`
+			for (var index = 0; index < ctrArgs.size(); index++)
+				useIndex(index);
+
 		\∙ names
 		\	names-assigns.map
 		\∙ assigns
 		\	names-assigns.map _second
+
 		∙ assigns-str
 			assigns.join ",\n\t"
 		∙ maybe-no-extend
@@ -435,7 +457,7 @@ C.do
 				{maybe-no-extend}
 
 		∙ define-properties
-			Fun.from-JS names  body
+			Fun.from-JS mangled body
 
 		‣ construct ...args
 			define-properties.apply me args
@@ -450,7 +472,7 @@ C.do
 		me.‣ name |...args
 			∙ delegated
 				dt.call me
-			`_call(delegated, name, [], [args])`
+			`_c(delegated, name, [], [args])`
 		\(method name).meta! delegate-to.meta
 
 	‣ delegate-many names:Array delegate-to:Fun

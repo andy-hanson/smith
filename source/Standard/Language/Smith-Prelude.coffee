@@ -123,11 +123,14 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 		if value instanceof Function
 			def .call clazz, name, value#imm clazz._methods, name, value
 
+	imm metaClass, '-id-check', "__is-a-id-#{metaClass._id}"
+	imm clazz, '-id-check', "__is-a-id-#{clazz._id}"
+
 	def.call metaClass, 'class', -> metaClass
-	imm metaClass._proto, "__is-a-id-#{metaClass._id}", yes
+	imm metaClass._proto, metaClass['-id-check'], yes
 
 	def.call clazz, 'class', -> clazz
-	imm clazz._proto, "__is-a-id-#{clazz._id}", yes
+	imm clazz._proto, clazz['-id-check'], yes
 
 	if maybeConstructor? and not isAny
 		def.call clazz, 'construct', maybeConstructor
@@ -177,8 +180,6 @@ clazz = (name, maybeIs, fun) ->
 
 	cls.__exported ? cls
 
-string = ->
-	Array.prototype.join.call arguments, ''
 
 fun = (delegate, unbound, makeMetaPre) ->
 	f =
@@ -190,22 +191,20 @@ fun = (delegate, unbound, makeMetaPre) ->
 	f
 
 lazy = (delegate, make) ->
-	get = ->
-		made =
-			make.call delegate
-		get = ->
-			made
-		made
-	get
+	#get = ->
+	#	made =
+	#		make.call delegate
+	#	get = ->
+	#		made
+	#	made
 
-itMethod = (name) ->
-	unless (Object name) instanceof String
-		throw new Error '?'
-	(it) ->
-		method = it[name]
-		unless method?
-			throw new Error "#{it} has no method #{name}"
-		it[name].apply it, Array.prototype.slice.call arguments, 1
+	#->
+	#	get()
+
+	cached = undefined
+	->
+		cached ? (cached = make.call delegate)
+
 
 checkNumberOfArguments = (args, expectedNumber) ->
 	if args.length < expectedNumber
@@ -224,7 +223,11 @@ call = (subject, verb, optionses, argumentses) ->
 
 	args = []
 	for newArgs in argumentses
-		Array.prototype.push.apply args, newArgs
+		#Array.prototype.push.apply args, newArgs
+		if newArgs instanceof Array
+			Array.prototype.push.apply args, newArgs
+		else
+			args['»»!'] newArgs
 
 	op = subject[verb]
 	unless op?
@@ -236,14 +239,7 @@ call = (subject, verb, optionses, argumentses) ->
 		args.unshift optionalArgumentTag, opts
 		op.apply subject, args
 
-# A unique object to indicate when optinal arguments are passed.
-optionalArgumentTag =
-	'OPTIONAL-ARGUMENT-TAG'
-
 Argument = makeAnyClass 'Argument'
-
-argument = (name, clazz) ->
-	Argument.of name, clazz
 
 Opt = makeAnyClass 'Opt'
 Some = makeAnyClass 'Some', Opt
@@ -257,17 +253,25 @@ None = Object.create NoneClass._proto
 module.exports =
 	fun: fun
 	bind: bind
-	itMethod: itMethod
-	string: string
+	itMethod: (name) ->
+		(it) ->
+			method = it[name]
+			unless method?
+				throw new Error "#{it} has no method #{name}"
+			method.apply it, Array.prototype.slice.call arguments, 1
+	string: ->
+		Array.prototype.join.call arguments, ''
 	class: clazz
 	lazy: lazy
 	Any: Any
 	Meta: Meta
 	'all-classes': -> allClasses
 	checkNumberOfArguments: checkNumberOfArguments
-	optionalArgumentTag: optionalArgumentTag
+	optionalArgumentTag:
+		'OPTIONAL-ARGUMENT-TAG'
 	call: call
-	argument: argument
+	argument: (name, clazz) ->
+		Argument.of name, clazz
 	Argument: Argument
 	Opt: Opt
 	Some: Some

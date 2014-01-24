@@ -4,6 +4,7 @@ AllModules = require './AllModules'
 Pos = require './Pos'
 path = require 'path'
 E = require './Expression'
+Options = require './Options'
 
 
 shortName = (fullName) ->
@@ -12,14 +13,16 @@ shortName = (fullName) ->
 ###
 Produces the output { code, map }.
 ###
-module.exports = (string, inName, outName, opts) ->
+module.exports = (string, inName, outName, options) ->
 	type string, String
 	type inName, String
 	check (inName.endsWith '.smith'), ->
 		"Input must be a .smith, not #{inName}"
 	type outName, String
-	{ allModules, printModuleDefines } = opts
+	type options, Options
+	allModules = options.allModules()
 	type allModules, AllModules
+	printModuleDefines = options.printModuleDefines()
 	type printModuleDefines, Boolean
 
 	shortIn = shortName inName
@@ -29,7 +32,7 @@ module.exports = (string, inName, outName, opts) ->
 	tokens =
 		lex string
 	[ sooper, autoUses, fun ] =
-		parse tokens, typeName, inName, allModules
+		parse tokens, typeName, inName, options
 	type sooper, E.Expression
 	type autoUses, Array
 	type fun, E.Expression
@@ -44,16 +47,19 @@ module.exports = (string, inName, outName, opts) ->
 	sourceMapRel = path.relative fullOut, fullIn
 
 	toNode = (x) ->
-		x.toNode sourceMapRel, ''
+		x.toNode new E.Context options, sourceMapRel, ''
 
 	superNode =
 		toNode sooper
 
 	autos =
-		(autoUses.map toNode).interleavePlus ';\n'
+		autoUses.filter (u) ->
+			u.local.everUsed()
+		.map(toNode)
+		.interleavePlus ';\n'
 
 	classConstruct =
-		"_prelude.class('#{typeName}', #{superNode}, "
+		"_p.class('#{typeName}', #{superNode}, "
 
 	open = [
 		"""
@@ -61,16 +67,9 @@ module.exports = (string, inName, outName, opts) ->
 		//# sourceMappingURL=#{shortOut}.map
 		"use strict"#{';'}
 		#{if printModuleDefines then "console.log('→ #{typeName}...');" else ''}
-		var _prelude = require('#{prelude}');
-		var _f = _prelude.fun;
-		var _b = _prelude.bind;
-		var _it = _prelude.itMethod;
-		var _s = _prelude.string;
-		var _l = _prelude.lazy;
-		var _nArgs = _prelude.checkNumberOfArguments;
-		var _arg = _prelude.argument;
-		var _opt = _prelude.optionalArgumentTag;
-		var _call = _prelude.call#{';'}
+		var _p = require('#{prelude}'), _b = _p.bind, _c = _p.call, _f = _p.fun,
+			_it = _p.itMethod, _l = _p.lazy, _n = _p.checkNumberOfArguments,
+			_s = _p.string, _a = _p.argument, _o = _p.optionalArgumentTag;\n
 
 		""", autos, 'module.exports = ', classConstruct ]
 

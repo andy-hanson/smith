@@ -1,5 +1,4 @@
 export |constructor:Fun ...arguments
-	∙ new
-		Global@Object.create constructor@prototype
-	constructor.apply new arguments
-	new
+	∙ boundConstructor
+		constructor.bind constructor ...arguments
+	`new boundConstructor`

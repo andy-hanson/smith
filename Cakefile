@@ -32,7 +32,7 @@ require('just-the-job') ->
 	@task 'compile',
 		'Compile all code in source',
 		['compile-compiler'],
-		'bin/smith --quiet'  # --print-module-defines # --just Main.smith
+		'bin/smith'  #--quiet --print-module-defines # --just Main.smith --no-checks --no-meta
 	@task 'just-run-smith', 'node js/Standard/run.js'
 	@task 'run',
 		'Run the compiled program',

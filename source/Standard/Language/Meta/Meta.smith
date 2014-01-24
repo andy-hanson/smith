@@ -65,6 +65,9 @@ M.do
 			TODO: write in Smith
 
 		`
+			if (this === M.Empty())
+				return other;
+
 			if (this === other)
 				throw new global.Error('Can not merge with self');
 

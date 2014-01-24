@@ -1,12 +1,33 @@
-doc
-	Here's my nifty program.
-
+\doc
+\	Here's my nifty program.
 
 use! require-all
 
-\use! Vec2
-\(use Standard/Test/Traits-Test/Sub).meta.eg.run!
+\Time.race!
+\	use! require-all
 
-\show-all-todo
+\∙ x
+\	Array.fill 1000000
+\		it.increment
 
-Test.all!
+\Time.race!
+\	x.forEach |n:Num
+\		()
+
+\	x.map _increment
+\|
+\	x.map `function(x) { return x.increment(); }`
+\|
+\	x.map `function(x) { return x['+'](1); }`
+\|
+\	x.map `function(x) { return x + 1; }`
+\|
+\	`
+\		var out = [];
+\		for (var index = 0; index < x.length; index++)
+\			out[index] = x[index] + 1;
+
+
+\Console.log! (Time! { Test.all! })
+
+(Iterator.method 'fold).meta.test-eg![Iterator]

@@ -21,13 +21,11 @@ Any-Class.do
 
 	‣‣ Singleton[super-class~:Any-Class] name:Str do-meta:Fun
 		∙ args
-			`arguments`
+			Array.proto@slice.call `arguments`
 		∙ class
 			Any-Class ...args
 		∙ instance
 			Global@Object.create class.proto
-		\class.‣‣ 'instance
-		\	instance
 		\class.‣ 'constructor
 		\	fail "Singleton class!"
 		instance

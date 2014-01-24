@@ -4,8 +4,15 @@ Pos = require './Pos'
 mangle = require './mangle'
 keywords = require './keywords'
 
-tab = (indent) ->
-	"\t#{indent}"
+
+class Context
+	constructor: (@options, @fileName, @indent) ->
+		type @options, require './Options'
+		type @fileName, String
+		type @indent, String
+
+	indented: (n = 1) ->
+		new Context @options, @fileName, "#{'\t'.repeated n}#{@indent}"
 
 ###
 All must have @pos
@@ -15,36 +22,36 @@ class Expression
 	inspect: ->
 		@toString()
 
-	nodeWrap: (chunk, fileName) ->
-		type fileName, String
+	nodeWrap: (chunk, context) ->
+		type context, Context
+		type context.fileName, String
 
 		new SourceNode \
 			@pos.line,
 			@pos.column,
-			fileName,
+			context.fileName,
 			chunk
 
-	toNode: (fileName, indent) ->
+	toNode: (context) ->
 		type @pos, Pos
-		type fileName, String
-		type indent, String
+		type context, Context
 
 		chunk =
-			@compile fileName, indent
+			@compile context
 
-		@nodeWrap chunk, fileName
+		@nodeWrap chunk, context
 
-class Trait
+class Trait extends Expression
 	constructor: (@use) ->
 		type use, Use
 		{ @pos } = use
 
-	toNode: (fileName, indent) ->
+	compile: (context) ->
 		def = new DefLocal @use.local, @use
 		trait = Call.me @pos, 'trait', [ @use.local ]
-		[	(def.toNode fileName, indent),
-			'\n', indent,
-			(trait.toNode fileName, indent) ]
+		[	(def.toNode context),
+			'\n', context.indent,
+			(trait.toNode context) ]
 
 class DefLocal extends Expression
 	constructor: (@local, @value) ->
@@ -55,40 +62,33 @@ class DefLocal extends Expression
 	toString: ->
 		"<DefLocal #{@local.name} {#{@value.toString()}}>"
 
-	compile: (fileName, indent) ->
-		newIndent =
-			tab indent
-		name =
-			@local.toNode fileName, indent
-		val =
-			if @local.lazy
-				newNewIndent =
-					tab newIndent
-				inner =
-					if @value instanceof Block
-						@value.toNode fileName, newNewIndent
-					else
-						[ 'return ', (@value.toNode fileName, newNewIndent), ';' ]
-				x =
-					[ 'function() {\n', newNewIndent, inner, '\n', newIndent, '}' ]
-				if @value instanceof Use
-					# require is cached anyway
-					x
-				else
-					[ '_l(this, ', x, ')' ]
-			else
-				if @value instanceof Block
-					@value.toValue fileName, newIndent
-				else
-					@value.toNode fileName, newIndent
+	needsToCompile: ->
+		@local.everUsed() or not @local.lazy
 
-		check =
-			if @local.tipe?
-				[ ';\n', indent, @local.typeCheck fileName, indent ]
-			else
-				''
+	compile: (context) ->
+		if @needsToCompile()
+			name =
+				@local.toNode context
+			val =
+				if @local.lazy
+					inner =
+						if @value instanceof Block
+							@value.toNode context.indented 2
+						else
+							[ 'return ', (@value.toNode context.indented 2), ';' ]
+					[ '_l(this, function() {\n\t\t', context.indent, inner, '\n\t', context.indent, '})' ]
+				else
+					@value[if @value instanceof Block then 'toValue' else 'toNode'] context
 
-		[ 'var ', name, ' =\n', newIndent, val, check ]
+			check =
+				if context.options.checks() and @local.tipe?
+					[ ';\n', context.indent, @local.typeCheck context ]
+				else
+					''
+
+			[ 'var ', name, ' =\n\t', context.indent, val, check ]
+		else
+			'' #"/* need not compile local #{@local.name}*/"
 
 	@fromUse = (use) ->
 		new DefLocal use.local, use
@@ -104,80 +104,69 @@ class Block extends Expression
 	toString: ->
 		'<BLOCK ' + (@subs.join '\n').indent() + '>\n'
 
-	toValue: (fileName, indent) ->
+	toValue: (context) ->
 		if @subs.length == 1 and not (@subs[0] instanceof DefLocal)
-			@subs[0].toNode fileName, indent
+			@subs[0].toNode context
 		else
-			newIndent =
-				tab indent
 			x =
-				[ '_f(this, function() {\n',
-					newIndent,
-					(@toNode fileName, newIndent),
-					'\n', indent,
-					'})()' ]
-			@nodeWrap x, fileName
+				[ '_f(this, function() {\n\t',
+					context.indent,
+					(@toNode context.indented()),
+					'\n', context.indent, '})()' ]
+			@nodeWrap x, context
+
+	filteredSubs: (subs, context) ->
+		out = []
+		subs.forEach (sub) ->
+			compiled = sub.compile context
+			if compiled != ''
+				out.push sub.nodeWrap compiled, context
+		out
+
 
 	###
 	When nothing is returned.
 	###
-	noReturn: (fileName, indent) ->
-		parts =
-			@subs.map (sub) ->
-				sub.toNode fileName, indent
-		parts.interleave ";\n#{indent}"
+	noReturn: (context) ->
+		@filteredSubs(@subs, context).interleave ";\n#{context.indent}"
 
 	###
 	Usual compile, where the last line returns.
 	###
-	compile: (fileName, indent) ->
-		[ allButLast, last ] =
-			@subs.allButAndLast()
+	compile: (context) ->
+		@compileWithLast context, (x) ->
+			[ 'return ', x, ';' ]
 
-		compiled =
-			allButLast.map (sub) -> sub.toNode fileName, indent
-
-		lastCompiled =
-			@compileLast fileName, indent, (x) ->
-				[ 'return ', x, ';' ]
-
-		compiled.push lastCompiled
-
-		compiled.interleave ";\n#{indent}"
-
-	toMakeRes: (fileName, indent) ->
-		[ allButLast, last ] =
-			@subs.allButAndLast()
-
-		compiled =
-			allButLast.map (sub) -> sub.toNode fileName, indent
-
-		lastCompiled =
-			@compileLast fileName, indent, (x) ->
-				[ 'var res =\n', (tab indent), x, ';' ]
-
-		compiled.push lastCompiled
-
+	toMakeRes: (context) ->
 		x =
-			compiled.interleave ";\n#{indent}"
+			@compileWithLast context, (x) ->
+				[ 'var res = ', x, ';' ]
 
-		@nodeWrap x, fileName
+		@nodeWrap x, context
 
-	compileLast: (fileName, indent, doIfNotSpecial) ->
-		last = @subs.last()
+	compileWithLast: (context, doIfNotSpecial) ->
+		last =
+			@subs.last()
+		node =
+			last.toNode context
 
-		node = last.toNode fileName, indent
+		lastNode =
+			if last instanceof Literal and T.indentedJS last.literal
+				node
+			else if last instanceof DefLocal
+				access =
+					new LocalAccess @pos, last.local
+				accessNode =
+					doIfNotSpecial access.toNode context
+				[ node, ';\n', context.indent, accessNode ]
+			else
+				[ doIfNotSpecial node, ';' ]
 
-		if last instanceof Literal and T.indentedJS last.literal
-			node
-		else if last instanceof DefLocal
-			access =
-				new LocalAccess @pos, last.local
-			accessNode =
-				doIfNotSpecial access.toNode fileName, indent
-			[ node, ';\n', indent, accessNode ]
-		else
-			doIfNotSpecial node
+		compiled =
+			@filteredSubs @subs.allButLast(), context
+		compiled.push lastNode
+
+		compiled.interleave ";\n#{context.indent}"
 
 class Call extends Expression
 	constructor: (@subject, @verb, @optionArgs, @args) ->
@@ -194,11 +183,9 @@ class Call extends Expression
 	toString: ->
 		"#{@subject}.#{@verb.text}(#{@args})"
 
-	compile: (fileName, indent) ->
-		newIndent =
-			tab indent
+	compile: (context) ->
 		subject =
-			@subject.toNode fileName, newIndent
+			@subject.toNode context
 		hasMany = (xx) ->
 			xx.containsWhere (x) ->
 				x instanceof ManyArgs
@@ -207,16 +194,17 @@ class Call extends Expression
 				parts =
 					args.map (arg) ->
 						if arg instanceof ManyArgs
-							# TODO - to-array
-							arg.value.toNode fileName, newIndent
+							[ (arg.value.toNode context) ]
 						else
-							[ '[', (arg.toNode fileName, newIndent), ']' ]
+							[ '[', (arg.toNode context), ']' ]
 				[ '[', (parts.interleave ', '), ']' ]
-			[ '_call(', subject, ", '", @verb.text, "', ",
+
+			[ '_c(', subject, ", '", @verb.text, "', ",
 				(renderArgs @optionArgs), ', ', (renderArgs @args), ')' ]
 		else
 			nodes =
-				@args.map (x) -> x.toNode fileName, newIndent
+				@args.map (x) ->
+					x.toNode context
 			args =
 				nodes.interleave ', '
 			optionArgs =
@@ -224,10 +212,10 @@ class Call extends Expression
 					''
 				else
 					opts =
-						(@optionArgs.map (x) -> x.toNode fileName, newIndent).interleavePlus ','
+						(@optionArgs.map (x) -> x.toNode context).interleavePlus ','
 					comma =
 						if @args.isEmpty() then '' else ', '
-					[ '_opt, [', opts, ']', comma ]
+					[ '_o, [', opts, ']', comma ]
 
 			[ subject, "['", @verb.text, "'](", optionArgs, args, ')' ]
 
@@ -251,8 +239,8 @@ class Property extends Expression
 	toString: ->
 		"#{@subject},#{@prop.text}"
 
-	compile: (fileName, indent) ->
-		[ (@subject.toNode fileName, indent), "['", @prop.text, "']" ]
+	compile: (context) ->
+		[ (@subject.toNode context), "['", @prop.text, "']" ]
 
 	@me = (pos, name) ->
 		new Property (new Me pos), name
@@ -264,26 +252,25 @@ class Meta extends Expression
 	@all =
 		[ 'eg', 'sub-eg' ].concat keywords.metaText
 
-	make: (fun, fileName, indent) ->
-		newIndent = tab indent
-
+	make: (fun, context) ->
 		parts = []
 
 		Meta.all.forEach (name) =>
-			val =
-				@[name]
-			if val?
-				part =
-					if keywords.metaFun.contains name
-						(FunDef.body val).toNode fileName, newIndent
-					else
-						val.toNode fileName, indent
+			if context.options.meta() or name == '_arguments'
+				val =
+					@[name]
+				if val?
+					part =
+						if keywords.metaFun.contains name
+							(FunDef.body val).toNode context.indented()
+						else
+							val.toNode context
 
-				parts.push [ "'_", name, "': ", part ]
+					parts.push [ "'_", name, "': ", part ]
 
 		arg = (x) ->
 			type x, Local
-			x.toMeta fileName, indent
+			x.toMeta context
 		args = (x) ->
 			(x.map arg).interleave ', '
 		rest = (name, x) ->
@@ -297,9 +284,9 @@ class Meta extends Expression
 		rest 'rest-argument', 'maybeRest'
 
 		body =
-			parts.interleave ",\n#{newIndent}"
+			parts.interleave ",\n\t#{context.indent}"
 
-		[ ', function() { return {\n', newIndent, body, '\n', indent, '}; }' ]
+		[ ', function() { return {\n\t', context.indent, body, '\n', context.indent, '}; }' ]
 
 
 	toString: ->
@@ -315,49 +302,45 @@ class FunDef extends Expression
 		type @optRest, Local if @optRest?
 		type @args, Array # of Locals
 		type @maybeRest, Local if @maybeRest?
-		if @body?
-			if @body instanceof T.JavascriptLiteral
-				check @body.kind == 'indented'
-			else
-				type @body, Block
+		type @body, Block if @body?
 
 	toString: ->
 		"{#{@args} ->\n #{@body?.toString().indent()}}"
 
-
-	assignArgs: (fileName, indent) ->
+	assignArgs: (context) ->
 		someOpen =
-			'_prelude.Some.of('
+			'_p.Some.of('
 
-		getRest = (rest, argsRendered, nArgs, isOpts = no) =>
+		getRest = (rest, argsRendered, nArgs, isOpts, end) =>
 			if rest?
 				getArray =
 					"global.Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
 				get =
 					jsLiteral @pos,
 						if isOpts then "#{someOpen}#{getArray})" else getArray
-				def =
-					new DefLocal rest, get
-				def.toNode fileName, indent
-			else
-				"_nArgs(#{argsRendered}, #{nArgs})"
 
+				[ ((new DefLocal rest, get).toNode context), end ]
+			else if context.options.checks()
+				"_n(#{argsRendered}, #{nArgs})#{end}"
+			else
+				''
 
 		if @optArgs? or @optRest?
 			nOpts = @optArgs.length
-			newIndent = tab indent
 
 			assign = (arg, args, index, isOpt = no) ->
 				val = "#{args}[#{index}]"
-				if arg.tipe?
+				if context.options.checks() and arg.tipe?
 					val = [
-						(arg.tipe.toNode fileName, indent),
+						(arg.tipe.toNode context),
 						".check('#{arg.name}', #{val})"
 					]
 				if isOpt
 					val =  [ someOpen, val, ')' ]
 
-				[ "var #{arg.toNode fileName, indent} = ", val ]
+				[
+					"var #{arg.toNode context} = ",
+					val ]
 
 			getOpts =
 				for opt, index in @optArgs
@@ -369,12 +352,12 @@ class FunDef extends Expression
 
 			getNoOpts =
 				for opt in @optArgs
-					[ 'var ', (opt.toNode fileName, indent), ' = _prelude.None' ]
+					[ 'var ', (opt.toNode context), ' = _p.None' ]
 
 			getNoOptRest =
 				if @optRest?
-					[ 'var ', (@optRest.toNode fileName, indent),
-						' = [];\n', newIndent ]
+					[ 'var ', (@optRest.toNode context),
+						' = [];\n\t', context.indent]
 				else
 					''
 
@@ -382,75 +365,99 @@ class FunDef extends Expression
 				for arg, index in @args
 					assign arg, 'arguments', index
 
-			nl = "\n#{newIndent}"
+			nl = "\n\t#{context.indent}"
 			snl = ";#{nl}"
 
-			s = [
-				'if (arguments[0] == _opt) {',
+			[
+				'if (arguments[0] == _o) {',
 					nl, 'var _opts = arguments[1]',
 					snl,
 					(getOpts.interleavePlus snl),
 					(getArgsIfOpts.interleavePlus snl),
-					(getRest @optRest, '_opts', nOpts, yes), snl,
-					(getRest @maybeRest, 'arguments', @args.length + 2),
-				';\n', indent, '} else {', nl,
+					(getRest @optRest, '_opts', nOpts, yes, snl),
+					(getRest @maybeRest, 'arguments', @args.length + 2, no, ";\n#{context.indent}"),
+				'} else {', nl,
 					(getNoOpts.interleavePlus snl),
 					(getArgsNoOpts.interleavePlus snl),
 					getNoOptRest,
-					(getRest @maybeRest, 'arguments', @args.length),
-				';\n', indent, '}'
-				]
+					(getRest @maybeRest, 'arguments', @args.length, no, ";\n#{context.indent}"),
+				'};\n', context.indent
+			]
 
 		else
 			checks =
-				@args.map (arg) -> arg.typeCheck fileName, indent
+				if context.options.checks()
+					@args.map (arg) ->
+						arg.typeCheck context
+					.filter (x) ->
+						x != ''
+				else
+					[]
 			rest =
-				getRest @maybeRest, 'arguments', @args.length
-			[ (checks.interleave ";\n#{indent}"), rest, ';' ]
+				getRest @maybeRest, 'arguments', @args.length, no, ";\n#{context.indent}"
 
-	compile: (fileName, indent) ->
+			console.lo
+
+			[ (checks.interleavePlus "\n#{context.indent}"), rest ]
+
+	compile: (context) ->
 		maybeMeta = (kind) =>
 			if @meta?[kind]?
-				[ (@meta[kind].noReturn fileName, newIndent), '\n', newIndent ]
+				[ (@meta[kind].noReturn context), '\n', context.indent ]
 			else
 				''
-		newIndent =
-			tab indent
+		needRes =
+			meta?.out? or @tipe?
+
 		argNames =
-			(@args.map (arg) -> arg.toNode fileName, newIndent).interleave ', '
+			(@args.map (arg) -> arg.toNode context.indented()).interleave ', '
 		assignArgs =
-			@assignArgs fileName, newIndent
+			@assignArgs context.indented()
 		inCond =
 			maybeMeta 'in'
 		body =
 			if @body?
-				@body.toMakeRes fileName, newIndent
+				if needRes
+					[ @body.toMakeRes context.indented() ]
+				else
+					[ @body.toNode context.indented() ]
 			else
-				"var res = null;"
+				"\tvar res = null;"
 		outCond =
 			maybeMeta 'out'
 		typeCheck = do =>
-			loc =
-				Local.res @pos, @tipe
-			loc.typeCheck fileName, newIndent
+			if context.options.checks()
+				loc =
+					Local.res @pos, @tipe
+				loc.typeCheck context.indented()
+			else
+				''
 		meta =
 			if @meta?
-				@meta.make @, fileName, indent
+				@meta.make @, context
+			else
+				''
+		res =
+			if needRes
+				[ 'return res;' ]
 			else
 				''
 
+		maybe = (x) ->
+			if x == ''
+				x
+			else
+				[ '\n\t', context.indent, x ]
+
 		[ '_f(this, function(', argNames, ') {',
-			'\n', newIndent,
-			assignArgs,
-			inCond,
-			'\n', newIndent,
+			maybe(assignArgs),
+			maybe(inCond),
 			body,
-			'\n', newIndent,
-			typeCheck,
-			outCond,
-			'return res;\n',
-			indent, '}',
-			meta, ')' ]
+			(maybe typeCheck),
+			(maybe outCond),
+			(maybe res),
+			'\n', context.indent,
+			'}', meta, ')' ]
 
 	@plain = (pos, meta, args, body) ->
 		new FunDef pos, meta, null, null, null, args, null, body
@@ -469,7 +476,7 @@ class ItFunDef extends Expression
 	constructor: (@name) ->
 		{ @pos } = @name
 
-	compile: (fileName, indent) ->
+	compile: (context) ->
 		[ "_it('", @name.text, "')" ]
 
 ###
@@ -482,8 +489,8 @@ class BoundFun extends Expression
 		type @name, T.Name
 		{ @pos } = @name
 
-	compile: (fileName, indent) ->
-		[ '_b(', (@subject.toNode fileName, indent), ", '", @name.text, "')" ]
+	compile: (context) ->
+		[ '_b(', (@subject.toNode context), ", '", @name.text, "')" ]
 
 	@me = (name) ->
 		new BoundFun (new Me name.pos), name
@@ -497,24 +504,8 @@ class Literal extends Expression
 	toString: ->
 		"<#{@literal}>"
 
-	compile: (fileName, indent) ->
-		[ (@literal.toJS fileName, indent) ]
-
-
-class LocalAccess extends Expression
-	constructor: (@pos, @local) ->
-		type @pos, Pos
-		type @local, Local
-
-	toString: ->
-		@local.toString()
-
-	compile: ->
-		m = mangle @local.name
-		if @local.lazy
-			"#{m}()"
-		else
-			m
+	compile: (context) ->
+		@literal.toJS context
 
 class Local extends Expression
 	constructor: (name, @tipe, @lazy) ->
@@ -523,6 +514,13 @@ class Local extends Expression
 		type @lazy, Boolean
 		@name = name.text
 		{ @pos } = name
+		@_everUsed = no
+
+	isUsed: ->
+		@_everUsed = yes
+
+	everUsed: ->
+		@_everUsed
 
 	toString: ->
 		"<#{@name}:#{@pos}>"
@@ -530,26 +528,26 @@ class Local extends Expression
 	compile: ->
 		mangle @name
 
-	typeCheck: (fileName, indent) ->
+	typeCheck: (context) ->
 		if @tipe?
 			tipe =
-				@tipe.toNode fileName, indent
+				@tipe.toNode context
 			nameLit =
 				new Literal new T.StringLiteral @pos, @name
 			name =
-				nameLit.toNode fileName, indent
-			[ tipe, '.check(', name, ', ', @compile(), ');\n', indent ]
+				nameLit.toNode context
+			[ tipe, '.check(', name, ', ', @compile(), ');' ]
 		else
 			''
 
-	toMeta: (fileName, indent) ->
+	toMeta: (context) ->
 		tipe =
 			if @tipe?
-				[ ", ", (@tipe.toNode fileName, indent) ]
+				[ ", ", (@tipe.toNode context) ]
 			else
 				''
 
-		@nodeWrap [ "_arg('", @name, "'", tipe, ')' ], fileName
+		@nodeWrap [ "_a('", @name, "'", tipe, ')' ], context
 
 	@it = (pos) ->
 		@eager new T.Name pos, 'it', 'x'
@@ -560,6 +558,23 @@ class Local extends Expression
 	@res = (pos, tipe) =>
 		@eager (new T.Name pos, 'res', 'x'), tipe
 
+
+
+class LocalAccess extends Expression
+	constructor: (@pos, @local) ->
+		type @pos, Pos
+		type @local, Local
+		@local.isUsed()
+
+	toString: ->
+		@local.toString()
+
+	compile: ->
+		m = mangle @local.name
+		if @local.lazy
+			"#{m}()"
+		else
+			m
 class Me extends Expression
 	constructor: (@pos) ->
 		type @pos, Pos
@@ -579,10 +594,10 @@ class Quote extends Expression
 	toString: ->
 		'"' + @parts.join '|' + '"'
 
-	compile: (fileName, indent) ->
+	compile: (context) ->
 		nodes =
 			@parts.map (part) ->
-				(part.toNode fileName, indent)
+				part.toNode context
 
 		[ '_s(', (nodes.join ', '), ')' ]
 
@@ -606,12 +621,12 @@ class Use extends Expression
 	toString: ->
 		"<#{@kind} #{@fullName}>"
 
-	compile: (fileName, indent) ->
+	compile: (context) ->
 		val =
 			new Literal new T.JavascriptLiteral @pos,
 				"require('#{@fullName}')", 'special'
 
-		val.compile fileName, indent
+		val.compile context
 
 	# used in type-level eg
 	@typeLocal = (typeName, fileName, allModules) ->
@@ -637,8 +652,8 @@ class Parend extends Expression
 	toString: ->
 		"(#{@content})"
 
-	compile: (fileName, indent) ->
-		@content.compile fileName, indent
+	compile: (context) ->
+		@content.compile context
 
 jsLiteral = (pos, text) ->
 	new Literal new T.JavascriptLiteral pos, text, 'special'
@@ -654,6 +669,7 @@ class ManyArgs extends Expression
 module.exports =
 	Block: Block
 	Call: Call
+	Context: Context
 	DefLocal: DefLocal
 	Expression: Expression
 	FunDef: FunDef

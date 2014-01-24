@@ -174,6 +174,7 @@ module.exports = class AllModules
 					useT = new T.Use Pos.start, auto, (if bang then 'use!' else 'use')
 					uses.push new E.Use useT, fileName, @
 
+				type au, Function
 				modules.autos.forEach au no
 				modules.autoBangs.forEach au yes
 

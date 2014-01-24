@@ -1,0 +1,56 @@
+super Iterable
+
+‣‣override of width height fill
+	TODO
+
+data |width height data
+	()
+
+‣ -to-index x y
+	(y.× x).+ x
+
+‣override of x:Num y:Num
+	(data) (to-index x y)
+
+‣ ! x:Num y:Num value
+	data.! (to-index x y) value
+
+‣ row row:Num
+	in
+		(Range 0 height).row
+
+	data.slice (row.× width) width
+
+‣override size
+	data.size
+
+‣ collect-with-indices collector:Fun
+	doc
+		`fun` should accept args: x y value
+
+	∙ s
+		size
+	∙ w
+		width
+	∙ d
+		data
+	∙ collected
+		Array.of-capacity s
+	`
+		var x = 0;
+		var y = 0;
+		for (var i = 0; i < s; i++) {
+			x = (x + 1) % w;
+			collected[i] = fun(x, y, d[i]);
+		}
+
+	Matrix width height collected
+
+‣ zip-with-indices
+	collect-with-indices ...args
+		args
+
+
+
+‣delegate iterator
+	data

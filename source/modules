@@ -1,5 +1,5 @@
-auto ↺ ✔ ✔= ✘ ◆ Any Any-Class Array Bag Bool Console Error Fun
-auto Global Iterable Iterator Meta New Num Opt Queue Range Ref Seq Str Test Vec2 Void
+auto ↺ ✔ ✔= ✘ ◆ Any Any-Class Array Bag Bool Console Error Fun Global Iterable Iterator
+auto Meta New Num Opt Queue Range Ref Time Seq Str Test Vec2 Void
 
 Standard Standard/index
 
@@ -33,6 +33,7 @@ Smith-Prelude Standard/Language/Smith-Prelude
 Seq Standard/Collection/Bag/Seq
 Str Standard/Str
 Test Standard/Test
+Time Standard/Time
 Vec2 Standard/Math/Vec2
 Void Standard/Void
 

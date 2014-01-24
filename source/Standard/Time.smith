@@ -1,0 +1,16 @@
+static!
+
+‣‣ race! ...raced
+	Console.log! (raced.collect of_).make-string
+
+‣‣override of do:Fun
+	∙ start
+		now-secs
+	do.run!
+	now-secs.- start
+
+‣‣ now-secs:Num
+	(New Global@Date).getTime.÷ 1000
+
+
+

@@ -4,12 +4,13 @@ Pos = require './Pos'
 AllModules = require './AllModules'
 Locals = require './Locals'
 { cCheck, cFail } = require './CompileError'
+Options = require './Options'
 
 class Parser
-	constructor: (@typeName, @fileName, @allModules) ->
+	constructor: (@typeName, @fileName, @options) ->
 		type @typeName, String
 		type @fileName, String
-		type @allModules, AllModules
+		type @options, Options
 
 		@locals =
 			new Locals
@@ -26,7 +27,7 @@ class Parser
 			E.Local.eager new T.Name @pos, @typeName, 'x'
 
 		useTypeLocal =
-			new E.DefLocal typeLocal, E.Use.typeLocal @typeName, @fileName, @allModules
+			new E.DefLocal typeLocal, E.Use.typeLocal @typeName, @fileName, @options.allModules()
 
 		[ meta, restTokens ] =
 			@takeAllMeta tokens, [], useTypeLocal
@@ -64,7 +65,7 @@ class Parser
 
 	autoUses: ->
 		noUseMe =
-			(@allModules.autoUses @fileName).filter (use) =>
+			(@options.allModules().autoUses @fileName).filter (use) =>
 				use.local.name != @typeName
 		autoUses =
 			noUseMe.map (use) =>
@@ -78,7 +79,7 @@ class Parser
 	###
 	readSuper: (tokens) ->
 		if T.super tokens[0]
-			[ (new E.Use tokens[0], @fileName, @allModules), tokens.tail() ]
+			[ (new E.Use tokens[0], @fileName, @options.allModules()), tokens.tail() ]
 		else
 			[ null, tokens ]
 
@@ -467,12 +468,14 @@ class Parser
 			"Did not expect anything after use at #{@pos}"
 
 		use =
-			new E.Use tokens[0] , @fileName, @allModules
+			new E.Use tokens[0] , @fileName, @options.allModules()
 
 		if isValue
 			cCheck use.kind == 'use', @pos,
 				"Use as value must be of kind 'use'"
+			use.local.isUsed()
 			use
+
 		else
 			cCheck use.kind != 'super', @pos, 'is must be at top of file'
 			@locals.addLocalMayShadow use.local
@@ -523,5 +526,5 @@ class Parser
 ###
 Returns: [ sooperAccess, autoUses, fun ]
 ###
-module.exports = (tokens, typeName, fileName, allModules) ->
-	(new Parser typeName, fileName, allModules).all tokens
+module.exports = (tokens, typeName, fileName, options) ->
+	(new Parser typeName, fileName, options).all tokens

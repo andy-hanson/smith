@@ -71,10 +71,12 @@ class JavascriptLiteral extends Literal
 	show: ->
 		"`#{@text}`"
 
-	toJS: (fileName, indent) ->
+	toJS: (context) ->
+		type context, (require './Expression').Context
+
 		switch @kind
 			when 'indented'
-				@text.indented indent
+				@text.indented context.indent
 			when 'plain'
 				"(#{@text})"
 			when 'special'

@@ -8,6 +8,17 @@ super Iterable
 
 	new min max step
 
+‣override ∋ value:Num
+	eg
+		✔ ((Range 1 5 ).∋ 3)
+		✔ ((Range 1 5 ).∋ 6).¬
+		✔ ((Range 1 5 2).∋ 4).¬
+
+	(value.< max).∧
+		∙ rel
+			(value.- min)
+		rel.negative?.¬.∧
+			rel.divisible? step
 
 data |min:Num max:Num step:Num
 	in

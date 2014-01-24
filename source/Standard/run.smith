@@ -9,7 +9,7 @@ doc
 	use! Main
 
 `
-	var FANCY_ERROR = true;
+	var FANCY_ERROR = false;
 
 	if (FANCY_ERROR) {
 		try {

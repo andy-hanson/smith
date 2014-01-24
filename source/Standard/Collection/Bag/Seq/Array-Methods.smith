@@ -8,11 +8,25 @@ Array.do
 
 		Global@Array n
 
+	‣‣ fill n:Num filler:Fun
+		(of-capacity n).collect-with-index |value index
+			filler index
+
 	‣‣ from-iterator:Array iterator:Iterator
 		∙ x
 			Array.of
 		iterator.each x.push_
 		x
+
+	‣ collect-with-index do:Fun
+		todo
+			Seq
+
+		`
+			var out = [];
+			for (var index = 0; index < this.length; index++)
+				out[index] = _do(this[index], index);
+			return out;
 
 	‣ copy:Array
 		slice
@@ -24,6 +38,9 @@ Array.do
 	‣ »:Array value
 		◆.returning copy
 			it.»! value
+
+	‣ »»!:Void value:Iterable
+		Array.proto@push.apply me value.to-bag
 
 	\ This goes down here because `trait` needs '+'
 	trait Seq
@@ -81,6 +98,7 @@ Array.do
 		`
 			for (var index = 0; index < size; index++)
 				this[index] = collector(this[index]);
+			var res = null;
 
 	‣override collect:Array collector:Fun
 		◆.returning copy

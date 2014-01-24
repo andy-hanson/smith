@@ -1,6 +1,4 @@
-use Num
-
-Num.do
+(use Num).do
 	‣ + a:Num
 		doc
 			Combination of two counts, one done after the other.

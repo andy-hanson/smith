@@ -2,16 +2,13 @@
 	Global@Boolean.to-class 'Bool
 
 B.do
-	∙ call
-		`function(f) { return B.check('a', f()); }`
-
 	‣ ? then:Fun else:Fun
 		doc
 			TODO
 
 		`this.valueOf() ? then() : _else()`
 
-	‣ ∨:B a:Fun
+	‣ ∨:B else:Fun
 		doc
 			Whether either this or `a` is ⊤.
 		eg
@@ -22,9 +19,9 @@ B.do
 				⊤.∨
 					⊥
 
-		`this || call(a)`
+		`this || B.check('else-result', _else())`
 
-	‣ ∧:B a:Fun
+	‣ ∧:B also:Fun
 		doc
 			Whether both I and the result of `a` are ⊤.
 		eg
@@ -35,7 +32,7 @@ B.do
 				⊤.∧
 					⊥
 
-		`this && call(a)`
+		`this && B.check('also-result', also())`
 
 	‣ ¬:B
 		doc
@@ -48,7 +45,7 @@ B.do
 
 		`!this`
 
-	‣ →:B a:Fun
+	‣ →:B then:Fun
 		doc
 			Whether this is ⊥ or the result of `a` is ⊤.
 		eg
@@ -62,7 +59,7 @@ B.do
 				⊤.→
 					⊥
 
-		`!this || call(a)`
+		`!this || B.check('then-result', then())`
 
 	‣ ↔ a:B
 		doc
@@ -76,14 +73,14 @@ B.do
 
 		≠ a
 
-	‣ nor a:B
+	‣ nor:B neither:B
 		doc
 			Whether I and `a` are both ⊥.
 		eg
 			✔= ⊤
 				⊥.nor ⊥
 
-		`!(this || a)`
+		`!(this || neither)`
 
 	‣ if! then:Fun
 		doc

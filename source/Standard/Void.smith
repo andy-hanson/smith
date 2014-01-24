@@ -1,4 +1,7 @@
 static!
 
+‣‣override check a
+	()
+
 ‣‣override subsumes? a
 	`a == null`

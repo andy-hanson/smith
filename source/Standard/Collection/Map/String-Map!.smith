@@ -1,21 +1,69 @@
+doc
+	TODO
+
+‣‣override of ...args
+	◆.returning (Global@Object.create `null`) |map
+		(args.group 2).each
+			map.add (it 0) (it 1)
+
+‣ sample
+	of 'a 1 'b 2 'c 3
+
+‣ -call name ...args
+	(Any.method name).apply data args
+
 data |data
-	Global@Object.create null
+	()
 
-‣ has name:Str
-	Global@Object@prototype@hasOwnProperty.call data name
+‣ empty?
+	eg
+		✔ String-Map!.of.empty?
 
-‣ get~ name:Str
-	data.property~ name
+	keys.empty?
 
-‣ get name:Str
-	(get~ name).force
+‣ key? name:Str
+	eg
+		✔ sample.key? 'a
 
-‣ add name:Str value
-	data.set! name value
+	call 'has-property? name
 
-‣ delete name:Str
-	data.delete-property! name
+‣ of~ name:Str
+	eg
+		✔= (Some 1)
+			sample.of~ 'a
+
+	-call 'property~ name
+
+‣ of name:Str
+	eg
+		✔= 1
+			sample 'a
+		✔.fails
+			sample 'b
+
+	-call 'property name
+
+‣ +! name:Str value
+	eg
+		✔.fails
+			sample.+! 'a
+
+	-call 'set! name value
+
+‣ -! name:Str
+	eg
+		∙ s
+			sample
+		s.-! 'a
+		✔ (s.key? 'a).¬
+		✔.fails
+			s.-! 'z
+
+	-call 'delete-property! name
 
 ‣ keys
-	Global@Object.getOwnPropertyNames data
+	✔= (Bag 1 2 3)
+		sample.keys
+
+	-call 'property-names
 
