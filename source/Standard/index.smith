@@ -1,10 +1,10 @@
 doc
 	TODO
 
-Prelude@Any.-def 'do |fun
-	fun.unbound.call `this`
+Prelude@Any.‣override-ok 'do |fun
+	fun.unbound.call me
 
-Prelude@Any.-def 'new! |name:Str value
+Prelude@Any.‣override-ok 'new! |name:Str value
 	doc
 		Defines a new immutable property on this object.
 	how

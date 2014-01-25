@@ -104,11 +104,8 @@ Array.do
 		◆.returning copy
 			it.collect! collector
 
-	‣override ++ oth:Array
-		todo
-			oth.to-array
-
-		concat oth
+	‣override ++ iter:Iterable
+		concat iter.to-bag
 
 	\ TODO: inherit this from Iterable!
 	\‣ make-string joiner:Str

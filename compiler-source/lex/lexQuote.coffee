@@ -34,7 +34,7 @@ module.exports = (quoteType, stream, oldIndent) ->
 				when '「'
 					'」'
 				else
-					fail()
+					cFail startPos, "Bad quote type #{quoteType}"
 
 	finish = ->
 		text =

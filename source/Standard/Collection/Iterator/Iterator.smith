@@ -7,7 +7,9 @@ doc
 		iter.of 1
 	Returns element 3, then element 4.
 	And operations such as each leave the iterator empty.
-todo
+
+oth
+	Remaining:
 	fold-while
 	take (Take-Iterator)
 	slice (drop then take)
@@ -38,8 +40,8 @@ abstract!
 	++-iterator iterators.first iterators.tail
 
 ‣‣ sample
-	todo
-		delete me, use abstract
+	doc
+		TODO: delete here, use abstractly
 
 	(Bag 1 2 3).iterator
 
@@ -156,14 +158,14 @@ abstract!
 
 	✘.throws? next_
 
-\‣ fold-while combine:Fun
+‣ fold-while combine:Fun
 \	eg
 \		✔= 10
 \			sample.fold-while |so-far next
 \				Opt.filter (next.< 3)
 \					so-far.+ next
-\
-\	TODO
+
+	TODO
 
 ‣ fold[initial] combine:Fun
 	doc
@@ -173,7 +175,8 @@ abstract!
 			sample.fold[4] _+
 		✔= 6
 			sample.fold _+
-	todo
+	oth
+		TODO:
 		fold-while |acc next
 			Opt.some (combine acc next)
 
@@ -286,8 +289,8 @@ abstract!
 		TODO
 	err
 		StopIteration
-	todo
-		Use native StopIteration
+	oth
+		TODO: Use native StopIteration
 
 	✘ 'StopIteration
 

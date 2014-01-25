@@ -20,7 +20,8 @@ eg
 super Seq
 
 ‣‣override of ...members
-	todo
+	oth
+		TODO:
 		inherit from Bag (builder)
 
 	members.size.zero?.?

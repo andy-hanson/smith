@@ -3,9 +3,9 @@ specialVar = [ 'me', 'it' ]
 
 module.exports =
 	metaText:
-		[ 'doc', 'how', 'todo', 'author', 'err' ]
+		[ 'doc', 'how', 'err', 'oth' ]
 	metaFun:
-		[ 'in', 'out', 'eg', 'sub-eg' ]
+		[ 'in', 'out', 'eg' ]
 	useLike:
 		[ 'use', 'use!', 'super', 'trait' ]
 	local:
@@ -14,3 +14,5 @@ module.exports =
 		specialVar
 	special:
 		local.concat specialVar
+	useAll:
+		'all-modules'

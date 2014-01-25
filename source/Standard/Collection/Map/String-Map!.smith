@@ -2,11 +2,11 @@ doc
 	TODO
 
 ‣‣override of ...args
-	◆.returning (Global@Object.create `null`) |map
+	◆.returning (new (Global@Object.create `null`)) |map
 		(args.group 2).each
-			map.add (it 0) (it 1)
+			map.+! (it 0) (it 1)
 
-‣ sample
+‣‣ sample
 	of 'a 1 'b 2 'c 3
 
 ‣ -call name ...args
@@ -23,23 +23,26 @@ data |data
 
 ‣ key? name:Str
 	eg
-		✔ sample.key? 'a
+		✔ (sample.key? 'a)
 
-	call 'has-property? name
+	-call 'has-property? name
 
 ‣ of~ name:Str
 	eg
-		✔= (Some 1)
+		✔= (Opt.some 1)
 			sample.of~ 'a
+	how
+		Can't simply -call 'property~ because that calls methods on 'this'.
 
-	-call 'property~ name
+	(key? name).if
+		of name
 
 ‣ of name:Str
 	eg
 		✔= 1
-			sample 'a
+			(sample) 'a
 		✔.fails
-			sample 'b
+			(sample) 'eeh
 
 	-call 'property name
 
@@ -48,22 +51,24 @@ data |data
 		✔.fails
 			sample.+! 'a
 
-	-call 'set! name value
+	-call 'set-property! name value
 
 ‣ -! name:Str
 	eg
 		∙ s
 			sample
 		s.-! 'a
+		s.-! 'z \ does nothing
 		✔ (s.key? 'a).¬
-		✔.fails
-			s.-! 'z
 
-	-call 'delete-property! name
+	-call 'delete-property-if-exists! name
 
 ‣ keys
-	✔= (Bag 1 2 3)
-		sample.keys
+	eg
+		✔= (Bag 'a 'b 'c)
+			sample.keys
 
 	-call 'property-names
 
+‣override toString
+	-call 'show-properties

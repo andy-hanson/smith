@@ -5,6 +5,10 @@ fileTypes:
 - smith
 uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
 
+# I keep using this pattern:
+# [^\.\s\(\)\[\]\"\「\」]*
+# For names. Don't change it just once, change it everywhere!
+
 patterns:
 
 - name: module.use
@@ -14,17 +18,21 @@ patterns:
       name: module.used
 
 - name: entity.name.capitalized
-  match: "[A-Z][^\\.\\s]*"
+  match: '[A-Z][^\.\s\(\)\[\]\"\「\」]*'
 
 - name: call.bang
-  match: (\b|\.)[^\.\s]*!
+  match: (\b|\.)[^\.\s\(\)\[\]\"\「\」]*!
 
 - name: call.normal
-  match: \.[^\.\s]+
+  match: \.[^\.\s\(\)\[\]\"\「\」]*
 
 - name: comment
   match: \\.*
 
+# single-word string
+- name: string
+  match: \'[^\.\s\(\)\[\]\"\「\」]*
+  
 - name: string
   begin: (\"|「)\n
   end: ^$ # end on blank line
@@ -36,15 +44,12 @@ patterns:
   begin: \"
   end: \"
   patterns:
-  - name: constant.other.placeholder.py # you heard me
+  - name: constant.other.placeholder.py
     match: \{[^\}]*\}
 
 - name: string
   begin: 「
   end: 」
-
-- name: string
-  match: \'\S*
 
 - name: constant.numeric
   match: \d+(\.\d+)*
@@ -60,49 +65,61 @@ patterns:
   comment:
     We expect it to be followed by another meta,
     or by a blank line.
-  begin: ^\s*(doc|how|todo|err|author)$
+  begin: ^\s*(doc|how|err|oth)$
   beginCaptures:
     '1':
       name: meta.tag
-  end: ^\s*(in|out|eg|sub-eg)?$
+  end: ^\s*(in|out|eg)?$
   endCaptures:
     '1':
       name: meta.tag
   patterns:
   - name: meta.text
-    begin: ^\s*(doc|how|todo|err|author)$
+    begin: ^\s*(doc|how|err|oth)$
     beginCaptures:
       '1':
         name: meta.tag
     end: ^$
 
 - name: meta.tag
-  match: ^\s*(in|out|eg|sub-eg)$
+  match: ^\s*(in|out|eg)$
 
 - name: keyword
   match: \b(me|res|it)\b
 
 - name: local.define.dot
-  match: (∙\s+)([^:]+)
+  match: (∙)\s([^:]+)
   captures:
     '2':
       name: local.define.strict
 
 - name: local.define.dot
-  match: (∘\s+)([^:]+)
+  match: (∘)\s([^:]+)
   captures:
     '2':
       name: local.define.lazy
 
 - name: entity.name.type
   match: \:\S+
+  captures:
+    '1':
+        name: local.define.dot
+  
 
 - name: variable.parameter
-  begin: \|
+  begin: (\|)
+  beginCaptures:
+    '1':
+      name: local.define.dot
   end: \n
   patterns:
     - name: entity.name.type
-      match: \:\S+
+      match: (\:)\S+
+      captures:
+        '1':
+          name: local.define.dot
+    - name: comment
+      match: \\.*
 
 - name: variable.parameter
   comment: define type of function
@@ -117,7 +134,12 @@ patterns:
   end: \n
   patterns:
     - name: entity.name.type
-      match: \:\S+
+      match: (\:)\S+
+      captures:
+        '1':
+            name: local.define.dot
+    - name: comment
+      match: \\.*
 
 - name: bracket
   match: "[\\(\\[\\{\\}\\]\\)]"

@@ -42,18 +42,16 @@ A.do
 			if (global.Object.prototype.hasOwnProperty.call(this, name))
 				return this[name];
 			else
-				throw new global.Error("" + this + " does not have property " + name);
+				throw new global.Error(
+					"Object does not have property " + name +
+					", has [" + global.Object.keys(this) + "]");
 
 	‣ property~ name:Str
 		doc
 			TODO
 
 		(has-property? name).if
-			∙ h
-				`this[name]`
-			✔ (A.exists? h)
-				"Object has key {name} but no value"
-			h
+			property name
 
 	‣ property-names:Array
 		doc
@@ -77,7 +75,8 @@ A.do
 	‣ each-property fun:Fun
 		doc
 			TODO
-		todo
+		oth
+			TODO:
 			property-iterator
 
 		\ must use forEach because defining Array requires this

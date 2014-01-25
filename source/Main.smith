@@ -1,10 +1,19 @@
 \doc
 \	Here's my nifty program.
 
-use! require-all
+
+use! Str-Color
+
+use! all-modules
+
+
+Str-Color.styles.each-property |name
+	\Console.log! (name.send name)
+
+
 
 \Time.race!
-\	use! require-all
+\	use! use-all
 
 \∙ x
 \	Array.fill 1000000
@@ -28,6 +37,5 @@ use! require-all
 \			out[index] = x[index] + 1;
 
 
-\Console.log! (Time! { Test.all! })
-
-(Iterator.method 'fold).meta.test-eg![Iterator]
+Time.race!
+	Test.all!

@@ -36,8 +36,6 @@ static!
 		✔= Opt.None
 			try
 				✘ 'fail
-	todo
-		Requires Some = Some
 
 	try-catch
 		Opt.some try.of

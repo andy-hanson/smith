@@ -1,12 +1,6 @@
 data |x:Num y:Num
 	()
 
-‣override = a
-	todo
-		This for all immutables (data with no !)
-
-	structural-= a
-
 ‣override toString
 	"<#{x} #{y}>"
 

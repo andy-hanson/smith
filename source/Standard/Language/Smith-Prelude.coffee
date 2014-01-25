@@ -144,14 +144,14 @@ Any = Object['to-class'] 'Any'
 
 AnyClass = Any.class()
 
-def.call AnyClass, '-def', def
+def.call AnyClass, '‣override-ok', def
 
-AnyClass['-def'] 'construct', makeAnyClass
+#AnyClass['‣override-ok'] 'construct', makeAnyClass
 
 Meta =
 	makeAnyClass 'Meta'
 
-Meta['-def'] 'construct', (meta) ->
+Meta['‣override-ok'] 'construct', (meta) ->
 	(Object.keys meta).forEach (name) =>
 		unless meta[name]?
 			throw new Error '?'
@@ -243,7 +243,7 @@ Argument = makeAnyClass 'Argument'
 
 Opt = makeAnyClass 'Opt'
 Some = makeAnyClass 'Some', Opt
-Some['-def'] 'construct', (x) ->
+Some['‣override-ok'] 'construct', (x) ->
 	@_value = x
 	Object.freeze @
 

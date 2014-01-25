@@ -1,20 +1,18 @@
-is Super-Type
-does Stuff
 use Junk
-use! More-Junk
+use! Junk
+super Junk
+trait Junk
 
 lowercase-name
 Capitalized-Name
 
-\ comment
-
 object.method.method!.method
-method
+method[option]
 method!
 
 「string」
 "{interpolated} string"
-'string
+'string.blah)
 block "
 	bla{interpolated}h
 	blah
@@ -22,37 +20,41 @@ block "
 block 「
 	blah blah
 
-1.23
-
 `javascript`
 
+`
+	javascript
+
+1.23
 
 doc
 	Hello?
-	Yes, this is docstring. sdfklsdjfs
-		More
+		Yes, this is docstring.
+	Sorry, wrong number.
 in
 	✔ 1.> 0
 out
-	✔ res.< 1
+	✔ 0.< 1
 eg
-	blah
+	✔ ✔.✔ ✔
 how
 	How it's done.
+oth
+	Other stuff
 
 me
 it
+res
 
-∙ local:Type
+∙ local:Type \comment
 	x
 ∘ lazy-local:Type
 	x
-∙
 
-blah |x:X y:Y
+blah |x:X y:Y \comment
 	x
 
-‣deffer deffed blah:Type blah
+‣deffer deffed blah:Type blah \comment
 	x
 
 (1 [2 {3}])

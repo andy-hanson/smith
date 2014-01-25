@@ -6,6 +6,7 @@ Pos = require './Pos'
 StringMap = require './StringMap'
 T = require './Token'
 E = require './Expression'
+keywords = require './keywords'
 
 class Module
 	constructor: (@fullName, @force) ->
@@ -244,6 +245,7 @@ module.exports = class AllModules
 
 		io.readFilesNamedSync dir, 'modules', allModules.bound 'parse'
 
-		(allModules.moduleses.get '.').add 'require-all', 'require-all', no
+		all = keywords.useAll
+		(allModules.moduleses.get '.').add all, all, no
 
 		allModules

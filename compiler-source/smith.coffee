@@ -8,6 +8,7 @@ smithCompile = require './compile'
 coffee = require 'coffee-script'
 watch = require 'watch'
 Options = require './Options'
+keywords = require './keywords'
 
 class Smith
 	constructor: (opts) ->
@@ -110,10 +111,11 @@ class Smith
 			x = inFile.withoutEnd path.extname inFile
 			all.push "#{x}.js"
 
-		requires = all.map (module) ->
-			"require('./#{module}');"
-		out = requires.join '\n'
-		fs.writeFileSync (path.join @outDir, 'require-all.js'), out
+		useAll =
+			all.map (module) ->
+				"require('./#{module}');"
+			.join '\n'
+		fs.writeFileSync (path.join @outDir, "#{keywords.useAll}.js"), useAll
 
 
 	watch: ->

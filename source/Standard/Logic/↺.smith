@@ -19,6 +19,10 @@ static!
 		for (var i = n; i > 0; i--)
 			_do();
 
+\ must get this here as use in JS will not trigger the use
+∙ Some
+	Opt.Some
+
 ‣‣ loop do:Fun
 	doc
 		Keep running fun until it returns Some.
@@ -40,7 +44,7 @@ static!
 	`
 		while (true) {
 			var result = _do();
-			if (Opt().Some()['subsumes?'](result))
+			if (Some['subsumes?'](result))
 				return result.value();
 		}
 

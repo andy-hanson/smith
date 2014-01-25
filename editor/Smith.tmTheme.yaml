@@ -30,7 +30,7 @@ settings:
 - name: Capitalized Name
   scope: entity.name.capitalized
   settings:
-    fontStyle: bold
+    fontStyle: bold # this does not work yet
 
 - name: Normal Call
   scope: call.normal

@@ -11,5 +11,3 @@ Any-Class.do-meta
 				@__exported
 			✔.fails
 				export 4
-	todo
-		defs in eg

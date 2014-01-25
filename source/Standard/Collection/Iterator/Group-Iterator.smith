@@ -9,7 +9,7 @@ data |original:Iterator group-size:Num
 
 ‣ next
 	◆.returning (Array.of) |group
-		group-size.times
+		↺.times group-size
 			group.»! original.next
 
 

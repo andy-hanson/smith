@@ -2,10 +2,7 @@
 	Prelude@Any.class
 
 C.do
-	`
-		var ass = console.assert;
-
-	-def 'check |name a
+	‣override-ok check name a
 		`
 			if (a == null)
 				throw new global.Error("Undefined "+name+":"+this._name);
@@ -17,7 +14,7 @@ C.do
 			}
 			return a;
 
-	-def 'export |exported
+	‣override-ok export exported
 		`
 			if (exported == null)
 				throw new global.Error('Exported nothing');
@@ -25,10 +22,10 @@ C.do
 				throw new global.Error(this._name + ' already exported ' + this.__exported);
 			this.__exported = exported;
 
-	-def 'subsumes? |a
+	‣override-ok subsumes? a
 		`a != null && a[this['-id-check']] === true`
 
-	-def '‣ |name:Str method:Fun
+	‣override-ok ‣ name:Str method:Fun
 		doc
 			TODO
 		in
@@ -41,7 +38,7 @@ C.do
 					throw new global.Error(this + ' already has method ' + name + fromStr);
 				}
 
-		-def name method
+		me.‣override-ok name method
 
 	‣ ‣override name:Str method:Fun
 		doc
@@ -51,7 +48,7 @@ C.do
 				if (this._proto[name] == null)
 					throw new global.Error('No need to override ' + name + ' in ' + this)
 
-		-def name method
+		me.‣override-ok name method
 
 	‣ new ...args
 		doc
@@ -390,8 +387,8 @@ C.do
 		me.‣object[me] name do-to
 
 	‣ data[can-extend~:Bool] constructor:Fun
-		todo
-			mangle
+		oth
+			TODO:
 			move elsewhere
 
 		∙ can-extend
