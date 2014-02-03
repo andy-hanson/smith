@@ -2,11 +2,9 @@ use Ref
 
 static!
 
-‣‣ times n:Num do:Fun
+‣‣ times n:ℕ do:Fun
 	doc
 		Runs `do` `n` times.
-	in
-		✔ n.natural?
 	eg
 		∙ r
 			Ref 0

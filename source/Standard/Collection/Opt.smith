@@ -12,7 +12,7 @@ Prelude@Opt.do
 
 		‣read value
 
-		‣ force[message~:Str]
+		‣ force message~\:Str
 			value
 
 		‣ or else:Fun
@@ -30,15 +30,15 @@ Prelude@Opt.do
 		‣ to-nullable
 			value
 
-		‣override toString
+		‣new toString
 			"(Some {value})"
 
 
 	None.class.do
-		‣ force[message~:Str]
+		‣ force message~\:Str]
 			∙ message
 				message~.or
-					「Tried to force None.」
+					"Tried to force None."
 			✘ message
 
 		‣ or else:Fun
@@ -56,7 +56,7 @@ Prelude@Opt.do
 		‣ to-nullable
 			()
 
-		‣override toString
+		‣new toString
 			"None"
 
 	‣‣ some value:Any

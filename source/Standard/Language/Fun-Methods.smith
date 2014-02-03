@@ -1,7 +1,9 @@
 Fun.do
-
 	‣ new-bound-of new-bound-to ...arguments
 		unbound.apply new-bound-to arguments
+
+	‣new inspect
+		"Fun(...)"
 
 	‣ of ...args
 		apply () args
@@ -20,11 +22,11 @@ Fun.do
 
 	alias 'of 'run!
 
-	\‣ be-override!
-	\	new! '_is-override Bool.⊤
+	\‣ be-any!
+	\	new! '_is-any Bool.⊤
 
-	\‣ is-override?
-	\	has-property? '_is-override
+	\‣ is-any?
+	\	has-property? '_is-any
 
 	‣ cache
 		doc

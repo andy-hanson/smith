@@ -1,6 +1,6 @@
 super Iterable
 
-‣‣override of width height fill
+‣‣new of width height fill
 	TODO
 
 data |width height data
@@ -9,19 +9,19 @@ data |width height data
 ‣ -to-index x y
 	(y.× x).+ x
 
-‣override of x:Num y:Num
+‣new of x:ℕ y:ℕ
 	(data) (to-index x y)
 
-‣ ! x:Num y:Num value
+‣ ! x:ℕ y:ℕ value
 	data.! (to-index x y) value
 
-‣ row row:Num
+‣ row row:ℕ
 	in
 		(Range 0 height).row
 
 	data.slice (row.× width) width
 
-‣override size
+‣new size
 	data.size
 
 ‣ collect-with-indices collector:Fun

@@ -1,41 +1,12 @@
-\doc
-\	Here's my nifty program.
-
+doc
+	Here's my nifty program.
 
 use! Str-Color
 
 use! all-modules
 
-
 Str-Color.styles.each-property |name
-	\Console.log! (name.send name)
+	Console.log! (name.send name)
 
+Test.all!
 
-
-\Time.race!
-\	use! use-all
-
-\∙ x
-\	Array.fill 1000000
-\		it.increment
-
-\Time.race!
-\	x.forEach |n:Num
-\		()
-
-\	x.map _increment
-\|
-\	x.map `function(x) { return x.increment(); }`
-\|
-\	x.map `function(x) { return x['+'](1); }`
-\|
-\	x.map `function(x) { return x + 1; }`
-\|
-\	`
-\		var out = [];
-\		for (var index = 0; index < x.length; index++)
-\			out[index] = x[index] + 1;
-
-
-Time.race!
-	Test.all!

@@ -1,10 +1,6 @@
 super Iterator
 
-data |original:Iterator group-size:Num
-	in
-		✔ group-size.natural?
-		✔ group-size.positive?
-
+data |original:Iterator group-size:ℕ
 	()
 
 ‣ next

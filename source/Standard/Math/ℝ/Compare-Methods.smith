@@ -1,28 +1,28 @@
-use Num
+use ℝ
 
-Num.do
-	‣override = a
+ℝ.do
+	‣new = a
 		`Object(a) instanceof Number && (this + 0) === (a + 0)`
 
-	‣ ≈[significant-digits~:Num] a:Num
+	‣ ≈ a:ℝ significant-digits~:ℕ
 		doc
 			Whether two I am equal to a to within `significant-digits` digits.
 			Delegates to ≈0 when I or a are 0.
 		eg
-			✔ (1001.≈[3] 1000)
-			✔ (1001.≈[4] 1000).¬
-			✔ (0.001001.≈[3] 0.001)
-			✔ (0.001001.≈[4] 0.001).¬
+			✔ (1001.≈ 1000 3)
+			✔ (1001.≈ 1000 4).¬
+			✔ (0.001001.≈ 0.001 3)
+			✔ (0.001001.≈ 0.001 4).¬
 
 		∙ significant-digits
 			significant-digits~.or
 				6
 
 		zero?.?
-			a.≈0[significant-digits]
+			a.≈0 significant-digits
 		|
 			a.zero?.?
-				≈0[significant-digits]
+				≈0 significant-digits
 			|
 				∙ avg-mag
 					magnitude.average a.magnitude
@@ -41,13 +41,13 @@ Num.do
 
 				scaled-diff.< epsilon
 
-	‣ ≈0[significant-digits~:Num]
+	‣ ≈0 significant-digits~:ℕ
 		doc
 			Whether a number is close to zero;
 			it must be 0.00... for sig-figs digits.
 		eg
-			✔ (0.00999.≈0[2])
-			✔ (0.01.≈0[2]).¬
+			✔ (0.00999.≈0 2)
+			✔ (0.01.≈0 2).¬
 
 		∙ significant-digits
 			significant-digits~.or
@@ -59,13 +59,13 @@ Num.do
 		magnitude.< max
 
 	‣ in-range min max
-		todo
-			Move to Comparable
+		oth
+			TODO: Move to Comparable
 
 		(≥ min).∧
 			(< max)
 
-	‣ < a:Num
+	‣ < a:ℝ
 		doc
 			Whether I am closer to -∞ than a.
 		eg
@@ -74,7 +74,7 @@ Num.do
 
 		`this < a`
 
-	‣ > a:Num
+	‣ > a:ℝ
 		doc
 			Whether I am closer to ∞ than a.
 		eg
@@ -83,7 +83,7 @@ Num.do
 
 		`this > a`
 
-	‣ ≤ a:Num
+	‣ ≤ a:ℝ
 		doc
 			Whether I am < or = a.
 		eg
@@ -91,7 +91,7 @@ Num.do
 
 		`this <= a`
 
-	‣ ≥ a:Num
+	‣ ≥ a:ℝ
 		doc
 			Whether I am > or = a.
 		eg
@@ -99,7 +99,7 @@ Num.do
 
 		`this >= a`
 
-	‣ min a:Num
+	‣ min a:ℝ
 		doc
 			Lower of me and `a`.
 		eg
@@ -110,7 +110,7 @@ Num.do
 
 		Global@Math.min me a
 
-	‣ max a:Num
+	‣ max a:ℝ
 		doc
 			Higher of me and `a`.
 		eg
@@ -119,7 +119,7 @@ Num.do
 
 		Global@Math.max me a
 
-	‣ crop min:Num max:Num
+	‣ crop min:ℝ max:ℝ
 		doc
 			Forces me in between min and max.
 		in

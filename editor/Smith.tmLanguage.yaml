@@ -6,10 +6,13 @@ fileTypes:
 uuid: 857c9cc3-2862-4a05-87e7-c7f90f51f1a7
 
 # I keep using this pattern:
-# [^\.\s\(\)\[\]\"\「\」]*
+# [^\.\s\(\)\[\]\"\「\」\\]*
 # For names. Don't change it just once, change it everywhere!
 
 patterns:
+
+- name: comment
+  match: \\.*
 
 - name: module.use
   match: ^\s*(use|use!|super|trait)(\s)(.+)
@@ -17,22 +20,23 @@ patterns:
     '3':
       name: module.used
 
+#- name: entity.name.normal
+#  match: '[^\.\s\(\)\[\]\"\「\」\\]+'
+
 - name: entity.name.capitalized
-  match: '[A-Z][^\.\s\(\)\[\]\"\「\」]*'
+  match: '[A-Z][^\.\s\(\)\[\]\"\「\」\\]*'
 
 - name: call.bang
-  match: (\b|\.)[^\.\s\(\)\[\]\"\「\」]*!
+  match: (\b|\.)[^\.\s\(\)\[\]\"\「\」\\]*!
 
 - name: call.normal
-  match: \.[^\.\s\(\)\[\]\"\「\」]*
+  match: \.[^\.\s\(\)\[\]\"\「\」\\]*
 
-- name: comment
-  match: \\.*
 
 # single-word string
 - name: string
-  match: \'[^\.\s\(\)\[\]\"\「\」]*
-  
+  match: \'[^\.\s\(\)\[\]\"\「\」\\]*
+
 - name: string
   begin: (\"|「)\n
   end: ^$ # end on blank line
@@ -46,6 +50,8 @@ patterns:
   patterns:
   - name: constant.other.placeholder.py
     match: \{[^\}]*\}
+  - name: escapeTODONAMEME
+    match: \\.
 
 - name: string
   begin: 「
@@ -104,7 +110,7 @@ patterns:
   captures:
     '1':
         name: local.define.dot
-  
+
 
 - name: variable.parameter
   begin: (\|)

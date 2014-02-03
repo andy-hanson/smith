@@ -1,18 +1,17 @@
 super Iterable
 
-
-‣‣override of[step~] min:Num max:Num
+‣‣new of min:ℝ max:ℝ step~
 	∙ step
 		step~.or
 			1
 
 	new min max step
 
-‣override ∋ value:Num
+‣new ∋ value:ℝ
 	eg
 		✔ ((Range 1 5 ).∋ 3)
 		✔ ((Range 1 5 ).∋ 6).¬
-		✔ ((Range[2] 1 5).∋ 4).¬
+		✔ ((Range 1 5 2).∋ 4).¬
 
 	(value.< max).∧
 		∙ rel
@@ -20,16 +19,17 @@ super Iterable
 		rel.negative?.¬.∧
 			rel.divisible? step
 
-data |min:Num max:Num step:Num
+data |min:ℝ max:ℝ step:ℝ
 	in
-		✔ (min.< max)
+		✔.≤ min
+			max
 		✔ step.positive?
 
 iterator
-	‣‣override of range
+	‣‣new of range
 		new range range.min
 
-	data |range:Range !current:Num
+	data |range:Range !current:ℝ
 		()
 
 	‣ next
@@ -39,5 +39,5 @@ iterator
 		|
 			stop
 
-‣override toString
+‣new toString
 	"<{min}..{max} by {step}>"

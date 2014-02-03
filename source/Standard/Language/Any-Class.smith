@@ -2,7 +2,7 @@
 	Prelude@Any.class
 
 C.do
-	‣override-ok check name a
+	‣new-ok check name a
 		`
 			if (a == null)
 				throw new global.Error("Undefined "+name+":"+this._name);
@@ -14,7 +14,7 @@ C.do
 			}
 			return a;
 
-	‣override-ok export exported
+	‣new-ok export exported
 		`
 			if (exported == null)
 				throw new global.Error('Exported nothing');
@@ -22,10 +22,10 @@ C.do
 				throw new global.Error(this._name + ' already exported ' + this.__exported);
 			this.__exported = exported;
 
-	‣override-ok subsumes? a
+	‣new-ok subsumes? a
 		`a != null && a[this['-id-check']] === true`
 
-	‣override-ok ‣ name:Str method:Fun
+	‣new-ok ‣ name:Str method:Fun
 		doc
 			TODO
 		in
@@ -38,30 +38,42 @@ C.do
 					throw new global.Error(this + ' already has method ' + name + fromStr);
 				}
 
-		me.‣override-ok name method
+		me.‣new-ok name method
 
-	‣ ‣override name:Str method:Fun
+	‣ ‣new name:Str method:Fun
 		doc
 			TODO
 		in
 			`
 				if (this._proto[name] == null)
-					throw new global.Error('No need to override ' + name + ' in ' + this)
+					throw new global.Error('No need to any ' + name + ' in ' + this)
 
-		me.‣override-ok name method
+		me.‣new-ok name method
+
+	‣ is-meta?
+		has-property? '_is-meta
 
 	‣ new ...args
 		doc
 			TODO
 		in
-			✔ (has-property? '_is-meta).¬
+			✔ is-meta?.¬
+				"Can't instantiate meta-class"
 
-		∙ new
-			Global@Object.create proto
-		new.construct ...args
-		new
+		◆.returning (Global@Object.create proto)
+			it.construct ...args
 
-	‣override toString
+	‣ seal-proto!
+		Global@Object.preventExtensions proto
+
+	‣ seal-static!
+		Global@Object.preventExtensions me
+
+	‣ seal!
+		seal-proto!
+		seal-static!
+
+	‣new toString
 		doc
 			TODO
 		how
@@ -87,13 +99,12 @@ C.do
 
 	alias 'new 'of
 
-	‣ ‣‣-maybe-override name:Str method:Fun
+	‣ ‣‣new-ok name:Str method:Fun
 		doc
 			TODO
 
 		new! name method
 		static-methods.new! name method
-
 
 	‣ ‣‣ name:Str method:Fun
 		doc
@@ -102,22 +113,33 @@ C.do
 			Not used by sub-classes.
 		in
 			✔ (has-proto-property? name).¬
-				"{me.name}.{name} already defined, use ‣‣override"
+				"{me.name}.{name} already defined, use ‣‣new"
 
-		me.‣‣-maybe-override name method
+		me.‣‣new-ok name method
 
-	‣ ‣‣override name:Str method:Fun
+	‣ ‣‣new name:Str method:Fun
 		in
 			✔ (has-proto-property? name)
-				"{me.name}.{name} not defined, no need to override"
+				"{me.name}.{name} not defined, no need to any"
 
-		me.‣‣-maybe-override name method
+		me.‣‣new-ok name method
 
 	‣ ‣val name:Str make-val:Fun
 		doc
-			Defines a lazy value on this class.
+			Defines a value on this class.
 
-		me.‣‣ name make-val.cache
+		∙ val
+			make-val.of
+		me.‣‣ name
+			val
+		\me.‣‣ name make-val.cache
+
+
+	\‣ ‣val! name:Str make-val:Fun
+	\	∙ val
+	\		make-val.of
+	\	me.‣‣ name
+	\		val
 
 	‣ ‣method-meta name:Str fun:Fun
 		how
@@ -247,7 +269,7 @@ C.do
 		doc
 			Instances of this class have this as their prototype.
 
-	‣read id
+	‣read id:ℕ
 		doc
 			Unique number for this class.
 
@@ -297,14 +319,19 @@ C.do
 		\ must use forEach because Array neads a trait to get each
 		(new-trait.inherits-from.» new-trait).forEach |inherit-from ...ignore
 			(inherits-from? inherit-from).unless!
-				proto.new-unless-exists! "__is-a-id-{new-trait.id}"
+				proto.new-unless-exists! inherit-from@-id-check
 					Bool.⊤
 				inherits-from.push inherit-from
 				inherit-from.methods.each-property |name value
 					(name.identical? 'class).unless!
 						✔ (proto.has-property? name).¬
 							"{me} already has method {name}, can't inherit from {inherit-from}"
-						proto.set-property! name value
+						`
+						`this.proto()[name] = value`
+						\proto.set-property! name value
+
+		is-meta?.unless!
+			class.trait new-trait.class
 
 	‣ meta
 		(property~ '_meta).or
@@ -319,7 +346,7 @@ C.do
 		do fun
 
 	‣ test-method! name:Str
-		(method name).meta.test-eg![me]
+		(method name).meta.test-eg! me
 
 	‣ test!
 		doc
@@ -327,14 +354,14 @@ C.do
 			I am used as the delegate in the `eg`.
 
 		✘.annotate
-			meta.test-eg![me]
+			meta.test-eg! me
 		|
 			name
 
 		∙ test |is-static
 			|name method
 				✘.annotate
-					method.meta.test-eg![me]
+					method.meta.test-eg! me
 				|
 					∙ def
 						is-static.?
@@ -347,46 +374,35 @@ C.do
 		methods.each-property (test Bool.⊥)
 		static-methods.each-property (test Bool.⊤)
 
+	‣ sub-class name:Str do-meta~:Fun
+		C me name do-meta~.to-nullable
 
-	‣ sub-class? class:C
-		doc
-			Whether `class` inherits from me.
-		eg
-			✔ (Fun.sub-class? Any)
-			✔ (Fun.sub-class? Str).¬
-			✔ (Fun.sub-class? Fun)
+	‣ ‣class name:Str do-meta~:Fun
+		me.‣val name
+			do-meta~.~
+				C Any name it
+			|
+				C Any name
 
-		class.subsumes? proto
-
-	‣ ‣class[super-class~:C] name:Str do-meta:Fun
+	‣ export-singleton super-class~:C do-meta~:Fun
 		∙ args
 			Array.proto@slice.call `arguments`
-		∙ class
-			C.of ...args
-		me.‣val name
-			class
+		export (C.singleton args)
 
-		class
-
-	‣ export-singleton[super-class~:C] do-meta:Fun
-		∙ s
-			super-class~.or
-				Any-Class
-		export (C.Singleton[s] name do-meta)
-
-	‣ ‣object[super-class~:C] name:Str do-meta:Fun
+	‣ ‣singleton super-class~:C name:Str do-meta:Fun
 		∙ args
 			Array.proto@slice.call `arguments`
 		me.‣val name
-			C.Singleton ...args
+			C.singleton ...args
 
 	‣ ‣sub-class name:Str do-to:Fun
-		me.‣class[me] name do-to
+		me.‣val name
+			sub-class name do-to
 
-	‣ ‣sub-object name:Str do-to:Fun
-		me.‣object[me] name do-to
+	‣ ‣sub-singleton name:Str do-to:Fun
+		me.‣singleton me name do-to
 
-	‣ data[can-extend~:Bool] constructor:Fun
+	‣ data can-extend~:Bool constructor:Fun
 		oth
 			TODO:
 			move elsewhere
@@ -423,7 +439,7 @@ C.do
 				me.‣write name
 
 			∙ assign
-				"'_{name}': \{ value: {mangle}, writable: {writable} \}"
+				"'_{name}': \{ value: {mangle}, writable: {writable} }"
 
 			\(Global@Array name assign)
 			names.push name
@@ -433,11 +449,6 @@ C.do
 		`
 			for (var index = 0; index < ctrArgs.size(); index++)
 				useIndex(index);
-
-		\∙ names
-		\	names-assigns.map
-		\∙ assigns
-		\	names-assigns.map _second
 
 		∙ assigns-str
 			assigns.join ",\n\t"
@@ -450,7 +461,7 @@ C.do
 			"
 				global.Object.defineProperties(this, \{
 					{assigns-str}
-				\});
+				});
 				{maybe-no-extend}
 
 		∙ define-properties
@@ -469,7 +480,7 @@ C.do
 		me.‣ name |...args
 			∙ delegated
 				dt.call me
-			`_c(delegated, name, [], [args])`
+			`_c(delegated, name, [args])`
 		\(method name).meta! delegate-to.meta
 
 	‣ delegate-many names:Array delegate-to:Fun

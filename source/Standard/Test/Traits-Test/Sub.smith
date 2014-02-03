@@ -3,9 +3,9 @@ eg
 	use Trait-A
 
 	✔ (Super.super-of? Sub)
-	✔ (Trait-A.trait-of? Sub)
-	✔ (Sub.sub-class? Super)
-	✔ (Sub.sub-class? Trait-A)
+	✔ (Trait-A.trait-of? Super)
+	✔ (Sub.inherits-from? Super)
+	✔ (Sub.inherits-from? Trait-A)
 	∙ sub
 		Sub.of
 	✔= 'super
@@ -14,7 +14,6 @@ eg
 		sub.trait-method
 
 super Super
-trait Trait-A
 
 ‣ construct
 	()

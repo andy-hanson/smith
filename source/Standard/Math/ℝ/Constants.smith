@@ -1,11 +1,11 @@
-use Num
+use ℝ
 
-Num.do
+ℝ.do
 	‣val E
 		Global@Math@E
 
 	‣val Golden-Ratio
-		5.square-root.inc.half
+		5.square-root.increment.half
 
 	‣val Not-A-Number
 		doc
@@ -26,17 +26,17 @@ Num.do
 	‣val -∞
 		∞.negate
 
-	‣val π/2
-		doc
-			A right angle, in radians.
-
-		π.÷ 2
-
 	‣val π
 		doc
 			Halfway around a circle, in radians.
 
 		Global@Math@PI
+
+	‣val π/2
+		doc
+			A right angle, in radians.
+
+		π.÷ 2
 
 	‣val π3/2
 		doc

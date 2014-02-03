@@ -144,14 +144,14 @@ Any = Object['to-class'] 'Any'
 
 AnyClass = Any.class()
 
-def.call AnyClass, '‣override-ok', def
+def.call AnyClass, '‣new-ok', def
 
-#AnyClass['‣override-ok'] 'construct', makeAnyClass
+#AnyClass['‣new-ok'] 'construct', makeAnyClass
 
 Meta =
 	makeAnyClass 'Meta'
 
-Meta['‣override-ok'] 'construct', (meta) ->
+Meta['‣new-ok'] 'construct', (meta) ->
 	(Object.keys meta).forEach (name) =>
 		unless meta[name]?
 			throw new Error '?'
@@ -174,9 +174,9 @@ bind = (object, name) ->
 clazz = (name, maybeIs, fun) ->
 	cls =
 		makeAnyClass name, maybeIs
-	cls['_make-meta-pre'] = fun['_make-meta-pre']
-
-	fun.unbound().call cls
+	if fun?
+		cls['_make-meta-pre'] = fun['_make-meta-pre']
+		fun.unbound().call cls
 
 	cls.__exported ? cls
 
@@ -212,38 +212,28 @@ checkNumberOfArguments = (args, expectedNumber) ->
 			"Expected #{expectedNumber} arguments, got #{args.length} " +
 			"(#{Array.prototype.join.call args, '; '})"
 
-call = (subject, verb, optionses, argumentses) ->
-	# optionses and argumentses are arrays of arrays
-	unless (Object verb) instanceof String
-		throw new global.Error '?'
-
-	opts = []
-	for newOpts in optionses
-		Array.prototype.push.apply opts, newOpts
+call = (subject, verb, argumentses) ->
+	# argumentses is an array of arrays
 
 	args = []
 	for newArgs in argumentses
-		#Array.prototype.push.apply args, newArgs
 		if newArgs instanceof Array
 			Array.prototype.push.apply args, newArgs
 		else
+			throw up
 			args['»»!'] newArgs
 
-	op = subject[verb]
-	unless op?
-		throw new Error "#{subject} of class #{subject.class()} has no method #{verb}"
+	method =
+		subject[verb] ?
+			throw new Error "#{subject} (a #{subject.class()}) has no method #{verb}"
 
-	if opts.length == 0
-		op.apply subject, args
-	else
-		args.unshift optionalArgumentTag, opts
-		op.apply subject, args
+	method.apply subject, args
 
 Argument = makeAnyClass 'Argument'
 
 Opt = makeAnyClass 'Opt'
 Some = makeAnyClass 'Some', Opt
-Some['‣override-ok'] 'construct', (x) ->
+Some['‣new-ok'] 'construct', (x) ->
 	@_value = x
 	Object.freeze @
 
@@ -267,8 +257,6 @@ module.exports =
 	Meta: Meta
 	'all-classes': -> allClasses
 	checkNumberOfArguments: checkNumberOfArguments
-	optionalArgumentTag:
-		'OPTIONAL-ARGUMENT-TAG'
 	call: call
 	argument: (name, clazz) ->
 		Argument.of name, clazz

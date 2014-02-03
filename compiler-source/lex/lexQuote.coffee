@@ -12,6 +12,9 @@ module.exports = (quoteType, stream, oldIndent) ->
 	escape =
 		't': '\t'
 		'n': '\n'
+		'{': '{'
+		'"': '"'
+		'\\': '\\'
 
 	read = ''
 	out = []
@@ -76,7 +79,10 @@ module.exports = (quoteType, stream, oldIndent) ->
 
 		if ch == '\\' and canEscape
 			next = stream.readChar()
-			read += (escape[next] or next)
+			if escape.hasOwnProperty next
+				read += escape[next]
+			else
+				cFail startPos, "No need to escape '#{next}'"
 
 		else if ch == '{' and canInterpolate
 			out.push new T.StringLiteral stream.pos, read

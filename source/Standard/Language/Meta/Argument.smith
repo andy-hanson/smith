@@ -10,7 +10,7 @@ Prelude@Argument.do
 	‣read name
 	‣read~ class-of
 
-	‣override toString
+	‣new toString
 		class-of~.~
 			"{name}:{it}"
 		|

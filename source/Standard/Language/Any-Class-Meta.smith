@@ -5,7 +5,12 @@ Any-Class.do-meta
 		✔ (Any-Class.subsumes? Any-Class)
 		✔ (Any-Class.super.identical? Any)
 
-		Any-Class 'Sample-Class
+		Any-Class Bag 'Sample-Class
+			✔ (inherits-from? Bag)
+			✔= Bag
+				me.super
+			✔ (Bag.super-of? me)
+
 			export 3
 			✔= 3
 				@__exported

@@ -110,11 +110,9 @@ class Parser
 		type tokens, Array
 		type isValue, Boolean
 
-		[ parts, opts ] = @expressionParts tokens, isValue
+		parts = @expressionParts tokens, isValue
 
 		if parts.isEmpty()
-			cCheck opts.isEmpty, @pos,
-				'Unexpected options'
 			new E.Null @pos
 		else
 			[ e0, tail ] = parts.unCons()
@@ -123,18 +121,15 @@ class Parser
 				unless tail.isEmpty()
 					check e0.args.isEmpty()
 					e0.args = tail
-				e0.optionArgs = opts
 				e0
 			else if e0 instanceof E.ManyArgs
 				@unexpected e0
-			else if tail.isEmpty() and opts.isEmpty()
+			else if tail.isEmpty()
 				e0
 			else
-				new E.Call.of e0, opts, tail
+				new E.Call.of e0, tail
 
-	###
-	Returns [regularParts, optionParts]
-	###
+
 	expressionParts: (tokens, isValue) ->
 		type tokens, Array
 		type isValue, Boolean
@@ -142,7 +137,7 @@ class Parser
 		tok0 = tokens[0]
 
 		plain = (x) ->
-			[ [x], [] ]
+			[ x ]
 
 		if tok0 instanceof T.Use
 			plain @use tokens, isValue
@@ -153,12 +148,7 @@ class Parser
 		else if T.defLocal tok0
 			plain @defLocal tokens.tail(), tok0.kind == '∘'
 		else
-			###
-			1.~= 2 [5]
-			###
-
 			slurped = []
-			opts = []
 
 			# TODO: tokens.forEach
 			until tokens.isEmpty()
@@ -181,13 +171,6 @@ class Parser
 							@soloExpression tok0
 						else
 							@unexpected tok0
-					else if T.square tok0
-						@pos = tok0.pos
-						[ someOpts, optOpts ] = @expressionParts tok0.body, yes
-						cCheck optOpts.isEmpty(),
-							'Did not expect options within options'
-						opts.pushAll someOpts
-						null
 					else if T.ellipsisName tok0
 						new E.ManyArgs @get tok0
 					else
@@ -197,7 +180,7 @@ class Parser
 					type x, E.Expression
 					slurped.push x
 
-			[ slurped, opts ]
+			slurped
 
 
 	###
@@ -302,10 +285,8 @@ class Parser
 			else
 				[ null, before ]
 
-		[ optArgs, optRest, restArgsTokens ] =
-			@takeOptionalArguments argsTokens
 		[ args, maybeRest ] =
-			@takeNewLocals restArgsTokens
+			@takeNewLocals argsTokens
 
 		[ meta, body ] =
 			if T.curlied last
@@ -315,28 +296,13 @@ class Parser
 					args = [ E.Local.it @pos ]
 
 				newLocals = args.slice()
-				if optArgs?
-					newLocals.pushAll optArgs
-				if optRest?
-					newLocals.push optRest
 				newLocals.push maybeRest if maybeRest?
 
 				@funBody bodyTokens, newLocals
 			else
 				[ (new E.Meta @pos), null ]
 
-		new E.FunDef \
-			@pos, meta, returnType, \
-			optArgs, optRest, \
-			args, maybeRest, body
-
-	takeOptionalArguments: (tokens) ->
-		if T.square tokens[0]
-			[ optArgs, optRest ] =
-				@takeNewLocals tokens[0].body
-			[ optArgs, optRest, tokens.tail() ]
-		else
-			[ null, null, tokens ]
+		new E.FunDef @pos, meta, returnType, args, maybeRest, body
 
 	###
 	Returns [plainLocals, restLocal]
@@ -477,7 +443,7 @@ class Parser
 			use
 
 		else
-			cCheck use.kind != 'super', @pos, 'is must be at top of file'
+			cCheck use.kind != 'super', @pos, 'super must be at top of file'
 			@locals.addLocalMayShadow use.local
 			if use.kind == 'trait'
 				new E.Trait use

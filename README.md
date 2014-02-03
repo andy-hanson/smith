@@ -4,6 +4,12 @@ Worship the language.
 
 Building
 ---
-* Get node.js: <nodejs.org/download/>
-* `sudo npm install --global coffeescript`
-* Run ./build.
+* Get node.js: <nodejs.org/download>
+* Run `./build`.
+
+License
+---
+DO WHATEVER THE FUCK YOU WANT, PUBLIC LICENSE
+TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION
+
+0. You just DO WHATEVER THE FUCK YOU WANT.

@@ -1,4 +1,7 @@
-(use Num).do
+(use ℝ).do
+	‣new inspect
+		toString
+
 	‣ not-a-number?
 		Global@Number.isNaN me
 
@@ -10,7 +13,7 @@
 
 	‣ sign
 		doc
-			1, -1, 0, -0, or `Num.Not-A-Number`.
+			1, -1, 0, -0, or `ℝ.Not-A-Number`.
 		eg
 			(Bag 1 -1 0 -0).each |n
 				✔= n
@@ -33,7 +36,7 @@
 						-0
 					|
 						✔ not-a-number?
-						Num.Not-A-Number
+						ℝ.Not-A-Number
 
 	‣ positive-zero?
 		doc
@@ -44,7 +47,7 @@
 			✔ -0.positive-zero?.¬
 
 		zero?.∧
-			inverse.= Num.∞
+			inverse.= ℝ.∞
 
 	‣ negative-zero?
 		doc
@@ -55,7 +58,7 @@
 			✔ 0.negative-zero?.¬
 
 		zero?.∧
-			inverse.= Num.-∞
+			inverse.= ℝ.-∞
 
 	‣ positive?
 		doc
@@ -91,7 +94,7 @@
 
 	‣ finite?
 		doc
-			Am I any number other than `Num.∞` or `Num.-∞`?
+			Am I any number other than `ℝ.∞` or `ℝ.-∞`?
 		eg
 			✔ 42.finite?
 
@@ -99,7 +102,7 @@
 
 	‣ infinite?
 		doc
-			`Num.∞` or `Num.-∞`.
+			`ℝ.∞` or `ℝ.-∞`.
 		eg
 			✔ ∞.infinite?
 			✔ -∞.infinite?

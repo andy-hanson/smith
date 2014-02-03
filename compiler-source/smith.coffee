@@ -1,5 +1,4 @@
 require './helpers'
-#[ './helpers', './parse', './lex', './compile', 'fs', 'optimist']
 io = require './io'
 fs = require 'fs'
 path = require 'path'
@@ -50,10 +49,6 @@ class Smith
 
 					[	[ out, code ],
 						[ "#{out}.map", map.toString() ] ]
-						#[ inFile, text ] ]
-
-				when 'js'
-					[ [ inFile, text ] ]
 
 				when 'coffee'
 					{ js, v3SourceMap } =
@@ -65,7 +60,7 @@ class Smith
 						[ "#{name}.js.map", v3SourceMap ] ]
 
 				else
-					fail()
+					[ [ inFile, text ] ]
 
 		catch error
 			error.message =
@@ -86,11 +81,9 @@ class Smith
 					[ name ]
 				when 'coffee'
 					[ "#{name}.js" ]
-				when '.kate-swp'
-					[ ]
 				else
 					@log "Ignoring #{inFile}"
-					[ ]
+					[ inFile, inFile ]
 
 	compilable: (inName) ->
 		if @just?
@@ -108,12 +101,13 @@ class Smith
 		all = []
 		io.recurseDirectoryFilesSync @inDir, (@bound 'compilable'), (inFile) =>
 			#Array.prototype.push.apply all, @outNames inFile
-			x = inFile.withoutEnd path.extname inFile
-			all.push "#{x}.js"
+			(@outNames inFile).forEach (name) ->
+				if name.endsWith 'js'
+					all.push name
 
 		useAll =
 			all.map (module) ->
-				"require('./#{module}');"
+				"require('./#{module.withoutEnd '.js'}');"
 			.join '\n'
 		fs.writeFileSync (path.join @outDir, "#{keywords.useAll}.js"), useAll
 
@@ -191,6 +185,7 @@ main = ->
 		console.log "Help yourself!"
 	else
 		(new Smith opts).main()
+
 
 module.exports =
 	parse: require './parse'

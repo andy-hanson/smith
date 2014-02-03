@@ -18,25 +18,24 @@
 				fun.run!
 
 	‣‣ rel relation-name:Str a make-b:Fun
-
 		∙ b
 			make-b.of
 
 		✔ (Any.exists? a)
 			"First argument undefined"
-		✔ (Any.exists? b)
-			"Second argument undefined"
+		\✔ (Any.exists? b)
+		\	"Second argument undefined"
 		✔ (a.send relation-name b)
 			"Expected {a}.{relation-name} {b}"
 
-	‣‣ ≈ [significant-digits~] a make-b
+	‣‣ ≈ a make-b significant-digits~
 		∙ significant-digits
 			significant-digits~.or
 				6
 		∙ b
 			make-b.of
 		∙ close
-			a.≈ [significant-digits] b
+			a.≈ b significant-digits
 		✔ close
 			"{a} not ≈ {b} (to {significant-digits} digits)"
 

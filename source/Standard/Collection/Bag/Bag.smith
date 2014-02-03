@@ -3,15 +3,14 @@ doc
 
 super Iterable
 
-‣‣override of ...members
+‣‣new of ...members
 	members
 
-\‣override to-bag
+\‣new to-bag
 \	me
 
 
-
-\‣override collect collector:Fun
+\‣new collect collector:Fun
 \	∙ builder
 \		class.builder
 \	each |value

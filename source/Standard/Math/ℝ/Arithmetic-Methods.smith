@@ -1,5 +1,5 @@
-(use Num).do
-	‣ + a:Num
+(use ℝ).do
+	‣ + a:ℝ
 		doc
 			Combination of two counts, one done after the other.
 			The method is addition and the result is the sum.
@@ -11,7 +11,7 @@
 
 		`this + a`
 
-	‣ - a:Num
+	‣ - a:ℝ
 		doc
 			Number of steps up from `a` to this.
 			For number of steps irrespective of direction, use `distance`.
@@ -24,7 +24,7 @@
 
 		`this - a`
 
-	‣ × a:Num
+	‣ × a:ℝ
 		doc
 			Sum of this many copies of a.
 			The method is multiplication and the result is the product.
@@ -38,7 +38,7 @@
 
 		`this * a`
 
-	‣ ÷ divisor:Num
+	‣ ÷ divisor:ℝ
 		doc
 			How many copies of divisor are needed to make me.
 			The method is division and the result is the ratio (or quotient).
@@ -52,7 +52,7 @@
 
 		`this / divisor`
 
-	‣ ^ power:Num
+	‣ ^ power:ℝ
 		doc
 			The product of `power` of me.
 		eg
@@ -61,7 +61,7 @@
 
 		(Global@Math.pow me power).forbid-NaN
 
-	‣ log base:Num
+	‣ log base:ℝ
 		doc
 			The number that `base` must be raised to the power of to reach me.
 		eg
@@ -72,7 +72,7 @@
 
 	‣ log-e
 		doc
-			The number that `Num.E` must be raised to the power of to reach me.
+			The number that `ℝ.E` must be raised to the power of to reach me.
 		eg
 			✔= 1
 				E.log-e
@@ -166,14 +166,14 @@
 
 		me.^ 3.inverse
 
-	‣ nth-root n:Num
+	‣ nth-root n:ℝ
 		eg
 			✔= 2
 				8.nth-root 3
 		^ n.inverse
 
 
-	‣ square-hypoteneuse a:Num
+	‣ square-hypoteneuse a:ℝ
 		doc
 			Square of the hypoteneuse.
 			Easier to compute than it.
@@ -183,7 +183,7 @@
 
 		square.+ a.square
 
-	‣ hypoteneuse a:Num
+	‣ hypoteneuse a:ℝ
 		doc
 			After moving me far right and `a` far up, the displacement.
 		eg
@@ -195,7 +195,7 @@
 		(square-hypoteneuse a).square-root
 
 
-	‣ average a:Num
+	‣ average a:ℝ
 		doc
 			Number in between this and a.
 		eg
@@ -227,7 +227,7 @@
 
 		Global@Math.abs me
 
-	‣ distance a:Num
+	‣ distance a:ℝ
 		doc
 			Space between two numbers.
 			Never returns a negative result.
@@ -250,8 +250,6 @@
 				50.% 4
 
 		(args.size.= 1).?
-			∙ x:Num
-				args 0
-			%.× x
+			%.× (args 0)
 		|
 			÷ 100

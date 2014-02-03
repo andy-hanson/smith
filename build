@@ -1,2 +1,2 @@
-npm install cake just-the-job
+npm update
 node_modules/cake/bin/cake all

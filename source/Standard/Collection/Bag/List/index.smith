@@ -1,4 +1,3 @@
 use! Array-Methods
 
-use Seq
-export Seq
+export (use List)

@@ -2,11 +2,13 @@
 	Prelude@Any
 
 A.do
-	\‣override class
-	\	doc
-	\		if not overridden...
-	\
-	\	(property 'constructor).to-class
+	‣ inspect
+		`
+			var s = '{ ', me = this, keys = global.Object.getOwnPropertyNames(me);
+			keys.forEach(function(key) {
+				s += key + ': ' //+ A.inspect(me[key]) + ',';
+			});
+			return s + ' }';
 
 	‣ has-property? name:Str
 		doc
@@ -60,17 +62,6 @@ A.do
 			TypeError if I'm a value type.
 
 		Global@Object.getOwnPropertyNames me
-
-	‣ show-properties:Str
-		doc
-			TODO
-
-		`
-			var s = "{", me = this;
-			Object.getOwnPropertyNames(this).forEach(function(key) {
-				s += key + ': ' + global.String(me[key]) + ',';
-			});
-			return s + "}";
 
 	‣ each-property fun:Fun
 		doc

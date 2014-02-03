@@ -24,10 +24,10 @@ use Zip-Iterator
 
 abstract!
 
-‣‣override of ...members
+‣‣new of ...members
 	members.iterator
 
-‣sub-object Empty
+‣sub-singleton Empty
 	‣ next
 		stop
 
@@ -47,8 +47,6 @@ abstract!
 
 ‣‣ slice array-like start end
 	Slice-Iterator array-like start end
-
-
 
 ‣ ++ ...iterators
 	doc
@@ -75,7 +73,7 @@ abstract!
 	doc
 		TODO
 	eg
-		✔ (sample.∀ _natural?)
+		✔ (sample.∀ _ℕ?)
 		✔ (sample.∀ _odd?).¬
 
 	`
@@ -102,14 +100,14 @@ abstract!
 ‣ collect collector:Fun
 	Collect-Iterator me collector
 
-‣ count:Num condition:Fun
+‣ count:ℕ condition:Fun
 	doc
 		How many elements satisfy the condition.
 	eg
 		✔= 2
 			sample.count _odd?
 
-	fold[0] |count em
+	fold 0 |count em
 		(condition em).?
 			count.increment
 		|
@@ -122,7 +120,7 @@ abstract!
 	Keep-Iterator me
 		(condition it).¬
 
-‣ drop n:Num
+‣ drop n:ℕ
 	doc
 		TODO
 	eg
@@ -167,12 +165,12 @@ abstract!
 
 	TODO
 
-‣ fold[initial] combine:Fun
+‣ fold initial~ combine:Fun
 	doc
 		TODO
 	eg
 		✔= 10
-			sample.fold[4] _+
+			sample.fold 4 _+
 		✔= 6
 			sample.fold _+
 	oth
@@ -181,7 +179,7 @@ abstract!
 			Opt.some (combine acc next)
 
 	∙ init
-		initial.or
+		initial~.or
 			next
 
 	`
@@ -203,7 +201,7 @@ abstract!
 
 	of 0
 
-‣ group group-size:Num
+‣ group group-size:ℕ
 	Group-Iterator me group-size
 
 ‣ if-next a:Fun b:Fun
@@ -223,6 +221,9 @@ abstract!
 			else
 				throw error;
 		}
+
+‣new inspect
+	"({class.name} {make-string})"
 
 ‣ keep condition:Fun
 	doc
@@ -252,14 +253,14 @@ abstract!
 				throw error;
 		}
 
-‣ make-string:Str[joiner~:Str]
+‣ make-string:Str joiner~
 	doc
 		TODO
 	eg
 		✔= "1 2 3"
 			sample.make-string
 		✔= "1+2+3"
-			sample.make-string['+]
+			sample.make-string '+
 
 	∙ joiner
 		joiner~.or
@@ -267,7 +268,7 @@ abstract!
 
 	(to-bag.collect Str.of_).join joiner
 
-‣ of index:Num
+‣ of index:ℕ
 	doc
 		TODO
 	err
@@ -297,8 +298,8 @@ abstract!
 ∙ Bag-Class
 	Bag.class
 
-‣ to-bag[class~:Bag-Class]
-	∙ class
+‣ to-bag class~:Bag-Class
+	∙ class:Bag-Class
 		class~.or
 			Array
 	class.from-iterator me

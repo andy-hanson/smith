@@ -44,7 +44,7 @@ M.do
 		doc
 			TODO
 
-	‣ test-eg![caller~]
+	‣ test-eg! caller~
 		eg~.each |egg
 			caller~.~
 				egg.new-bound-of it
@@ -92,7 +92,7 @@ M.do
 
 			return M.of(m);
 
-	‣override toString
+	‣new toString
 		show-properties
 
 export M

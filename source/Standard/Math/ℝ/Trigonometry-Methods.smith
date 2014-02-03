@@ -1,4 +1,4 @@
-(use Num).do
+(use ℝ).do
 	‣ sine
 		doc
 			If I am an angle (in radians) counter-clockwise from +x, the y-value is me.sin.

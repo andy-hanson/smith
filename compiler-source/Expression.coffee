@@ -3,7 +3,7 @@ T = require './Token'
 Pos = require './Pos'
 mangle = require './mangle'
 keywords = require './keywords'
-
+{ countWhere } = require './helpers'
 
 class Context
 	constructor: (@options, @fileName, @indent) ->
@@ -169,11 +169,11 @@ class Block extends Expression
 		compiled.interleave ";\n#{context.indent}"
 
 class Call extends Expression
-	constructor: (@subject, @verb, @optionArgs, @args) ->
+	constructor: (@subject, @verb, @args) ->
+		check arguments.length == 3
 		type @subject, Expression
 		type @verb, T.Name
 		check @verb.kind == '.x'
-		type @optionArgs, Array
 		type @args, Array
 
 		@args.forEach (arg) ->
@@ -186,49 +186,42 @@ class Call extends Expression
 	compile: (context) ->
 		subject =
 			@subject.toNode context
-		hasMany = (xx) ->
-			xx.containsWhere (x) ->
+
+		hasMany =
+			@args.containsWhere (x) ->
 				x instanceof ManyArgs
-		if (hasMany @args) or hasMany @optionArgs
-			renderArgs = (args) ->
-				parts =
-					args.map (arg) ->
-						if arg instanceof ManyArgs
-							[ (arg.value.toNode context) ]
-						else
-							[ '[', (arg.toNode context), ']' ]
+
+		if hasMany
+			parts =
+				@args.map (arg) ->
+					if arg instanceof ManyArgs
+						[ arg.value.toNode context ]
+					else
+						[ '[', (arg.toNode context), ']' ]
+
+			args =
 				[ '[', (parts.interleave ', '), ']' ]
 
-			[ '_c(', subject, ", '", @verb.text, "', ",
-				(renderArgs @optionArgs), ', ', (renderArgs @args), ')' ]
+			[ '_c(', subject, ", '", @verb.text, "', ", args, ')' ]
 		else
-			nodes =
+			parts =
 				@args.map (x) ->
 					x.toNode context
 			args =
-				nodes.interleave ', '
-			optionArgs =
-				if @optionArgs.isEmpty()
-					''
-				else
-					opts =
-						(@optionArgs.map (x) -> x.toNode context).interleavePlus ','
-					comma =
-						if @args.isEmpty() then '' else ', '
-					[ '_o, [', opts, ']', comma ]
+				parts.interleave ', '
 
-			[ subject, "['", @verb.text, "'](", optionArgs, args, ')' ]
+			[ subject, "['", @verb.text, "'](", args, ')' ]
 
 	@me = (pos, verb, args) ->
 		verb = new T.Name pos, verb, '.x'
-		new Call (new Me pos), verb, [], args
+		new Call (new Me pos), verb, args
 
-	@of = (expr, opts, args) ->
+	@of = (expr, args) ->
 		verb = new T.Name expr.pos, 'of', '.x'
-		new Call expr, verb, opts, args
+		new Call expr, verb, args
 
 	@noArgs = (subject, verb) ->
-		new Call subject, verb, [], []
+		new Call subject, verb, []
 
 class Property extends Expression
 	constructor: (@subject, @prop) ->
@@ -293,13 +286,11 @@ class Meta extends Expression
 		"doc: #{@doc}; eg: #{@eg}; how: #{@how}; sub-eg: #{@['sub-eg']}"
 
 class FunDef extends Expression
-	constructor: (@pos, @meta, @tipe, @optArgs, \
-			   @optRest, @args, @maybeRest, @body) ->
+	constructor: (@pos, @meta, @tipe, @args, @maybeRest, @body) ->
+		check arguments.length == 6
 		type @pos, Pos
 		type @meta, Meta if @meta?
 		type @tipe, Expression if @tipe?
-		type @optArgs, Array if @optArgs?
-		type @optRest, Local if @optRest?
 		type @args, Array # of Locals
 		type @maybeRest, Local if @maybeRest?
 		type @body, Block if @body?
@@ -307,17 +298,17 @@ class FunDef extends Expression
 	toString: ->
 		"{#{@args} ->\n #{@body?.toString().indent()}}"
 
-	assignArgs: (context) ->
-		someOpen =
-			'_p.Some.of('
+	isOpts: (arg) ->
+		type arg, Local
+		arg.name.endsWith '~'
 
-		getRest = (rest, argsRendered, nArgs, isOpts, end) =>
+
+	optLessAssignArgs: (context) ->
+		getRest = (rest, argsRendered, nArgs, end) =>
 			if rest?
-				getArray =
-					"global.Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
 				get =
 					jsLiteral @pos,
-						if isOpts then "#{someOpen}#{getArray})" else getArray
+						"global.Array.prototype.slice.call(#{argsRendered}, #{nArgs})"
 
 				[ ((new DefLocal rest, get).toNode context), end ]
 			else if context.options.checks()
@@ -325,80 +316,53 @@ class FunDef extends Expression
 			else
 				''
 
-		if @optArgs? or @optRest?
-			nOpts = @optArgs.length
+		checks =
+			if context.options.checks()
+				@args.map (arg) ->
+					arg.typeCheck context
+				.filter (x) ->
+					x != ''
+			else
+				[]
+		rest =
+			getRest @maybeRest, 'arguments', @args.length, ";\n#{context.indent}"
 
-			assign = (arg, args, index, isOpt = no) ->
-				val = "#{args}[#{index}]"
-				if context.options.checks() and arg.tipe?
-					val = [
-						(arg.tipe.toNode context),
-						".check('#{arg.name}', #{val})"
-					]
-				if isOpt
-					val =  [ someOpen, val, ')' ]
+		[ (checks.interleavePlus "\n#{context.indent}"), rest ]
 
-				[
-					"var #{arg.toNode context} = ",
-					val ]
+	optFullAssignArgs: (context, nOpts) ->
+		if @maybeRest?
+			cFail @pos, "Can not have both optional and rest arguments"
 
-			getOpts =
-				for opt, index in @optArgs
-					assign opt, "_opts", index, yes
+		nNormal = @args.length - nOpts
 
-			getArgsIfOpts =
-				for arg, index in @args
-					assign arg, 'arguments', index + 2
+		optIndex = 0
+		assigns = @args.map (arg) =>
+			inside =
+				arg.typeCheckValue context, (Literal.JS arg.pos, '_r[_i++]')
 
-			getNoOpts =
-				for opt in @optArgs
-					[ 'var ', (opt.toNode context), ' = _p.None' ]
-
-			getNoOptRest =
-				if @optRest?
-					[ 'var ', (@optRest.toNode context),
-						' = [];\n\t', context.indent]
+			assigned =
+				if @isOpts arg
+					nth = optIndex + nNormal
+					optIndex += 1
+					[ '(_l > ', "#{nth}", ') ? _p.Some.of(', inside, ') : _p.None' ]
 				else
-					''
+					inside
+			[ (arg.toNode context), ' = ', assigned ]
 
-			getArgsNoOpts =
-				for arg, index in @args
-					assign arg, 'arguments', index
+		x = ",\n\t#{context.indent}"
+		assigns = assigns.interleave x
 
-			nl = "\n\t#{context.indent}"
-			snl = ";#{nl}"
+		[ 'var _i = 0, _r = arguments, _l = _r.length', x, assigns, ';\n', context.indent ]
 
-			[
-				'if (arguments[0] == _o) {',
-					nl, 'var _opts = arguments[1]',
-					snl,
-					(getOpts.interleavePlus snl),
-					(getArgsIfOpts.interleavePlus snl),
-					(getRest @optRest, '_opts', nOpts, yes, snl),
-					(getRest @maybeRest, 'arguments', @args.length + 2, no, ";\n#{context.indent}"),
-				'} else {', nl,
-					(getNoOpts.interleavePlus snl),
-					(getArgsNoOpts.interleavePlus snl),
-					getNoOptRest,
-					(getRest @maybeRest, 'arguments', @args.length, no, ";\n#{context.indent}"),
-				'};\n', context.indent
-			]
+	assignArgs: (context) ->
+		nOpts =
+			countWhere @args, (arg) =>
+				@isOpts arg
 
+		if nOpts == 0
+			@optLessAssignArgs context
 		else
-			checks =
-				if context.options.checks()
-					@args.map (arg) ->
-						arg.typeCheck context
-					.filter (x) ->
-						x != ''
-				else
-					[]
-			rest =
-				getRest @maybeRest, 'arguments', @args.length, no, ";\n#{context.indent}"
-
-			console.lo
-
-			[ (checks.interleavePlus "\n#{context.indent}"), rest ]
+			@optFullAssignArgs context, nOpts
 
 	compile: (context) ->
 		maybeMeta = (kind) =>
@@ -460,7 +424,7 @@ class FunDef extends Expression
 			'}', meta, ')' ]
 
 	@plain = (pos, meta, args, body) ->
-		new FunDef pos, meta, null, null, null, args, null, body
+		new FunDef pos, meta, null, args,  null, body
 
 	###
 	Just the body, no meta, no args
@@ -507,6 +471,11 @@ class Literal extends Expression
 	compile: (context) ->
 		@literal.toJS context
 
+	@JS = (pos, text) ->
+		type pos, Pos
+		type text, String
+		new Literal new T.JavascriptLiteral pos, text, 'special'
+
 class Local extends Expression
 	constructor: (name, @tipe, @lazy) ->
 		type name, T.Name
@@ -530,15 +499,25 @@ class Local extends Expression
 
 	typeCheck: (context) ->
 		if @tipe?
+			[ (@typeCheckValue context, @), ';' ]
+		else
+			''
+
+	typeCheckValue: (context, checked) ->
+		type checked, Expression
+
+		if @tipe?
 			tipe =
 				@tipe.toNode context
 			nameLit =
 				new Literal new T.StringLiteral @pos, @name
 			name =
 				nameLit.toNode context
-			[ tipe, '.check(', name, ', ', @compile(), ');' ]
+			checkedNode =
+				checked.toNode context
+			[ tipe, '.check(', name, ', ', checkedNode, ')' ]
 		else
-			''
+			checked.toNode context
 
 	toMeta: (context) ->
 		tipe =
@@ -662,6 +641,9 @@ class ManyArgs extends Expression
 	constructor: (@value) ->
 		type @value, Expression
 		@pos = @value.pos
+
+	compile: ->
+		throw new Error "Should not be compiling ManyArgs"
 
 	toString: ->
 		"...#{@value}"

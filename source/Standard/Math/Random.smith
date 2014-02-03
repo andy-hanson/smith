@@ -3,15 +3,15 @@ doc
 
 static!
 
-‣‣ in-0-1
+‣‣ in-0-1:ℝ
 	doc
 		Random fraction.
 
 	Global@Math.random
 
-‣‣override of:Num min max
+‣‣new of:ℝ min:ℝ max:ℝ
 	doc
-		Random number from (exclusive) min to max.
+		Random number from (inclusive) min to (exclusive) max.
 	in
 		✔ (min.≤ max)
 
@@ -21,15 +21,14 @@ static!
 		in-0-1.× size
 	min.+ offset
 
-‣‣ int:Num min:Num max:Num
+‣‣ int:ℕ min:ℕ max:ℕ
 	doc
-		Random integer from (exclusive) min to max.
+		Random integer from (inclusive) min to (exclusive) max.
 	eg
 		∙ x
 			int 3 8
-		✔ x.integer?
 		✔ (x.≥ 3)
-		✔ (x.≤ 8)
+		✔ (x.< 8)
 
 	(of min max).round-down
 

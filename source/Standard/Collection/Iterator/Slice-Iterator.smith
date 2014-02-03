@@ -4,7 +4,7 @@ doc
 
 super Iterator
 
-data |array:Array !index:Num end:Num
+data |array:Array !index:ℕ end:ℕ
 	in
 		index.< end
 	()

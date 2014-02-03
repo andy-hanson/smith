@@ -1,8 +1,12 @@
 static!
 
 \ I know this won't override anything, but ‣‣ relies on ✔.of.
-‣‣-maybe-override of condition:Bool ...args
-	condition.unless!
-		`
+‣‣new-ok of condition:Bool ...args
+	doc
+		TODO
+
+	`
+		// not using condition.¬ to save on stack trace
+		if (!condition)
 			throw new global.Error((args.length > 0) ? args[0]() : 'Check failed.');
 

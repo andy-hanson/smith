@@ -183,3 +183,11 @@ global.type = (val, type) ->
 		throw new Error \
 			"Expected #{asObject} (a #{asObject.constructor.name}) " +
 			"to be a #{type.name}"
+
+module.exports =
+	countWhere: (arr, pred) ->
+		count = 0
+		arr.forEach (em) ->
+			if pred em
+				count += 1
+		count

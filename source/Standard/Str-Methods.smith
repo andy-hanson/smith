@@ -4,7 +4,10 @@ Str.do-meta
 	doc
 		...
 
-	‣‣override of a
+	‣new inspect
+		"\"{me}\""
+
+	‣‣new of a
 		`
 			switch (typeof a) {
 				case 'undefined':
@@ -17,7 +20,7 @@ Str.do-meta
 					return a.toString();
 			}
 
-	‣override = a
+	‣new = a
 		identical? a
 
 	‣ ++ a:Str
@@ -37,9 +40,6 @@ Str.do-meta
 
 	‣ size
 		`this.length`
-
-	\‣ char-at n:Num
-	\	`this[n]`
 
 	‣ tail
 		how

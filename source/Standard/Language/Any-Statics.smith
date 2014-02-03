@@ -1,4 +1,10 @@
 Any.do
+	‣‣new inspect a
+		`a != null`.?
+			a.inspect
+		|
+			`(a === null) ? "NULL" : "UNDEFINED"`
+
 	‣‣ exists?:Bool a
 		doc
 			TODO

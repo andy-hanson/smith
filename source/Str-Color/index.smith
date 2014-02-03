@@ -1,7 +1,12 @@
+use Yaml
+
 ‣‣ console?
 	Bool.⊤
 
 ‣val styles
+	(Yaml.load "{`__dirname`}/styles.yaml")@console
+
+‣val styles-poop
 	`
 		return this['console?'] ? {
 			//styles
@@ -69,10 +74,10 @@
 
 ∙ color |str:Str color-name:Str
 	∙ style
-		styles.property color-name
+		(styles.property color-name).split "|"
 
 	"{style 0}{str}{style 1}"
 
 styles.each-property |name
-	Str.‣override-ok name
+	Str.‣new-ok name
 		color me name

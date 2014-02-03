@@ -1,7 +1,4 @@
-use Num
-
-Num.do
-
+(use ℝ).do
 	‣ round-towards-0
 		doc
 			Rounds down if positive, rounds up if negative.
@@ -25,7 +22,7 @@ Num.do
 
 		Global@Math.round me
 
-	‣ round-down
+	‣ round-down:ℤ
 		doc
 			Highest integer lower than me.
 		eg
@@ -36,7 +33,7 @@ Num.do
 
 		Global@Math.floor me
 
-	‣ round-up
+	‣ round-up:ℤ
 		doc
 			Lowest integer higher than me.
 		eg
@@ -47,7 +44,7 @@ Num.do
 
 		Global@Math.ceil me
 
-	‣ remainder divisor:Num
+	‣ remainder:ℝ divisor:ℝ
 		doc
 			Remainder after division.
 		eg
@@ -56,33 +53,32 @@ Num.do
 
 		`this % divisor`
 
-	‣ natural?
+	‣ ℕ?
 		doc
-			Am I a non-negative integer?
+			Am I a natural number, a non-negative integer?
 		eg
-			✔ 0.natural?
-			✔ -1.natural?.¬
+			✔ 0.ℕ?
+			✔ -1.ℕ?.¬
 
-		integer?.∧
+		ℤ?.∧
 			negative?.¬
 
-	‣ integer?
+	‣ ℤ?
 		doc
-			Do I have no fractional parts?
+			Am I an integer, do I have no fractional parts?
 		eg
-			✔ 42.integer?
-			✔ 0.5.integer?.¬
-			✔ ∞.integer?.¬
-			✔ Not-A-Number.integer?.¬
+			✔ 42.ℤ?
+			✔ 0.5.ℤ?.¬
+			✔ ∞.ℤ?.¬
+			✔ Not-A-Number.ℤ?.¬
 		how
 			TODO: Number.isInteger
 
 		finite?.∧
-			(> -9007199254740992).∧
-				(< 9007199254740992).∧
-					= round-down
+			(in-range -9007199254740992 9007199254740992).∧
+				= (Global@Math.floor me)
 
-	‣ divisible? divisor:Num
+	‣ divisible? divisor:ℝ
 		doc
 			Whether an ingeger number of divisor can add up to me.
 		eg
@@ -118,30 +114,25 @@ Num.do
 		doc
 			Product of all integers up to me.
 		in
-			✔ natural?
-		eg
-			✔= 6
-				3.factorial
-			✔= 1
-				0.factorial
-			✔.fails
-				-1.factorial
-			✔.fails
-				0.5.factorial
-		how
-			TODO: (Range.int 1 inc).fold _×
+			✔ ℕ?
+		\TODO
+		\eg
+		\	✔= 6
+		\		3.factorial
+		\	✔= 1
+		\		0.factorial
+		\	✔.fails
+		\		-1.factorial
+		\	✔.fails
+		\		0.5.factorial
 
-		(< 2).?
-			1
-		|
-			× decrement.factorial
+		(Range 1 increment).fold _×
 
-	‣ greatest-common-divisor a:Num
+	‣ greatest-common-divisor a:ℕ
 		doc
 			Highest integer that both I and `a` are divisible by.
 		in
-			✔ natural?
-			✔ a.natural?
+			✔ ℕ?
 		eg
 			✔= 6
 				12.greatest-common-divisor 18
@@ -154,12 +145,11 @@ Num.do
 		|
 			a.greatest-common-divisor (remainder a)
 
-	‣ least-common-multiple a:Num
+	‣ least-common-multiple a:ℕ
 		doc
 			Lowest integer that both I and `a` are factors of.
 		in
-			✔ natural?
-			✔ a.natural?
+			✔ ℕ?
 		out
 			me.divisible? res
 			a.divisible? res
@@ -169,7 +159,7 @@ Num.do
 
 		(× a).÷ (greatest-common-divisor a)
 
-	‣ whole-÷ divisor:Num
+	‣ whole-÷ divisor:ℝ
 		doc
 			Like ÷, but any fractional part is rounded down. _Not_ necessarily rounded towards 0.
 		eg
@@ -180,7 +170,7 @@ Num.do
 
 		(÷ divisor).round-down
 
-	‣ divide-evenly~ divisor:Num
+	‣ divide-evenly~ divisor:ℝ
 		doc
 			If possible, an integer which × divisor is me.
 		eg
@@ -191,25 +181,25 @@ Num.do
 		how
 			TODO: Some equality
 
-		Opt.filter (÷ divisor) _integer?
+		Opt.filter (÷ divisor) _ℤ?
 
-	‣ binary-or n:Num
+	‣ binary-or:ℤ n:ℤ
 		`this | n`
 
-	‣ binary-and n:Num
+	‣ binary-and:ℤ n:ℤ
 		`this & n`
 
-	‣ binary-xor n:Num
+	‣ binary-xor:ℤ n:ℤ
 		`this ^ n`
 
-	‣ binary-not
+	‣ binary-not:ℤ
 		`~this`
 
-	‣ binary-shift-left n:Num
+	‣ binary-shift-left:ℤ n:ℤ
 		`this << n`
 
-	‣ binary-shift-right-signed n:Num
+	‣ binary-shift-right-signed:ℤ n:ℤ
 		`this >> n`
 
-	‣ binary-shift-right-unsigned n:Num
+	‣ binary-shift-right-unsigned:ℤ n:ℤ
 		`this >>> n`

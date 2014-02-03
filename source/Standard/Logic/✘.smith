@@ -3,7 +3,7 @@ static!
 ‣‣ TODO
 	✘ 'TODO
 
-‣‣override of message:Str
+‣‣new of message:Str
 	doc
 		Throw a new Error with the given message.
 	eg
@@ -20,7 +20,7 @@ static!
 		Opt.some it
 
 ‣‣ catch try:Fun
-	(catch~ try).force[「Expected to throw an error.」]
+	(catch~ try).force "Expected to throw an error."
 
 ‣‣ catch-message try:Fun
 	(catch try)@message

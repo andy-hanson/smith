@@ -2,6 +2,12 @@
 	Global@Boolean.to-class 'Bool
 
 B.do
+	‣new inspect
+		?
+			'⊤
+		|
+			'⊥
+
 	‣ ? then:Fun else:Fun
 		doc
 			TODO

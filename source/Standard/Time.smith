@@ -3,13 +3,13 @@ static!
 ‣‣ race! ...raced
 	Console.log! (raced.collect of_).make-string
 
-‣‣override of do:Fun
+‣‣new of do:Fun
 	∙ start
 		now-secs
 	do.run!
 	now-secs.- start
 
-‣‣ now-secs:Num
+‣‣ now-secs:ℝ
 	(New Global@Date).getTime.÷ 1000
 
 

@@ -1,5 +1,6 @@
-auto ↺ ✔ ✔= ✘ ◆ Any Any-Class Array Bag Bool Console Error Fun Global Iterable Iterator
-auto Meta New Num Opt Queue Range Ref Time Seq Str Test Vec2 Void
+auto ↺ ✔ ✔= ✘ ◆ ℝ ℤ ℕ Any Any-Class Array Bag Bool Console
+auto Error Fun Global Iterable Iterator
+auto Meta New Opt Queue Range Ref Time List Str Test Vec2 Void
 
 Standard Standard/index
 
@@ -8,11 +9,15 @@ Standard Standard/index
 ✔= Standard/Logic/✔=
 ✘ Standard/Logic/✘
 ◆ Standard/Logic/◆
+ℝ Standard/Math/ℝ
+ℤ Standard/Math/ℝ/ℤ
+ℕ Standard/Math/ℝ/ℕ
 Any Standard/Language/Any
 Any-Class Standard/Language/Any-Class
-Array Standard/Collection/Bag/Seq/Array
+Array Standard/Collection/Bag/List/Array
 Bag Standard/Collection/Bag/index
 Bool Standard/Logic/Bool
+Class-Like Standard/Language/Class-Like
 Collection Standard/Collection
 Console Standard/IO/Console
 Error Standard/Logic/Error
@@ -23,14 +28,13 @@ Iterator Standard/Collection/Iterator
 Math Standard/Math/index
 Meta Standard/Language/Meta
 New Standard/Language/New
-Num Standard/Math/Num
 Opt Standard/Collection/Opt
-Queue Standard/Collection/Bag/Seq/Queue
+Queue Standard/Collection/Bag/List/Queue
 Random Standard/Math/Random
 Range Standard/Collection/Range
 Ref Standard/Language/Ref
 Smith-Prelude Standard/Language/Smith-Prelude
-Seq Standard/Collection/Bag/Seq
+List Standard/Collection/Bag/List
 Str Standard/Str
 Test Standard/Test
 Time Standard/Time
@@ -40,3 +44,6 @@ Void Standard/Void
 Source-Map-Support source-map-support FORCE
 
 Main Main
+
+Yaml yamljs FORCE
+Segfault-Handler segfault-handler FORCE

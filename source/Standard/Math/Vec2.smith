@@ -1,7 +1,7 @@
-data |x:Num y:Num
+data |x:ℝ y:ℝ
 	()
 
-‣override toString
+‣new toString
 	"<#{x} #{y}>"
 
 ‣ +:Vec2 v:Vec2
@@ -49,10 +49,10 @@ data |x:Num y:Num
 
 	negate-x.negate-y
 
-‣ length^2:Num
+‣ length^2:ℝ
 	x.square.+ y.square
 
-‣ length:Num
+‣ length:ℝ
 	length^2.square-root
 
 ‣val zero
@@ -62,22 +62,22 @@ data |x:Num y:Num
 	x.zero?.∧
 		y.zero?
 
-‣ ↺:Vec2 amount:Num
+‣ ↺:Vec2 amount:ℝ
 	TODO
 
-‣ ↻:Vec2 amount:Num
+‣ ↻:Vec2 amount:ℝ
 	TODO
 
-‣ ← amount:Num
+‣ ← amount:ℝ
 	Vec2 (x.- amount) y
 
-‣ → amount:Num
+‣ → amount:ℝ
 	Vec2 (x.+ amount) y
 
-‣ ↓ amount:Num
+‣ ↓ amount:ℝ
 	Vec2 x (y.- amount)
 
-‣ ↑ amount:Num
+‣ ↑ amount:ℝ
 	Vec2 x (y.+ amount)
 
 ‣ ←?

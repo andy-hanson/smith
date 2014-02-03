@@ -5,7 +5,7 @@ F.do
 	eg
 		Console.log! 'hi
 
-	‣override-ok meta:Meta
+	‣new-ok meta:Meta
 		doc
 			Gets this function's meta.
 		how

@@ -1,10 +1,10 @@
 doc
 	TODO
 
-Prelude@Any.‣override-ok 'do |fun
+Prelude@Any.‣new-ok 'do |fun
 	fun.unbound.call me
 
-Prelude@Any.‣override-ok 'new! |name:Str value
+Prelude@Any.‣new-ok 'new! |name:Str value
 	doc
 		Defines a new immutable property on this object.
 	how
@@ -35,9 +35,9 @@ use! Language/Fun-Meta
 use! Language/Any-Class-Meta
 use! Language/Any-Meta
 
-use! Num
+use! ℝ
 
-use! Seq
+use! List
 \use! Bag
 \use! Collection
 use! Error

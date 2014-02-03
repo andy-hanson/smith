@@ -3,4 +3,5 @@ super Class-Like
 static!
 
 ‣‣new subsumes? a
-	`a == null`
+	(ℝ.subsumes? a).∧
+		a.ℤ?

@@ -10,7 +10,7 @@ class.do
 			TODO
 
 		∙ iterator-class
-			Any-Class[Iterator] "{name}-Iterator"
+			Iterator.sub-class "{name}-Iterator"
 				do iterator-class-body
 
 		‣ iterator
@@ -22,10 +22,13 @@ class.do
 		push 'fold 'first 'group 'keep 'last 'make-string 'of 'size 'to-bag 'zip
 		me
 
+\‣new inspect
+\	iterator.inspect
+
 \ Can't use normal Array, doesn't exist yet
 delegate-many methods
 	iterator
 
 
-\‣override toString
+\‣new toString
 \	"({type.name} {make-string})"

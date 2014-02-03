@@ -2,7 +2,7 @@
 	Global@Error.to-class
 
 E.do
-	‣‣override of message
+	‣‣new of message
 		New Global@Error message
 
 	‣ throw!

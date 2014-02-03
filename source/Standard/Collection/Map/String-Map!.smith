@@ -1,7 +1,7 @@
 doc
 	TODO
 
-‣‣override of ...args
+‣‣new of ...args
 	◆.returning (new (Global@Object.create `null`)) |map
 		(args.group 2).each
 			map.+! (it 0) (it 1)
@@ -70,5 +70,5 @@ data |data
 
 	-call 'property-names
 
-‣override toString
+‣new toString
 	-call 'show-properties

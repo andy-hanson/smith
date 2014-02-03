@@ -17,9 +17,9 @@ eg
 			un-»!
 		✔ empty?
 
-super Seq
+super List
 
-‣‣override of ...members
+‣‣new of ...members
 	oth
 		TODO:
 		inherit from Bag (builder)
@@ -30,19 +30,19 @@ super Seq
 		new members 0 members.size.decrement
 
 \ end is non-inclusive, front is
-data |!data:Array !front:Num !end:Num
+data |!data:Array !front:ℕ !end:ℕ
 	()
 
 ‣ print!
 	Console.log! "{data} {front} {end}"
 
-‣override size
+‣new size
 	end.- front
 
-‣override empty?
+‣new empty?
 	front.= end
 
-‣ -loop index:Num
+‣ -loop:ℕ index:ℤ
 	(data.size.+ index).remainder data.size
 
 ‣ »! value
@@ -57,10 +57,10 @@ data |!data:Array !front:Num !end:Num
 		-loop it.decrement
 	data.! front value
 
-‣override first:Any
+‣new first:Any
 	(data) front
 
-‣override last:Any
+‣new last:Any
 	(data) end.decrement
 
 ‣ un-«!
@@ -90,10 +90,10 @@ data |!data:Array !front:Num !end:Num
 
 
 iterator
-	‣‣override of deque
+	‣‣new of deque
 		new deque deque.front
 
-	data |deque:Deque !index:Num
+	data |deque:Deque !index:ℕ
 		()
 
 	‣ next

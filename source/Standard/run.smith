@@ -2,7 +2,8 @@ doc
 	Prepares the program.
 	Don't edit this file.
 
-(use Source-Map-Support).install
+\(use Source-Map-Support).install
+\(use Segfault-Handler).registerHandler
 
 ∙ f |
 	use! Standard

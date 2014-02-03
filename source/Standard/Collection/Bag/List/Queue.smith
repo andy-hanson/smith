@@ -11,18 +11,18 @@ eg
 		✔.fails
 			next!
 
-super Seq
+super List
 
 ‣ iterator
 	Iterator.slice data left right
 
-‣‣override of ...args
+‣‣new of ...args
 	new 0 args.size args
 
-data |!left:Num !right:Num data:Array
+data |!left:ℕ !right:ℕ data:Array
 	()
 
-‣override empty?:Bool
+‣new empty?:Bool
 	left.= right
 
 ‣ add!:Void value
