@@ -1,3 +1,6 @@
+∙ Math
+	(use Global)@Math
+
 (use ℝ).do
 	‣ sine
 		doc
@@ -11,7 +14,8 @@
 				π.sine
 			✔= -1
 				π3/2.sine
-		Global@Math.sin me
+
+		Math.sin me
 
 	‣ cosine
 		doc
@@ -26,7 +30,7 @@
 			✔.≈ 0
 				π3/2.cosine
 
-		Global@Math.cos me
+		Math.cos me
 
 	‣ tangent
 		doc
@@ -37,7 +41,7 @@
 			✔.≈ 0
 				π.tangent
 
-		Global@Math.tan me
+		Math.tan me
 
 	‣ arc-cosine
 		doc
@@ -48,7 +52,7 @@
 			✔= 0
 				1.arc-cosine
 
-		Global@Math.acos me
+		Math.acos me
 
 	‣ arc-sine
 		doc
@@ -62,7 +66,7 @@
 		how
 			TODO - avoid NaN
 
-		Global@Math.asin me
+		Math.asin me
 
 	‣ arc-tangent
 		doc
@@ -71,5 +75,5 @@
 			✔= 0
 				0.arc-tangent
 
-		Global@Math.atan me
+		Math.atan me
 

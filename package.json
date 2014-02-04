@@ -22,8 +22,9 @@
 	},
 	"devDependencies": {
 		"cake": ">= 0.1.1",
+		"coffeedoc": ">= 0.3.0",
 		"coffeelint": ">=1.0.3",
-		"just-the-job": ">= 0.0.0"
+		"just-the-job": ""
 	},
 	"repository":
 		"github.com/andy-hanson/smith/",

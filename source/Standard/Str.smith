@@ -1,4 +1,4 @@
 ∙ S
-	Global@String.to-class 'Str
+	(use Global)@String.to-class 'Str
 
 export S

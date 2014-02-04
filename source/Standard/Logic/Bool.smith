@@ -1,5 +1,5 @@
 ∙ B
-	Global@Boolean.to-class 'Bool
+	(use Global)@Boolean.to-class 'Bool
 
 B.do
 	‣new inspect

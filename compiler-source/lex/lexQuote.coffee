@@ -1,13 +1,14 @@
 T = require '../Token'
 Stream = require './Stream'
 GroupPre = require './GroupPre'
-{ cFail, cCheck } = require '../CompileError'
-keywords = require '../keywords'
+{ cFail, cCheck } = require '../compile-help/✔'
+keywords = require '../compile-help/keywords'
+{ check, type } = require '../help/✔'
+{ isEmpty } = require '../help/list'
+{ repeated, withoutStart } = require '../help/str'
 
 module.exports = (quoteType, stream, oldIndent) ->
-	type quoteType, String
-	type stream, Stream
-	type oldIndent, Number
+	type quoteType, String, stream, Stream, oldIndent, Number
 
 	escape =
 		't': '\t'
@@ -25,7 +26,7 @@ module.exports = (quoteType, stream, oldIndent) ->
 	canEscape =
 		quoteType != '`'
 	canInterpolate =
-		not quoteType.isAny '「', '`'
+		quoteType != '`'
 	quoteIndent =
 		oldIndent + 1
 
@@ -34,28 +35,26 @@ module.exports = (quoteType, stream, oldIndent) ->
 			switch quoteType
 				when '`', '"'
 					quoteType
-				when '「'
-					'」'
 				else
 					cFail startPos, "Bad quote type #{quoteType}"
 
 	finish = ->
 		text =
 			if indented
-				read.tail().trimRight() # skip initial newline
+				(withoutStart read, '\n').trimRight() # skip initial newline
 			else
 				read
 
 		getInterpolatedGroup = ->
 			check canInterpolate
 			literal = new T.StringLiteral stream.pos, text
-			if out.isEmpty()
+			if isEmpty out
 				literal
 			else
 				out.push literal
 				new T.Group startPos, stream.pos, '"', out
 
-		if keywords.metaText.contains quoteType
+		if quoteType in keywords.metaText
 			new T.MetaText startPos, quoteType, getInterpolatedGroup()
 		else
 			switch quoteType
@@ -65,8 +64,6 @@ module.exports = (quoteType, stream, oldIndent) ->
 					kind =
 						if indented then 'indented' else 'plain'
 					new T.JavascriptLiteral startPos, text, kind
-				when '「'
-					new T.StringLiteral startPos, text
 				else
 					fail()
 
@@ -106,7 +103,7 @@ module.exports = (quoteType, stream, oldIndent) ->
 				check stream.peek() == '\n'
 				return finish()
 			else
-				read += '\n' + '\t'.repeated nowIndent - quoteIndent
+				read += '\n' + repeated '\t', nowIndent - quoteIndent
 
 		else if ch == closeQuote and not indented
 			return finish()

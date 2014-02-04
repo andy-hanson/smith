@@ -1,5 +1,5 @@
 ∙ N
-	Global@Number.to-class 'ℝ
+	(use Global)@Number.to-class 'ℝ
 
 N.do-meta
 	doc

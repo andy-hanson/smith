@@ -1,40 +1,30 @@
-require './helpers'
-io = require './io'
 fs = require 'fs'
 path = require 'path'
-nopt = require 'nopt'
-smithCompile = require './compile'
-coffee = require 'coffee-script'
 watch = require 'watch'
-Options = require './Options'
-keywords = require './keywords'
+{ check, type } =  require '../help/✔'
+{ endsWith, withoutEnd } = require '../help/str'
+{ isEmpty } = require '../help/list'
+io = require '../help/io'
+compileCoffeeScript = (require 'coffee-script').compile
+Options = require '../run/Options'
+keywords = require '../compile-help/keywords'
+compileSingle = require './single'
 
-class Smith
-	constructor: (opts) ->
-		@inDir = opts.in
-		@outDir = opts.out
-		{ @watch, @quiet, @just } = opts
-		@options = new Options opts.checks, opts.meta, opts['print-module-defines'], @inDir
-		type @inDir, String
-		type @outDir, String
-		type @watch, Boolean
-		type @quiet, Boolean
-		type @just, String if @just?
+class CompileDir
+	constructor: (@options) ->
+		type @options, Options
 
 	log: (text) ->
-		unless @quiet
+		if @options.verbose()
 			console.log text
 
 	###
 	Returns a list of [name, text] pairs to write.
 	###
 	compile: (inFile, text) ->
-		type inFile, String
-		type text, String
+		type inFile, String, text, String
 
 		check @compilable inFile
-
-		@log "Compiling #{inFile}"
 
 		[ name, ext ] =
 			io.extensionSplit inFile
@@ -42,17 +32,19 @@ class Smith
 		try
 			switch ext
 				when 'smith'
+					@log "Compiling #{inFile}"
 					out =
 						"#{name}.js"
 					{ code, map } =
-						smithCompile text, inFile, out, @options
+						compileSingle text, inFile, out, @options
 
 					[	[ out, code ],
 						[ "#{out}.map", map.toString() ] ]
 
 				when 'coffee'
+					@log "Compiling #{inFile}"
 					{ js, v3SourceMap } =
-						coffee.compile text,
+						compileCoffeeScript text,
 							filename: inFile
 							sourceMap: yes
 
@@ -82,39 +74,38 @@ class Smith
 				when 'coffee'
 					[ "#{name}.js" ]
 				else
-					@log "Ignoring #{inFile}"
 					[ inFile, inFile ]
 
 	compilable: (inName) ->
-		if @just?
-			inName == @just
+		if @options.just()?
+			inName == @options.just()
 		else
-			not (@outNames inName).isEmpty()
+			not isEmpty @outNames inName
 
 	compileAll: ->
-		io.processDirectorySync @inDir, @outDir,
-			(@bound 'compilable'), @bound 'compile'
+		io.processDirectorySync @options.in(), @options.out(),
+			((file) => @compilable file), (file, text) => @compile file, text
 
 		@writeAll()
 
 	writeAll: ->
 		all = []
-		io.recurseDirectoryFilesSync @inDir, (@bound 'compilable'), (inFile) =>
+		io.recurseDirectoryFilesSync @options.in(), (-> yes), (inFile) =>
 			#Array.prototype.push.apply all, @outNames inFile
 			(@outNames inFile).forEach (name) ->
-				if name.endsWith 'js'
+				if endsWith name, 'js'
 					all.push name
 
 		useAll =
 			all.map (module) ->
-				"require('./#{module.withoutEnd '.js'}');"
+				"require('./#{withoutEnd module, '.js'}');"
 			.join '\n'
-		fs.writeFileSync (path.join @outDir, "#{keywords.useAll}.js"), useAll
+		fs.writeFileSync (path.join @options.out(), "#{keywords.useAll}.js"), useAll
 
 
 	watch: ->
 		toShortName = (inName) =>
-			io.relativeName @inDir, inName
+			io.relativeName @options.in(), inName
 		toOutName = (inName) ->
 			path.join outDir, toShortName inName
 
@@ -134,13 +125,13 @@ class Smith
 			ignoreDotFiles: yes
 			#filter: compilable
 
-		watch.createMonitor @inDir, options, (monitor) =>
+		watch.createMonitor @options.in(), options, (monitor) =>
 			monitor.on 'created', compileAndWrite
 			monitor.on 'changed', compileAndWrite
 			monitor.on 'removed', (inFile) =>
 				@log "#{inFile} was deleted."
 				for shortOut in outNames (toShortName inFile)
-					outFile = path.join @outDir, shortOut
+					outFile = path.join @options.out(), shortOut
 					@log "Removing #{outFile}"
 					fs.unlink outFile, (err) ->
 						throw err if err?
@@ -148,7 +139,7 @@ class Smith
 	compileAndWrite: (inFile, text) ->
 		(@compile inFile, text).forEach (compiled) =>
 			[ shortOut, text ] = compiled
-			outFile = path.join @outDir, shortOut
+			outFile = path.join @options.out(), shortOut
 			fs.writeFile outFile, text, (err) =>
 				throw err if err?
 				@log "Wrote to #{outFile}"
@@ -156,41 +147,13 @@ class Smith
 	main: ->
 		@compileAll()
 
-		if @watch
-			@log "Watching #{argv.in}..."
+		if @options.watch()
+			@log "Watching #{@options.in()}..."
 			@watch()
 
+module.exports = (options) ->
+	type options, Options
+	(new CompileDir options).main()
 
-main = ->
-	opts = nopt
-		'checks': Boolean
-		'in': String
-		out: String
-		'help': Boolean
-		'meta': Boolean
-		'just': String
-		'print-module-defines': Boolean
-		'quiet': Boolean
-		'watch': Boolean
-
-	opts.checks ?= yes
-	opts.in ?= 'source'
-	opts.out ?= 'js'
-	opts.meta ?= yes
-	opts['print-module-defines'] ?= no
-	opts.quiet ?= yes
-	opts.watch ?= no
-
-	if opts.help?
-		console.log "Help yourself!"
-	else
-		(new Smith opts).main()
-
-
-module.exports =
-	parse: require './parse'
-	lex: require './lex'
-	compile: smithCompile
-	main: main
 
 

@@ -1,5 +1,8 @@
-local = [ '∙', '∘' ]
-specialVar = [ 'me', 'it' ]
+local =
+	[ '∙', '∘' ]
+specialVar =
+	[ 'me', 'it' ]
+
 
 module.exports =
 	metaText:
@@ -8,10 +11,8 @@ module.exports =
 		[ 'in', 'out', 'eg' ]
 	useLike:
 		[ 'use', 'use!', 'super', 'trait' ]
-	local:
-		local
-	specialVar:
-		specialVar
+	local: local
+	specialVar: specialVar
 	special:
 		local.concat specialVar
 	useAll:

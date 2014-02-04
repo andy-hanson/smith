@@ -1,7 +1,8 @@
+{ type } = require '../help/✔'
+
 module.exports = class Pos
 	constructor: (@line, @column) ->
-		type @line, Number
-		type @column, Number
+		type @line, Number, @column, Number
 		Object.freeze @
 
 	plusLine: ->

@@ -1,3 +1,5 @@
+use! Global
+
 (use ℝ).do
 	‣new inspect
 		toString
@@ -7,7 +9,7 @@
 
 	‣ forbid-NaN
 		not-a-number?.?
-			✘ 「Not a Number」
+			✘ "Not a Number"
 		|
 			me
 

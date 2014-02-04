@@ -2,7 +2,7 @@
 	‣‣ fails fun:Fun
 		eg
 			fails
-				✘ 「whoops」
+				✘ "whoops"
 
 			fails
 				fails
@@ -12,7 +12,7 @@
 		✘.catch
 			fun.run!
 
-	‣‣  fail-message message:Str fun:Fun
+	‣‣ fail-message message:Str fun:Fun
 		✔= message
 			✘.catch-message
 				fun.run!

@@ -1,8 +1,10 @@
-E = require './Expression'
-T = require './Token'
-{ cCheck } = require './CompileError'
-StringMap = require './StringMap'
-Pos = require './Pos'
+E = require '../Expression'
+T = require '../Token'
+{ cCheck } = require '../compile-help/✔'
+StringMap = require '../help/StringMap'
+Pos = require '../compile-help/Pos'
+{ check, type } =  require '../help/✔'
+{ last } = require '../help/list'
 
 module.exports = class Locals
 	constructor: ->
@@ -15,7 +17,7 @@ module.exports = class Locals
 
 	_add: (local, canRepeat) ->
 		type local, E.Local
-		@frames.last().push local
+		(last @frames).push local
 		unless canRepeat
 			check not (@names.has local.name), =>
 				"Already have local #{local}, it's #{@names.get local.name}"
@@ -28,8 +30,7 @@ module.exports = class Locals
 		@_add local, yes
 
 	popFrame: ->
-		last = @frames.pop()
-		last.forEach (local) =>
+		@frames.pop().forEach (local) =>
 			@names.delete local.name
 
 	withFrame: (fun) ->

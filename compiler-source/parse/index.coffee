@@ -1,16 +1,17 @@
-T = require './Token'
-E = require './Expression'
-Pos = require './Pos'
-AllModules = require './AllModules'
+T = require '../Token'
+E = require '../Expression'
+Pos = require '../compile-help/Pos'
+AllModules = require '../compile/AllModules'
+{ cCheck, cFail } = require '../compile-help/✔'
+{ check, type, typeExist } =  require '../help/✔'
+Options = require '../run/Options'
+{ containsWhere, isEmpty, last, rightUnCons,
+	split, splitOnceWhere, tail, unCons } = require '../help/list'
 Locals = require './Locals'
-{ cCheck, cFail } = require './CompileError'
-Options = require './Options'
 
 class Parser
 	constructor: (@typeName, @fileName, @options) ->
-		type @typeName, String
-		type @fileName, String
-		type @options, Options
+		type @typeName, String, @fileName, String, @options, Options
 
 		@locals =
 			new Locals
@@ -79,7 +80,7 @@ class Parser
 	###
 	readSuper: (tokens) ->
 		if T.super tokens[0]
-			[ (new E.Use tokens[0], @fileName, @options.allModules()), tokens.tail() ]
+			[ (new E.Use tokens[0], @fileName, @options.allModules()), (tail tokens) ]
 		else
 			[ null, tokens ]
 
@@ -87,8 +88,8 @@ class Parser
 		type tokens, Array
 
 		exprs =
-			(tokens.splitBy T.nl).filter (toks) ->
-				not toks.isEmpty()
+			(split tokens, T.nl).filter (toks) ->
+				not isEmpty toks
 
 		parsed =
 			exprs.map (tokens) =>
@@ -107,78 +108,75 @@ class Parser
 	Use expressions in parentheses must be values.
 	###
 	expression: (tokens, isValue = no) ->
-		type tokens, Array
-		type isValue, Boolean
+		type tokens, Array, isValue, Boolean
 
 		parts = @expressionParts tokens, isValue
 
-		if parts.isEmpty()
+		if isEmpty parts
 			new E.Null @pos
 		else
-			[ e0, tail ] = parts.unCons()
+			[ e0, rest ] = unCons parts
 
 			if e0 instanceof E.Call
-				unless tail.isEmpty()
-					check e0.args.isEmpty()
-					e0.args = tail
+				unless isEmpty rest
+					check isEmpty e0.args
+					e0.args = rest
 				e0
 			else if e0 instanceof E.ManyArgs
 				@unexpected e0
-			else if tail.isEmpty()
+			else if isEmpty rest
 				e0
 			else
-				new E.Call.of e0, tail
+				new E.Call.of e0, rest
 
 
 	expressionParts: (tokens, isValue) ->
-		type tokens, Array
-		type isValue, Boolean
+		type tokens, Array, isValue, Boolean
 
-		tok0 = tokens[0]
+		token = tokens[0]
 
 		plain = (x) ->
 			[ x ]
 
-		if tok0 instanceof T.Use
+		if token instanceof T.Use
 			plain @use tokens, isValue
-		else if tok0 instanceof T.Def
+		else if token instanceof T.Def
 			cCheck not isValue, @pos,
 				'Can not have local def in inner expression.'
-			plain @def tok0, tokens
-		else if T.defLocal tok0
-			plain @defLocal tokens.tail(), tok0.kind == '∘'
+			plain @def token, tokens
+		else if T.defLocal token
+			plain @defLocal (tail tokens), token.kind == '∘'
 		else
 			slurped = []
 
-			# TODO: tokens.forEach
-			until tokens.isEmpty()
-				tok0 = tokens[0]
-				tokens = tokens.tail()
+			tokens.forEach (token) =>
 				x =
-					if T.dotLikeName tok0
+					if T.dotLikeName token
 						pop = slurped.pop()
 						if pop?
-							switch tok0.kind
+							switch token.kind
 								when '.x'
-									new E.Call.noArgs pop, tok0
+									new E.Call.noArgs pop, token
 								when '@x'
-									new E.Property pop, tok0
+									new E.PropertyAccess pop, token
 								when '.x_'
-									new E.BoundFun pop, tok0
+									new E.BoundFun pop, token
 								else
 									fail()
-						else if tok0.kind == '@x'
-							@soloExpression tok0
+						else if token.kind == '@x'
+							@soloExpression token
 						else
-							@unexpected tok0
-					else if T.ellipsisName tok0
-						new E.ManyArgs @get tok0
+							@unexpected token
+					else if T.ellipsisName token
+						new E.ManyArgs @get token
 					else
-						@soloExpression tok0
+						@soloExpression token
 
 				if x?
 					type x, E.Expression
 					slurped.push x
+				else
+					fail() # this never happens, right?
 
 			slurped
 
@@ -187,10 +185,8 @@ class Parser
 	Expression of a single token
 	###
 	soloExpression: (token) ->
-		type token, T.Token
-
 		@pos = token.pos
-		type @pos, Pos
+		type token, T.Token, @pos, Pos
 
 		switch token.constructor
 			when T.Name
@@ -202,7 +198,7 @@ class Parser
 					when 'x_'
 						new E.BoundFun.me token
 					when '@x'
-						E.Property.me @pos, token
+						E.PropertyAccess.me @pos, token
 					else
 						@unexpected token
 			when T.Group
@@ -213,7 +209,7 @@ class Parser
 						new E.Parend @valueExpression token.body
 					when '['
 						@unexpected token
-					when '{'
+					when '→'
 						@fun [ token ]
 					when '"'
 						@quote token
@@ -236,7 +232,8 @@ class Parser
 	quote: (quote) ->
 		if quote instanceof T.Group
 			# every part is a string literal or () group
-			new E.Quote quote.pos, quote.body.map @bound 'soloExpression'
+			new E.Quote quote.pos, quote.body.map (litOrGroup) =>
+				@soloExpression litOrGroup
 		else
 			new E.Literal quote
 
@@ -252,16 +249,24 @@ class Parser
 		@_accessLocalOr name, ->
 			E.Call.me name.pos, name.text, []
 
+	checkPlainName: (name) ->
+		cCheck (T.plainName name), @pos, ->
+			"Expected local name, not #{name}"
+
 	getLocalOnly: (name) ->
+		###
+		Can only be a local, not a method.
+		###
 		@_accessLocalOr name, =>
 			cFail @pos, "Type #{name.text} must be a local (not in #{@locals})"
 
 	containsIt: (x) ->
 		if x instanceof Array
-			x.containsWhere @bound 'containsIt'
+			containsWhere x, (sub) =>
+				@containsIt sub
 		else
 			type x, T.Token
-			if x instanceof T.Group and not T.curlied x
+			if x instanceof T.Group and not T.indented x
 				@containsIt x.body
 			else if T.it x
 				yes
@@ -271,17 +276,17 @@ class Parser
 	fun: (tokens) ->
 		type tokens, Array
 
-		lastToken = tokens.last()
+		lastToken = last tokens
 
-		[ before, last ] =
-			if T.curlied lastToken
-				tokens.allButAndLast()
+		[ before, bodyGroup ] =
+			if T.indented lastToken
+				rightUnCons tokens
 			else
 				[ tokens, null ]
 
 		[ returnType, argsTokens ] =
 			if T.typeName before[0]
-				[ (@get before[0]), before.tail() ]
+				[ (@get before[0]), (tail before) ]
 			else
 				[ null, before ]
 
@@ -289,10 +294,10 @@ class Parser
 			@takeNewLocals argsTokens
 
 		[ meta, body ] =
-			if T.curlied last
-				bodyTokens = last.body
+			if bodyGroup?
+				bodyTokens = bodyGroup.body
 
-				if argsTokens.isEmpty() and @containsIt bodyTokens
+				if (isEmpty argsTokens) and @containsIt bodyTokens
 					args = [ E.Local.it @pos ]
 
 				newLocals = args.slice()
@@ -308,24 +313,29 @@ class Parser
 	Returns [plainLocals, restLocal]
 	###
 	takeNewLocals: (tokens) ->
+		type tokens, Array
+
 		out = []
 		rest = null
 
-		while not tokens.isEmpty()
-			name = tokens[0]
+		index = 0
+		while index < tokens.length
+			name = tokens[index]
+			type name, T.Token
+			index += 1
 
 			if T.ellipsisName name
-				tokens = tokens.tail()
-				cCheck tokens.isEmpty(), @pos, ->
+				cCheck index == tokens.length, @pos, ->
 					"Did not expect anything after ellipsis"
 				rest = E.Local.eager name, null
 
 			else if T.plainName name
-				[ typeName, tokens ] =
-					if T.typeName tokens[1]
-						[ tokens[1], tokens.tail().tail() ]
+				typeName =
+					if T.typeName tokens[index]
+						index += 1
+						tokens[index - 1]
 					else
-						[ null, tokens.tail() ]
+						null
 				out.push @newLocal name, typeName
 			else
 				@unexpected name
@@ -336,10 +346,11 @@ class Parser
 	Returns: [ Meta, bodyTokens ]
 	###
 	takeAllMeta: (tokens, newLocals = [], useTypeLocal) ->
-		type tokens, Array
-		type newLocals, Array
+		type tokens, Array, newLocals, Array
+		typeExist useTypeLocal, E.DefLocal
+
 		[ metaToks, bodyToks ] =
-			tokens.takeWhile (x) ->
+			splitOnceWhere tokens, (x) ->
 				(T.nl x) or \
 					x instanceof T.MetaText or \
 					T.metaGroup x
@@ -368,22 +379,23 @@ class Parser
 	Eg: ‣deffer def-name arg1 arg2
 	###
 	def: (def, tokens) ->
-		type def, T.Def
-		type tokens, Array
+		type def, T.Def, tokens, Array
 
-		if tokens.isEmpty()
-			fail "Expected something after #{def}"
+		check not (isEmpty tokens), "Expected something after #{def}"
 
 		check tokens[0] instanceof T.Def
 
 		fun =
-			@fun tokens.tail()
+			@fun tail tokens
 		args =
 			[ (new E.Literal new T.StringLiteral @pos, def.name2), fun ]
 
 		E.Call.me @pos, def.name, args
 
 	meta: (meta, token, newLocals, useTypeLocal) ->
+		type meta, E.Meta, newLocals, Array
+		typeExist useTypeLocal, E.DefLocal
+
 		return if T.nl token
 
 		meta[token.kind] =
@@ -391,11 +403,11 @@ class Parser
 				@quote token.text
 			else if T.metaGroup token
 				check token.body.length == 1
-				curlied = token.body[0]
-				check T.curlied curlied
+				indented = token.body[0]
+				check T.indented indented
 
 				getBlock = =>
-					@block curlied.body
+					@block indented.body
 
 				switch token.kind
 					when 'in'
@@ -418,16 +430,15 @@ class Parser
 
 	# Local from function arg
 	newLocal: (name, typeName) ->
-		cCheck (T.plainName name), @pos, ->
-			"Expected local name, not #{name}"
+		@checkPlainName name
 
-		type =
+		localType =
 			if typeName?
 				@getLocalOnly typeName
 			else
 				null
 
-		E.Local.eager name, type
+		E.Local.eager name, localType
 
 	use: (tokens, isValue) ->
 		check tokens.length == 1, =>
@@ -451,13 +462,11 @@ class Parser
 				new E.DefLocal.fromUse use
 
 	defLocal: (tokens, lazy) ->
-		type tokens, Array
-		type lazy, Boolean
-		##check tokens.length == 2, ->
-		#	"Expected name, curlied after defLocal at #{@pos}"
-
+		type tokens, Array, lazy, Boolean
 		[ before, value ] =
-			tokens.allButAndLast()
+			rightUnCons tokens
+
+		type value, T.Group
 
 		[ locals, rest ] =
 			@takeNewLocals before
@@ -470,8 +479,6 @@ class Parser
 
 		@pos = value.pos
 
-		type value, T.Group
-
 		val =
 			switch value.kind
 				when '|'
@@ -479,7 +486,7 @@ class Parser
 					check not lazy, =>
 						"[#{@pos}] must use ∙ before local fun, not ∘"
 					@fun value.body
-				when '{'
+				when '→'
 					@block value.body
 				else
 					@unexpected val

@@ -1,6 +1,6 @@
-use ℝ
+use! Global
 
-ℝ.do
+(use ℝ).do
 	‣val E
 		Global@Math@E
 

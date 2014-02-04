@@ -1,3 +1,5 @@
+{ type } = require './✔'
+
 jsWords =
 	"""
 	abstract
@@ -69,15 +71,9 @@ jsWords =
 module.exports = (text) ->
 	type text, String
 
-	if jsWords.contains text
+	if text in jsWords
 		"_#{text}"
 	else
-		parts =
-			text.map (ch) ->
-				if ch.match /[a-zA-Z0-9_]/
-					ch
-				else
-					"_#{ch.charCodeAt 0}_"
-
-		parts.join ''
+		text.replace /[^a-zA-Z0-9_]/g, (ch) ->
+			"_#{ch.charCodeAt 0}_"
 

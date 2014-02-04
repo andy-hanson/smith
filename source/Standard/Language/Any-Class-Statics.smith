@@ -1,3 +1,5 @@
+use! Global
+
 Any-Class.do
 	‣‣new of super-class:Any-Class name:Str do-meta~:Fun
 		Prelude.class name super-class do-meta~.to-nullable

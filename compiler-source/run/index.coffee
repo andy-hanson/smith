@@ -1,3 +1,2 @@
 (require 'source-map-support').install()
-
-(require './smith').main()
+(require '../index').main()

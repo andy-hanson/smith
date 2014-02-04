@@ -1,3 +1,6 @@
+∙ Math
+	(use Global)@Math
+
 (use ℝ).do
 	‣ + a:ℝ
 		doc
@@ -59,7 +62,7 @@
 			✔= 8
 				2.^ 3
 
-		(Global@Math.pow me power).forbid-NaN
+		(Math.pow me power).forbid-NaN
 
 	‣ log base:ℝ
 		doc
@@ -77,7 +80,7 @@
 			✔= 1
 				E.log-e
 
-		Global@Math.log me
+		Math.log me
 
 	‣ log-10
 		doc
@@ -151,7 +154,7 @@
 			✔.fails
 				-1.square-root
 
-		(Global@Math.sqrt me).forbid-NaN
+		(Math.sqrt me).forbid-NaN
 
 	‣ cube-root
 		doc
@@ -162,7 +165,7 @@
 			✔.fails
 				-1.cube-root
 		how
-			TODO: Global@Math.cbrt
+			TODO: Math.cbrt
 
 		me.^ 3.inverse
 
@@ -190,7 +193,7 @@
 			✔= 5
 				3.hypoteneuse 4
 		how
-			TODO: Global@Math.hypot
+			TODO: Math.hypot
 
 		(square-hypoteneuse a).square-root
 
@@ -225,7 +228,7 @@
 			✔= 1
 				-1.magnitude
 
-		Global@Math.abs me
+		Math.abs me
 
 	‣ distance a:ℝ
 		doc

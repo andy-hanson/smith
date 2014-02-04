@@ -1,6 +1,9 @@
-Pos = require './Pos'
-{ cCheck } = require './CompileError'
-keywords = require './keywords'
+Pos = require './compile-help/Pos'
+{ cCheck } = require './compile-help/✔'
+keywords = require './compile-help/keywords'
+{ check, type } = require './help/✔'
+{ last } = require './help/list'
+{ escapeToJS, indented, startsWith } = require './help/str'
 
 class Token
 	toString: ->
@@ -13,10 +16,9 @@ class Name extends Token
 	@kinds = ['x', '_x', 'x_', '.x', '.x_', '@x', ':x', '‣x', '...x']
 
 	constructor: (@pos, @text, @kind) ->
-		type @pos, Pos
-		type @text, String
+		type @pos, Pos, @text, String
 
-		check (Name.kinds.contains @kind), =>
+		check (@kind in Name.kinds), =>
 			"Name kind #{@kind} not in #{Name.kinds}"
 
 	show: ->
@@ -24,17 +26,8 @@ class Name extends Token
 
 
 class Group extends Token
-	constructor: (openPos, closePos, open, @body) ->
-		type openPos, Pos
-		type closePos, Pos
-		type open, String
-		type body, Array
-
-		@kind =
-			if open == '→'
-				'{'
-			else
-				open
+	constructor: (openPos, closePos, @kind, @body) ->
+		type openPos, Pos, closePos, Pos, @kind, String, body, Array
 		@pos =
 			openPos
 
@@ -43,8 +36,6 @@ class Group extends Token
 
 	@match =
 		'(': ')'
-		'[': ']'
-		'{': '}'
 		'→': '←'
 		'"': '"'
 
@@ -57,16 +48,14 @@ class NumberLiteral extends Literal
 		@value.toString()
 
 	toJS: ->
-		if @value.startsWith '-'
+		if startsWith @value, '-'
 			"(#{@value})"
 		else
 			@value.toString()
 
 class JavascriptLiteral extends Literal
 	constructor: (@pos, @text, @kind) ->
-		type @pos, Pos
-		type @text, String
-		type @kind, String
+		type @pos, Pos, @text, String, @kind, String
 
 	show: ->
 		"`#{@text}`"
@@ -76,31 +65,27 @@ class JavascriptLiteral extends Literal
 
 		switch @kind
 			when 'indented'
-				@text.indented context.indent
+				indented @text, context.indent
 			when 'plain'
 				"(#{@text})"
 			when 'special'
 				@text
 			else
-				fail
+				fail()
 
 class StringLiteral extends Literal
 	constructor: (@pos, @text) ->
-		type @pos, Pos
-		type @text, String
+		type @pos, Pos, @text, String
 
 	show: ->
-		type @text, String
 		@toJS()
 
 	toJS: ->
-		type @text, String
-		"'#{@text.escapeToJS()}'"
+		"'#{escapeToJS @text}'"
 
 class Special extends Token
 	constructor: (@pos, @kind) ->
-		type @pos, Pos
-		type @kind, String
+		type @pos, Pos, @kind, String
 
 	show: ->
 		x =
@@ -115,6 +100,8 @@ class Use extends Token
 		type @pos, Pos
 		type @used, String
 		type @kind, String
+		cCheck (not ('.' in @used)), @pos,
+			"Use (#{@used}) should not include '.'"
 
 	lazy: ->
 		@kind == 'use'
@@ -123,16 +110,12 @@ class Use extends Token
 		"<use #{@used}>"
 
 	shortName: ->
-		name =
-			(@used.split '/').last()
-		cCheck (not name.contains '.'), @pos,
-			'Local used should not have extension'
-		name
+		last (@used.split '/')
 
 class MetaText extends Token
 	constructor: (@pos, @kind, @text) ->
 		type @pos, Pos
-		check keywords.metaText.contains @kind
+		check @kind in keywords.metaText
 		type @text, Token # string literal or interpolated group
 
 	show: ->
@@ -140,10 +123,8 @@ class MetaText extends Token
 
 class Def extends Token
 	constructor: (@pos, @name, @name2) ->
-		type @pos, Pos
-		type @name, String
-		type @name2, String
-		check @name.startsWith "‣"
+		type @pos, Pos, @name, String, @name2, String
+		check startsWith @name, "‣"
 
 	show: ->
 		"<Def #{@name} #{@name2}>"
@@ -165,23 +146,23 @@ module.exports =
 	bar: (token) ->
 		token instanceof Special and token.kind == '|'
 	dotLikeName: (token) ->
-		token instanceof Name and token.kind.isAny '.x', '@x', '.x_'
+		token instanceof Name and token.kind in [ '.x', '@x', '.x_' ]
 	plainName: (token) ->
 		token instanceof Name and token.kind == 'x'
 	typeName: (token) ->
 		token instanceof Name and token.kind == ':x'
 	ellipsisName: (token) ->
 		token instanceof Name and token.kind == '...x'
-	curlied: (token) ->
-		token instanceof Group and token.kind == '{'
+	indented: (token) ->
+		token instanceof Group and token.kind == '→'
 	square: (token) ->
 		token instanceof Group and token.kind == '['
 	metaGroup: (token) ->
-		token instanceof Group and keywords.metaFun.contains token.kind
+		token instanceof Group and token.kind in keywords.metaFun
 	indentedJS: (token) ->
 		token instanceof JavascriptLiteral and token.kind == 'indented'
 	defLocal: (token) ->
-		token instanceof Special and token.kind.isAny '∙', '∘'
+		token instanceof Special and token.kind in [ '∙', '∘' ]
 	super: (token) ->
 		token instanceof Use and token.kind == 'super'
 	it: (token) ->

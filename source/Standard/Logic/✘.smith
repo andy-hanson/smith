@@ -58,7 +58,8 @@ static!
 			|
 				it@message
 
-	try-catch-finally try catch { }
+	try-catch-finally try catch
+		()
 
 ‣‣ try-catch-finally try:Fun catch:Fun finally:Fun
 	doc
@@ -106,7 +107,7 @@ static!
 	doc
 		If an error happens in `try`, prepend new text to its message and throw it again.
 	eg
-		✔.fail-message 「4: fail」
+		✔.fail-message "4: fail"
 			annotate
 				✘ 'fail
 			|

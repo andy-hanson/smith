@@ -2,57 +2,61 @@ T = require '../Token'
 Stream = require './Stream'
 GroupPre = require './GroupPre'
 lexQuote = require './lexQuote'
-{ cFail, cCheck } = require '../CompileError'
-keywords = require '../keywords'
+{ cFail, cCheck } = require '../compile-help/✔'
+keywords = require '../compile-help/keywords'
+{ check, type, typeExist } = require '../help/✔'
+{ isEmpty, last, pushAll, repeat } = require '../help/list'
+{ endsWith, startsWith, withoutEnd } = require '../help/str'
 
-module.exports = (stream, inQuote) ->
+module.exports = (stream, inQuoteInterpolation = no) ->
 	type stream, Stream
+	type inQuoteInterpolation, Boolean
 
 	out = []
 
 	removePrecedingNL = ->
-		if T.nl out.last()
+		if T.nl last out
 			# No \n precedes '|' or '.x'
 			out.pop()
 
 	# not space, not bracket, not punc, not quote,
 	# not comment, not bar, not @, not :,
-	nameChar = /[^\s\(\[\{\)\]\};,'"`「」\\\|@\:\.]/
+	nameChar = /[^\s\(\[\{\)\]\};,'"`\\\|@\:\.]/
 	# like nameChar but can include .
-	usedChar = /[^\s\(\[\{\)\]\};,'"`「」\\\|@\:]/
+	usedChar = /[^\s\(\[\{\)\]\};,'"`\\\|@\:]/
 	digit = /[0-9]/
 	numChar = /[0-9\.]/
-	groupChar = /[\(\[\{\)\]\}]/
+	groupChar = /[\(\)]/
 	space = RegExp ' '
 
 	indent = 0
 
 	takeName = ->
-		cCheck not (stream.peek().match digit), stream.pos,
+		cCheck not (digit.test stream.peek()), stream.pos,
 			'Expected name, got number'
 		name = stream.takeMatching nameChar
-		cCheck not name.isEmpty(), stream.pos,
+		cCheck not (isEmpty name), stream.pos,
 			'Expected name, got nothing'
 		name
 
 	while ch = stream.peek()
 		pos = stream.pos
 
-		if inQuote and ch == '}'
+		if inQuoteInterpolation and ch == '}'
 			stream.readChar()
 			return out
 
 		match = (regex) ->
-			ch.match regex
+			regex.test ch
 
 		token =
 			switch
-				when (match digit) or (ch == '-' and (stream.peek 1).match digit)
+				when (match digit) or (ch == '-' and digit.test stream.peek 1)
 					first = stream.readChar()
 					n = stream.takeMatching numChar
-					if n.endsWith '.'
+					if endsWith n, '.'
 						stream.stepBack()
-						n = n.withoutEnd '.'
+						n = withoutEnd n, '.'
 					new T.NumberLiteral pos, "#{first}#{n}"
 
 				when match groupChar
@@ -69,12 +73,12 @@ module.exports = (stream, inQuote) ->
 
 					name = takeName()
 
-					if ch == '.' and name.last() == '_'
+					if ch == '.' and (last name) == '_'
 						check kind != '...x', 'Unexpected _'
 						kind = '.x_'
-						name = name.withoutEnd '_'
+						name = withoutEnd name, '_'
 
-					removePrecedingNL() if ch.isAny ',', '.'
+					removePrecedingNL() if ch in [ ',', '.' ]
 					if ch == "'"
 						new T.StringLiteral pos, name
 					else
@@ -82,19 +86,19 @@ module.exports = (stream, inQuote) ->
 
 				when match nameChar
 					name = takeName()
-					if name.endsWith '_'
-						new T.Name pos, (name.withoutEnd '_'), 'x_'
-					else if keywords.metaText.contains name
+					if endsWith name, '_'
+						new T.Name pos, (withoutEnd name, '_'), 'x_'
+					else if name in keywords.metaText
 						lexQuote name, stream, indent
-					else if keywords.metaFun.contains name
+					else if name in keywords.metaFun
 						new GroupPre pos, name
-					else if keywords.useLike.contains name
+					else if name in keywords.useLike
 						stream.takeMatching space
 						used = stream.takeMatching usedChar
 						new T.Use pos, used, name
-					else if keywords.special.contains name
+					else if name in keywords.special
 						new T.Special pos, name
-					else if name.startsWith '‣'
+					else if startsWith name, '‣'
 						stream.takeMatching space
 						name2 = takeName()
 						new T.Def pos, name, name2
@@ -123,7 +127,6 @@ module.exports = (stream, inQuote) ->
 
 					#else
 					stream.takeUpToString '\n'
-					check stream.peek() == '\n'
 					[]
 
 				when ch == '\n'
@@ -139,7 +142,7 @@ module.exports = (stream, inQuote) ->
 						removePrecedingNL()
 						new T.Special pos, '\n'
 					else if now < old
-						x = (old - now).repeat new GroupPre stream.pos, '←'
+						x = repeat (old - now), new GroupPre stream.pos, '←'
 						x.push new T.Special stream.pos, '\n'
 						x
 					else if now == old + 1
@@ -147,7 +150,7 @@ module.exports = (stream, inQuote) ->
 					else
 						cFail pos, "Too indented! Was #{old}, now #{now}"
 
-				when match /[`「"]/
+				when match /[`"]/
 					stream.readChar()
 					lexQuote ch, stream, indent
 
@@ -156,7 +159,7 @@ module.exports = (stream, inQuote) ->
 
 
 		if token instanceof Array
-			out.pushAll token
+			pushAll out, token
 		else
 			out.push token
 

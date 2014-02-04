@@ -9,8 +9,6 @@ module.exports = class StringMap
 		Object.prototype.hasOwnProperty.call @_data, name
 
 	get: (name) ->
-		type name, String
-		
 		if @has name
 			@_data[name]
 		else

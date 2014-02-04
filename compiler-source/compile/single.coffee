@@ -1,11 +1,13 @@
-lex = require './lex'
-parse = require './parse'
-AllModules = require './AllModules'
-Pos = require './Pos'
 path = require 'path'
-E = require './Expression'
-Options = require './Options'
-
+lex = require '../lex'
+parse = require '../parse'
+Pos = require '../compile-help/Pos'
+E = require '../Expression'
+Options = require '../run/Options'
+{ check, type } = require '../help/✔'
+{ interleavePlus } = require '../help/list'
+{ endsWith, withoutEnd } = require '../help/str'
+AllModules = require './AllModules'
 
 shortName = (fullName) ->
 	(fullName.split '/').pop()
@@ -16,7 +18,7 @@ Produces the output { code, map }.
 module.exports = (string, inName, outName, options) ->
 	type string, String
 	type inName, String
-	check (inName.endsWith '.smith'), ->
+	check (endsWith inName, '.smith'), ->
 		"Input must be a .smith, not #{inName}"
 	type outName, String
 	type options, Options
@@ -27,15 +29,13 @@ module.exports = (string, inName, outName, options) ->
 
 	shortIn = shortName inName
 	shortOut = shortName outName
-	typeName = shortIn.withoutEnd '.smith'
+	typeName = withoutEnd shortIn, '.smith'
 
 	tokens =
-		lex string
+		lex string, options
 	[ sooper, autoUses, fun ] =
 		parse tokens, typeName, inName, options
-	type sooper, E.Expression
-	type autoUses, Array
-	type fun, E.Expression
+	type sooper, E.Expression, autoUses, Array, fun, E.Expression
 
 	prelude =
 		allModules. get 'Smith-Prelude', Pos.start, inName
@@ -56,7 +56,8 @@ module.exports = (string, inName, outName, options) ->
 		autoUses.filter (u) ->
 			u.local.everUsed()
 		.map(toNode)
-		.interleavePlus ';\n'
+
+	autos = interleavePlus autos, '\n'
 
 	classConstruct =
 		"_p.class('#{typeName}', #{superNode}, "

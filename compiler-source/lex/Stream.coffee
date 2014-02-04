@@ -1,5 +1,7 @@
-Pos = require '../Pos'
-{ cCheck } = require '../CompileError'
+Pos = require '../compile-help/Pos'
+{ cCheck } = require '../compile-help/✔'
+{ times } = require '../help/oth'
+{ check } = require '../help/✔'
 
 module.exports = class Stream
 	constructor: (@str) ->
@@ -10,7 +12,7 @@ module.exports = class Stream
 		@idx < @str.length
 
 	stepBack: (n = 1) ->
-		n.times =>
+		times n, =>
 			@idx -= 1
 			if @peek() == '\n'
 				@pos = @pos.minusLine()
@@ -43,13 +45,13 @@ module.exports = class Stream
 		@readChar() if take
 		take
 
-	takeMatching: (rgx) ->
+	takeMatching: (regex) ->
 		@takeWhile (x) ->
-			x.match rgx
+			regex.test x
 
-	takeNotMatching: (rgx) ->
+	takeNotMatching: (regex) ->
 		@takeWhile (x) ->
-			not x.match rgx
+			not regex.test x
 
 	takeUpToString: (str) ->
 		start = @idx
@@ -58,14 +60,17 @@ module.exports = class Stream
 		cCheck end != -1, @pos, ->
 			"Expected to find #{str} before end of file."
 
-		(end - start).times =>
+		times (end - start), =>
 			@readChar()
+
+		if str.length == 1
+			check @peek() == '\n'
 
 		@str.slice start, end
 
 	takeUpToAndIncludingString: (str) ->
 		x = @takeUpToString str
-		str.length.times =>
+		times str.length, =>
 			@readChar()
 		x
 

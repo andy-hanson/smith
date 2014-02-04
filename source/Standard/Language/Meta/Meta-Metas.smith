@@ -1,6 +1,8 @@
 doc
 	We can't give Meta a meta before defining it. So Standard/index calls this after.
 
+use! Meta
+
 Meta.do-meta
 	doc
 		TODO

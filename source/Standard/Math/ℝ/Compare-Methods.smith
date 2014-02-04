@@ -1,6 +1,7 @@
-use ℝ
+∙ Math
+	(use Global)@Math
 
-ℝ.do
+(use ℝ).do
 	‣new = a
 		`Object(a) instanceof Number && (this + 0) === (a + 0)`
 
@@ -108,7 +109,7 @@ use ℝ
 		how
 			TODO: in Comparable
 
-		Global@Math.min me a
+		Math.min me a
 
 	‣ max a:ℝ
 		doc
@@ -117,7 +118,7 @@ use ℝ
 			✔= 2
 				1.max 2
 
-		Global@Math.max me a
+		Math.max me a
 
 	‣ crop min:ℝ max:ℝ
 		doc

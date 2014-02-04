@@ -1,6 +1,8 @@
 doc
 	Anything with an iterator.
 
+use! Global
+
 class.do
 	doc
 		All Iterable types have these methods.
@@ -17,18 +19,14 @@ class.do
 			iterator-class me
 
 ∙ methods
-	(Global@Array.of).do
+	(use Global)@Array.of.do
 		push '++ '∃ '∀ '∋ 'count 'collect 'drop 'each 'empty?
 		push 'fold 'first 'group 'keep 'last 'make-string 'of 'size 'to-bag 'zip
 		me
 
-\‣new inspect
-\	iterator.inspect
-
 \ Can't use normal Array, doesn't exist yet
 delegate-many methods
 	iterator
-
 
 \‣new toString
 \	"({type.name} {make-string})"

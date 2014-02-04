@@ -1,5 +1,7 @@
+use Meta
+
 ∙ F
-	Global@Function.to-class 'Fun
+	(use Global)@Function.to-class 'Fun
 
 F.do
 	eg

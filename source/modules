@@ -1,6 +1,6 @@
-auto ↺ ✔ ✔= ✘ ◆ ℝ ℤ ℕ Any Any-Class Array Bag Bool Console
-auto Error Fun Global Iterable Iterator
-auto Meta New Opt Queue Range Ref Time List Str Test Vec2 Void
+auto ↺ ✔ ✔= ✘ ◆ ℝ ℤ ℕ Any Any-Class Array Bag Bool
+auto Error Fun Iterable Iterator
+auto New Opt Queue Range Ref Time List Str Test Void
 
 Standard Standard/index
 

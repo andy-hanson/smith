@@ -1,1 +1,1 @@
-export Global@Array.to-class
+export (use Global)@Array.to-class

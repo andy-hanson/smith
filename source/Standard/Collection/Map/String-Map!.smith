@@ -1,6 +1,8 @@
 doc
 	TODO
 
+use! Global
+
 ‣‣new of ...args
 	◆.returning (new (Global@Object.create `null`)) |map
 		(args.group 2).each

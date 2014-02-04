@@ -1,3 +1,6 @@
+∙ Math
+	(use Global)@Math
+
 (use ℝ).do
 	‣ round-towards-0
 		doc
@@ -20,7 +23,7 @@
 			✔= 1
 				0.5.round
 
-		Global@Math.round me
+		Math.round me
 
 	‣ round-down:ℤ
 		doc
@@ -31,7 +34,7 @@
 			✔= 0
 				0.5.round-down
 
-		Global@Math.floor me
+		Math.floor me
 
 	‣ round-up:ℤ
 		doc
@@ -42,7 +45,7 @@
 			✔= 1
 				0.5.round-up
 
-		Global@Math.ceil me
+		Math.ceil me
 
 	‣ remainder:ℝ divisor:ℝ
 		doc
@@ -76,7 +79,7 @@
 
 		finite?.∧
 			(in-range -9007199254740992 9007199254740992).∧
-				= (Global@Math.floor me)
+				= (Math.floor me)
 
 	‣ divisible? divisor:ℝ
 		doc

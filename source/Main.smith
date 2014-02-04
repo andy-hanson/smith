@@ -1,6 +1,8 @@
 doc
 	Here's my nifty program.
 
+use Console
+
 use! Str-Color
 
 use! all-modules

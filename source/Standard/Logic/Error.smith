@@ -1,9 +1,12 @@
+∙ JS-Error
+	(use Global)@Error
+
 ∙ E
-	Global@Error.to-class
+	JS-Error.to-class
 
 E.do
 	‣‣new of message
-		New Global@Error message
+		New JS-Error message
 
 	‣ throw!
 		doc

@@ -1,8 +1,10 @@
 fs = require 'fs'
 path = require 'path'
+{ type } = require './✔'
+{ withoutStart, withoutEnd } = require './str'
 
 relativeName = (dir, name) ->
-	name.withoutStart "#{dir}/" # also remove '/'
+	withoutStart name, "#{dir}/" # also remove '/'
 
 statKindSync = (name) ->
 	stat =
@@ -40,16 +42,14 @@ extensionSplit = (name) ->
 		[ name, '' ]
 	else
 		extNoDot =
-			ext.withoutStart '.'
-		[ (name.withoutEnd ext), extNoDot ]
+			withoutStart ext, '.'
+		[ (withoutEnd name, ext), extNoDot ]
 
 ###
 Callback takes dir and text.
 ###
 readFilesNamedSync = (inDir, name, callBack) ->
-	type inDir, String
-	type name, String
-	type callBack, Function
+	type inDir, String, name, String, callBack, Function
 
 	filter = (fileName) ->
 		(path.basename fileName) == name
@@ -63,9 +63,7 @@ readFilesNamedSync = (inDir, name, callBack) ->
 callBack takes dir (relative to inDir) and text.
 ###
 recurseDirectoryFilesSync = (inDir, filter, callBack) ->
-	type inDir, String
-	type filter, Function
-	type callBack, Function
+	type inDir, String, filter, Function, callBack, Function
 
 	recurseDirectorySync inDir, (fileName) ->
 		rel =
@@ -78,6 +76,7 @@ recurseDirectoryFilesSync = (inDir, filter, callBack) ->
 
 
 processDirectorySync = (inDir, outDir, filter, callBack) ->
+	type inDir, String, outDir, String, filter, Function, callBack, Function
 	ensureDir outDir
 	processDirectorySyncRecurse inDir, inDir, outDir, filter, callBack
 

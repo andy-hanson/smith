@@ -1,3 +1,12 @@
+use! Global
+
 Fun.do
 	‣‣ from-JS ...arguments-and-body
-		Global@Function.apply () arguments-and-body
+		✘.annotate
+			Global@Function.apply () arguments-and-body
+		|
+			∙ ab
+				arguments-and-body
+			∙ body
+				`ab[ab.length - 1]`
+			"Could not compile function '{body}'"

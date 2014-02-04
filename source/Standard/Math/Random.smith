@@ -1,6 +1,8 @@
 doc
 	Generates random numbers.
 
+use! Global
+
 static!
 
 ‣‣ in-0-1:ℝ

@@ -2,6 +2,16 @@
 	Prelude@Any.class
 
 C.do
+	‣new-ok export exported
+		`
+			if (exported == null)
+				throw new global.Error('Exported nothing');
+			if (this.__exported != null)
+				throw new global.Error(this._name + ' already exported ' + this.__exported);
+			this.__exported = exported;
+
+	use! Global
+
 	‣new-ok check name a
 		`
 			if (a == null)
@@ -13,14 +23,6 @@ C.do
 					throw new global.Error(name+' is not a '+this+'; is '+a+'; a '+a.class());
 			}
 			return a;
-
-	‣new-ok export exported
-		`
-			if (exported == null)
-				throw new global.Error('Exported nothing');
-			if (this.__exported != null)
-				throw new global.Error(this._name + ' already exported ' + this.__exported);
-			this.__exported = exported;
 
 	‣new-ok subsumes? a
 		`a != null && a[this['-id-check']] === true`
@@ -326,12 +328,13 @@ C.do
 					(name.identical? 'class).unless!
 						✔ (proto.has-property? name).¬
 							"{me} already has method {name}, can't inherit from {inherit-from}"
-						`
 						`this.proto()[name] = value`
 						\proto.set-property! name value
 
 		is-meta?.unless!
 			class.trait new-trait.class
+
+	use Meta
 
 	‣ meta
 		(property~ '_meta).or
@@ -418,7 +421,7 @@ C.do
 		∙ mangled
 			Global@Array.of
 
-		∙  ctrArgs
+		∙ ctrArgs
 			constructor.meta.arguments
 
 		∙ useIndex |index
