@@ -1,11 +1,13 @@
 Prelude@Argument.do
 	doc
 		I came here for an argument.
+	how
+		TODO: data
 
 	‣ construct name:Str class-of
-		new! '_name name
+		new! "_name" name
 		(Opt.from-nullable class-of).each
-			new! '_class-of it
+			new! "_class-of" it
 
 	‣read name
 	‣read~ class-of

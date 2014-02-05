@@ -6,6 +6,11 @@ super Iterable
 ‣‣new of ...members
 	members
 
+‣new = a
+	`true`
+	\(Bag.subsumes? a).∧
+	\	same-members a
+
 \‣new to-bag
 \	me
 

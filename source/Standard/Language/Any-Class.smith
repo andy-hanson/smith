@@ -48,12 +48,12 @@ C.do
 		in
 			`
 				if (this._proto[name] == null)
-					throw new global.Error('No need to any ' + name + ' in ' + this)
+					throw new global.Error('No need to override ' + name + ' in ' + this)
 
 		me.‣new-ok name method
 
 	‣ is-meta?
-		has-property? '_is-meta
+		has-property? "_is-meta"
 
 	‣ new ...args
 		doc
@@ -122,7 +122,7 @@ C.do
 	‣ ‣‣new name:Str method:Fun
 		in
 			✔ (has-proto-property? name)
-				"{me.name}.{name} not defined, no need to any"
+				"{me.name}.{name} not defined, no need to override"
 
 		me.‣‣new-ok name method
 
@@ -337,11 +337,11 @@ C.do
 	use Meta
 
 	‣ meta
-		(property~ '_meta).or
-			Meta.from-maybe-pre (property~ '_make-meta-pre)
+		(property~ "_meta").or
+			Meta.from-maybe-pre (property~ "_make-meta-pre")
 
 	‣ meta! mod:Fun
-		set-property! '_meta (mod meta)
+		set-property! "_meta" (mod meta)
 
 	‣ do-meta fun:Fun
 		meta!

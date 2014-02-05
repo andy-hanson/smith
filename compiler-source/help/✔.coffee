@@ -1,3 +1,4 @@
+# @noDoc
 typeIt = (args, mustExist) ->
 	i = 0
 	while i < args.length
@@ -14,20 +15,50 @@ typeIt = (args, mustExist) ->
 				"Expected #{value} (a #{value.constructor.name}) " +
 				"to be a #{type.name}"
 
+###
+Fail because this method is abstract and wasn't implemented.
+###
+@abstract = ->
+	fail 'Not implemented'
 
-
-module.exports =
-	check: (cond, err) ->
-		unless cond
-			module.exports.fail err ? 'Check failed'
-
-	fail: (err) ->
+###
+Assert the condition.
+@param err [String, Error, Function]
+	Input to `fail` or a `Function` producing it.
+###
+@check = (cond, err) ->
+	unless cond
 		if err instanceof Function
 			err = err()
-		throw (if err instanceof Error then err else new Error err)
+		module.exports.fail err ? 'Check failed'
 
-	type: ->
-		typeIt arguments, yes
+###
+If `err` is an Error, throws it.
+Else, throws a new Error with `err` as the message.
+###
+@fail = (err) ->
+	throw (if err instanceof Error then err else new Error err)
 
-	typeExist: ->
-		typeIt arguments, no
+###
+Checks that each odd argument is an instance of each even argument.
+@example
+  type 1, Number, 'one', String
+###
+@type = ->
+	typeIt arguments, yes
+
+###
+Checks that every member of `array` is of type `elementType`.
+###
+@typeEach = (array, elementType) ->
+	exports.type array, Array
+	array.forEach (element) ->
+		exports.type element, elementType
+
+###
+Like `type` but non-existent arguments are OK.
+@example
+  typeExist null, Number
+###
+@typeExist = ->
+	typeIt arguments, no

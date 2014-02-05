@@ -1,58 +1,56 @@
 { check } = require './✔'
 { contains } = require './list'
 
-module.exports =
-	repeated: (str, times) ->
-		if times == 0
-			''
-		else
-			x = ([0..times-1].map -> str).join ''
-			check (x.length == str.length * times)
-			x
+###
+`times` copies of `str` concatenated together.
+###
+@repeated = (str, times) ->
+	([0 ... times].map -> str).join ''
 
-	trimLeftChar: (str, trimmed) ->
-		index = 0
-		while str[index] == trimmed
-			index += 1
-		str.slice index
+###
+Removes any `trimmed`s from the start of `str`.
+@param trimmed [String]
+  Character to remove.
+###
+@trimLeftChar = (str, trimmed) ->
+	index = 0
+	while str[index] == trimmed
+		index += 1
+	str.slice index
 
-	indented: (str, indent) ->
-		str.replace /\n/g, "\n#{indent}"
+###
+Adds `indent` to every line in `str`.
+@param indent [String]
+###
+@indented = (str, indent) ->
+	str.replace /\n/g, "\n#{indent}"
 
-	escapeToJS: (str) ->
-		###
-		replace =
-			"'": "\\'"
-			'"': '\\"'
-			'\t': '\\t'
-			'\n': '\\n'
+###
+Whether `start` is at the start of `str`.
+###
+@startsWith = (str, start) ->
+	(str.slice 0, start.length) == start
 
-		Array.prototype.map.call str, (ch) ->
-			replace[ch] or ch
-		.join ''
-		###
-		str.replace /'|"|\t|\n/g, (x) ->
-			switch x
-				when '\n'
-					'\\n'
-				when '\t'
-					'\\t'
-				when "'", '"'
-					"\\#{x}"
+###
+Whether `end` is at the end of `str`.
+###
+@endsWith = (str, end) ->
+	(str.slice str.length - end.length) == end
 
-	startsWith: (str, start) ->
-		(str.slice 0, start.length) == start
+###
+The part of `str` after `start`.
+@throw If `str` does not start with `start`.
+###
+@withoutStart = (str, start) ->
+	check (exports.startsWith str, start), ->
+		"'#{str}' does not start with '#{start}'"
+	str.slice start.length
 
-	endsWith: (str, end) ->
-
-		(str.slice str.length - end.length) == end
-
-	withoutStart: (str, start) ->
-		check (module.exports.startsWith str, start), ->
-			"'#{str}' does not start with '#{start}'"
-		str.slice start.length
-
-	withoutEnd: (str, end) ->
-		check (module.exports.endsWith str, end), ->
-			"'#{str}' does not end with '#{end}'"
-		str.slice 0, str.length - end.length
+###
+The part of `str` before `end`.
+@throw If `str` does not end with `end`.
+###
+@withoutEnd = (str, end) ->
+	check (exports.endsWith str, end), ->
+		"'#{str}' does not end with '#{end}'"
+	str.slice 0, str.length - end.length

@@ -1,21 +1,21 @@
 { type } =  require '../help/✔'
-mangle = require '../help/mangle'
 Pos = require '../compile-help/Pos'
 Expression = require './Expression'
 Local = require './Local'
 
-module.exports = class LocalAccess extends Expression
+###
+Looks like `localName`.
+Accesses a Local.
+###
+module.exports = class AccessLocal extends Expression
+	# @param local [Local]
 	constructor: (@pos, @local) ->
-		type @pos, Pos
-		type @local, Local
+		type @pos, Pos, @local, Local
 		@local.isUsed()
 
-	toString: ->
-		@local.toString()
-
+	# @noDoc
 	compile: ->
-		m = mangle @local.name
 		if @local.lazy
-			"#{m}()"
+			[ @local.mangled(), '()' ]
 		else
-			m
+			@local.mangled()

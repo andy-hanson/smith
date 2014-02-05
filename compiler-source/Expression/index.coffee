@@ -1,4 +1,7 @@
+# Aggregates all `Expression`s.
 module.exports =
+	AccessLocal: require './AccessLocal'
+	AccessProperty: require './AccessProperty'
 	Block: require './Block'
 	Call: require './Call'
 	Context: require './Context'
@@ -9,13 +12,11 @@ module.exports =
 	BoundFun: require './BoundFun'
 	Literal: require './Literal'
 	Local: require './Local'
-	LocalAccess: require './LocalAccess'
 	Me: require './Me'
 	Meta: require './Meta'
-	PropertyAccess: require './PropertyAccess'
+	Parend: require './Parend'
 	Quote: require './Quote'
 	Use: require './Use'
 	Null: require './Null'
-	Parend: require './Parend'
 	Trait: require './Trait'
 	ManyArgs: require './ManyArgs'

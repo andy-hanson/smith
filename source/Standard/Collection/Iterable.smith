@@ -21,7 +21,7 @@ class.do
 ∙ methods
 	(use Global)@Array.of.do
 		push '++ '∃ '∀ '∋ 'count 'collect 'drop 'each 'empty?
-		push 'fold 'first 'group 'keep 'last 'make-string 'of 'size 'to-bag 'zip
+		push 'fold 'first 'group 'keep 'last 'make-string 'of 'size 'to-bag 'zip 'same-members
 		me
 
 \ Can't use normal Array, doesn't exist yet

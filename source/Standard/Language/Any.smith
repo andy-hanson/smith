@@ -4,11 +4,12 @@ use! Global
 	Prelude@Any
 
 A.do
+
 	‣ inspect
 		`
 			var s = '{ ', me = this, keys = global.Object.getOwnPropertyNames(me);
 			keys.forEach(function(key) {
-				s += key + ': ' //+ A.inspect(me[key]) + ',';
+				s += key + ', '; //+ ': ' + A.inspect(me[key]) + ',';
 			});
 			return s + ' }';
 
@@ -48,7 +49,7 @@ A.do
 			else
 				throw new global.Error(
 					"Object does not have property " + name +
-					", has [" + global.Object.keys(this) + "]");
+					", has [" + global.Object.getOwnPropertyNames(this) + "]");
 
 	‣ property~ name:Str
 		doc
@@ -79,8 +80,9 @@ A.do
 	‣ new-mutable! name:Str value
 		doc
 			TODO
+		in
+			✔ (has-property? name).¬
 
-		✔ (has-property? name).¬
 		set-property! name value
 
 	‣ set-property!:Void name:Str value
@@ -186,5 +188,8 @@ A.do
 				1.send '+ 2
 
 		(proto-property name).apply me args
+
+	∙ oi
+		proto@inspect
 
 export A

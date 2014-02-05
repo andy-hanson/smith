@@ -1,40 +1,23 @@
 fs = require 'fs'
 path = require 'path'
-{ type } = require './✔'
+{ check, type } = require './✔'
 { withoutStart, withoutEnd } = require './str'
 
-relativeName = (dir, name) ->
-	withoutStart name, "#{dir}/" # also remove '/'
-
-statKindSync = (name) ->
-	stat =
-		fs.statSync name
-	if stat.isFile()
-		'file'
-	else if stat.isDirectory()
-		'directory'
+###
+Ensures that `directoryPath` is the name of a directory.
+If it doesn't exist, makes it.
+If it does, and is a file, throws an error.
+###
+ensureDir = (directoryPath) ->
+	if fs.existsSync directoryPath
+		check (statKindSync directoryPath) == 'directory', ->
+			"#{directoryPath} is not a directory"
 	else
-		'other'
+		fs.mkdirSync directoryPath
 
-ensureDir = (dir) ->
-	unless fs.existsSync dir
-		fs.mkdirSync dir
-
-readTextSync = (fileName) ->
-	fs.readFileSync fileName, 'utf8'
-
-recurseDirectorySync = (dir, callBack) ->
-	(fs.readdirSync dir).forEach (file) ->
-		full = path.join dir, file
-		switch statKindSync full
-			when 'file'
-				callBack full
-			when 'directory'
-				recurseDirectorySync full, callBack
-			else
-				null
-
-
+###
+Returns the file name without the extension, and the extension.
+###
 extensionSplit = (name) ->
 	ext =
 		path.extname name
@@ -46,7 +29,66 @@ extensionSplit = (name) ->
 		[ (withoutEnd name, ext), extNoDot ]
 
 ###
-Callback takes dir and text.
+Recursively processes the files in `inDir` and writes to `outDir`.
+@param inDir [String]
+  Directory to read files from.
+@param outDir [String]
+  Directory to write to (created as needed).
+@param filter [(String) -> Bool]
+  Whether a file of the given name should be processed.
+@param callBack [(String, String) -> Array<(String, String>]
+  Takes in a name relative to `inDir` and file content, and
+  outputs a list of [ name, content ] pairs to write to `outDir`.
+###
+processDirectorySync = (inDir, outDir, filter, callBack) ->
+	type inDir, String, outDir, String, filter, Function, callBack, Function
+
+	recurse = (fullName) ->
+		relName =
+			relativeName inDir, fullName
+
+		switch statKindSync fullName
+			when 'file'
+				if filter relName
+					text =
+						readTextSync fullName
+					toWrites =
+						callBack relName, text
+					type toWrites, Array
+					toWrites.forEach (toWrite) ->
+						[ shortName, content ] = toWrite
+						type shortName, String, content, String
+						outFile =
+							path.join outDir, shortName
+						writeTextSync outFile, content
+
+			when 'directory'
+				ensureDir path.join outDir, relName
+				(fs.readdirSync fullName).forEach (shortName) ->
+					recurse path.join fullName, shortName
+
+			else
+				# ignore it
+
+	recurse inDir
+
+
+###
+The path of `name` from `dir`. Eg `(relativeName 'a/b', 'a/b/c/d') == 'c/d'`
+@param name [String] name of a file in `dir`.
+@param dir [String] Directory of `name`.
+No relation to path.relative
+###
+relativeName = (dir, name) ->
+	if dir == name
+		''
+	else
+		withoutStart name, "#{dir}/"
+
+###
+Runs `callBack` on every file in `inDir` (and its subdirectories) called `name`.
+@param callBack [(String, String) -> ()]
+	Does something with a file name and its content.
 ###
 readFilesNamedSync = (inDir, name, callBack) ->
 	type inDir, String, name, String, callBack, Function
@@ -57,10 +99,31 @@ readFilesNamedSync = (inDir, name, callBack) ->
 	recurseDirectoryFilesSync inDir, filter, (fileName, text) ->
 		callBack (path.dirname fileName), text
 
+# @noDoc
+readTextSync = (fileName) ->
+	fs.readFileSync fileName, 'utf8'
 
+
+# @noDoc
+recurseDirectorySync = (dir, callBack) ->
+	(fs.readdirSync dir).forEach (file) ->
+		full = path.join dir, file
+		switch statKindSync full
+			when 'file'
+				callBack full
+			when 'directory'
+				recurseDirectorySync full, callBack
+			else
+				null
 
 ###
-callBack takes dir (relative to inDir) and text.
+In `inDir`, calls `callBack` on each file name and content that passes `filter`.
+@param inDir [String]
+  Name of directory to recurse through.
+@param filter [Function]
+  Whether a file should be read.
+@param callBack [(String, String) -> ()]
+  Called on each file name (relative to `inDir`) and its content.
 ###
 recurseDirectoryFilesSync = (inDir, filter, callBack) ->
 	type inDir, String, filter, Function, callBack, Function
@@ -73,50 +136,29 @@ recurseDirectoryFilesSync = (inDir, filter, callBack) ->
 				readTextSync fileName
 			callBack rel, text
 
-
-
-processDirectorySync = (inDir, outDir, filter, callBack) ->
-	type inDir, String, outDir, String, filter, Function, callBack, Function
-	ensureDir outDir
-	processDirectorySyncRecurse inDir, inDir, outDir, filter, callBack
-
 ###
-callBack takes dir (relative to inDir) and text.
+Whether `name` names a 'file', a 'directory', or 'other'.
 ###
-processDirectorySyncRecurse = (origInDir, inDir, outDir, filter, callBack) ->
-	x = fs.readdirSync inDir
+statKindSync = (name) ->
+	stat =
+		fs.statSync name
+	if stat.isFile()
+		'file'
+	else if stat.isDirectory()
+		'directory'
+	else
+		'other'
 
-	x.forEach (file) ->
-		full = "#{inDir}/#{file}"
-		stats = fs.statSync full
-		rel =
-			relativeName origInDir, full
+# @noDoc
+writeTextSync = (fileName, content) ->
+	fs.writeFileSync fileName, content, 'utf8'
 
-		if stats.isFile()
-			if filter rel
-				text =
-					fs.readFileSync full, 'utf8'
-				toWrites =
-					callBack rel, text
 
-				type toWrites, Array
-
-				toWrites.forEach (toWrite) ->
-					[ shortName, content ] = toWrite
-					type shortName, String
-					type content, String
-					outFile = path.join outDir, shortName
-					fs.writeFileSync outFile, content, 'utf8'
-
-		else if stats.isDirectory()
-			ensureDir path.join outDir, rel
-			processDirectorySyncRecurse origInDir, full, outDir, filter, callBack
-
+# @noDoc
 module.exports =
 	extensionSplit: extensionSplit
-	relativeName: relativeName
-	recurseDirectorySync: recurseDirectorySync
 	processDirectorySync: processDirectorySync
+	relativeName: relativeName
 	readFilesNamedSync: readFilesNamedSync
-	statKindSync: statKindSync
 	recurseDirectoryFilesSync: recurseDirectoryFilesSync
+	statKindSync: statKindSync

@@ -1,21 +1,24 @@
-T = require '../Token'
-GroupPre = require './GroupPre'
 { cCheck, cFail } = require '../compile-help/✔'
 keywords = require '../compile-help/keywords'
+{ groupMatch } = require '../compile-help/language'
 { check, type } = require '../help/✔'
 { isEmpty, last } = require '../help/list'
-#{ endsWith, startsWith } = require '../help/str'
+T = require '../Token'
+GroupPre = require './GroupPre'
 
-module.exports = (tokens) ->
-	stack = []
-	current = [] # Tokens to form this body
-	opens = [] # GroupPres
+###
+Joins everything within matching `GroupPre`s into `Group`s.
+###
+module.exports = joinGroups = (tokens) ->
+	stack = [ ]
+	current = [ ] # Tokens to form this body
+	opens = [ ] # GroupPres
 
 	newLevel = (open) ->
 		type open, GroupPre
 		opens.push open
 		stack.push current
-		current = []
+		current = [ ]
 
 	finishLevel = (result) ->
 		current = stack.pop()
@@ -40,7 +43,7 @@ module.exports = (tokens) ->
 					"Unexpected closing #{kind}"
 				open = opens.pop()
 
-				cCheck T.Group.match[open.kind] == kind, tok.pos, ->
+				cCheck groupMatch[open.kind] == kind, tok.pos, ->
 					"#{open} does not match #{tok}"
 
 				finishLevel new T.Group \

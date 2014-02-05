@@ -21,23 +21,34 @@ Any = null
 
 
 # call with a class as 'this'
-def = (name, method) ->
+def = (name, method, overridable = yes) ->
 	unbound = method.unbound()
 	unbound._class = this
 	imm @_methods, name, unbound
-	imm @_proto, name, unbound
+
+	assign =
+		if overridable
+			(object, name, value) ->
+				object[name] = value
+		else
+			imm
+
+	assign @_proto, name, unbound
 
 	defInherit = (inheritor) ->
-		# not immutable - may be overridden
-		inheritor._proto[name] = unbound
+		assign inheritor._proto, name = unbound
 		inheritor['_trait-of'].forEach defInherit
 
+	# only traits need this manual inheritence
 	@['_trait-of'].forEach defInherit
-
 
 imm = (object, name, value) ->
 	global.Object.defineProperty object, name,
 		value: value
+		enumerable: true
+
+	if object[name] != value
+		throw up
 
 makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 	unless (Object name) instanceof String
@@ -47,9 +58,6 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 			throw new Error '?'
 		unless maybeIs['__is-a-id-0']?
 			throw new Error "super of #{name} must be a Any-Class, not #{maybeIs}"
-	#if maybeProto?
-	#	unless typeof maybeProto == 'object'
-	#		throw new Error "YYY"
 
 	superClass = metaClass = clazz = null
 
@@ -118,10 +126,11 @@ makeAnyClass = (name, maybeIs, maybeProto, maybeConstructor) ->
 	imm metaClass, '_static-methods', {}
 	imm clazz, '_static-methods', {}
 
-	(Object.getOwnPropertyNames clazz._proto).forEach (name) ->
-		value = clazz._proto[name]
-		if value instanceof Function
-			def .call clazz, name, value#imm clazz._methods, name, value
+	(Object.getOwnPropertyNames clazz._proto).forEach (methodName) ->
+		if methodName != 'constructor'
+			value = clazz._proto[methodName]
+			if value instanceof Function
+				def.call clazz, methodName, value
 
 	imm metaClass, '-id-check', "__is-a-id-#{metaClass._id}"
 	imm clazz, '-id-check', "__is-a-id-#{clazz._id}"

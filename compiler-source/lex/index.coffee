@@ -1,11 +1,15 @@
 Stream = require './Stream'
-lexPlain = require './lexPlain'
+tokenize = require './tokenize'
 checkSpaces = require './checkSpaces'
 { type } = require '../help/✔'
 joinGroups = require './joinGroups'
 Options = require '../run/Options'
 
-module.exports = (str, options) ->
+###
+Converts a `String` to `Token`s.
+@return [Array<Token>]
+###
+module.exports = lex = (str, options) ->
 	type str, String, options, Options
 
 	checkSpaces str, options
@@ -13,9 +17,6 @@ module.exports = (str, options) ->
 
 	stream =
 		new Stream str
-	plain =
-		lexPlain stream
-	tokens =
-		joinGroups plain
-
-	tokens
+	preTokens =
+		tokenize stream
+	joinGroups preTokens

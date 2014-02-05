@@ -24,6 +24,10 @@ use Zip-Iterator
 
 abstract!
 
+‣ same-members
+	(use Console).log! 'Hi
+	`true`
+
 ‣‣new of ...members
 	members.iterator
 

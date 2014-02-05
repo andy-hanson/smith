@@ -49,9 +49,11 @@ data |data
 	-call 'property name
 
 ‣ +! name:Str value
+	in
+		✔ (-call 'has-property? name).¬
 	eg
 		✔.fails
-			sample.+! 'a
+			sample.+! 'a 2
 
 	-call 'set-property! name value
 

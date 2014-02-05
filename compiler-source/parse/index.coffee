@@ -3,36 +3,57 @@ E = require '../Expression'
 Pos = require '../compile-help/Pos'
 AllModules = require '../compile/AllModules'
 { cCheck, cFail } = require '../compile-help/✔'
-{ check, type, typeExist } =  require '../help/✔'
+{ check, fail, type, typeExist } =  require '../help/✔'
 Options = require '../run/Options'
 { containsWhere, isEmpty, last, rightUnCons,
-	split, splitOnceWhere, tail, unCons } = require '../help/list'
+	splitWhere, tail, takeAndAfter, unCons } = require '../help/list'
 Locals = require './Locals'
 
+###
+Converts a list of `Token`s to an `Expression`.
+@private
+###
 class Parser
-	constructor: (@typeName, @fileName, @options) ->
-		type @typeName, String, @fileName, String, @options, Options
-
+	###
+	Arguments are the same as in `parse`.
+	###
+	constructor: (@typeName, @fileName, @options, @allModules) ->
 		@locals =
 			new Locals
 		@pos =
-			Pos.start
+			Pos.start()
 
 	###
-	Returns: [ superAccess, autoUses, fun ]
+	Get a local or me-call named `name`.
+	###
+	access: (name, mustBeLocal = no) ->
+		type name, T.Name
+		if @locals.has name
+			new E.AccessLocal @pos, @locals.get name
+		else
+			cCheck not mustBeLocal, @pos, 'Type #{name.text} must be a local'
+			E.Call.me name.pos, name.text, [ ]
+
+	###
+	Get a local named `name`, or fail.
+	###
+	accessLocal: (name) ->
+		@access name, yes
+
+	###
+	Returns same as `parse`.
 	###
 	all: (tokens) ->
-		autoUses = @autoUses()
-
 		typeLocal =
-			E.Local.eager new T.Name @pos, @typeName, 'x'
-
+			new E.Local new T.Name @pos, @typeName, 'x'
 		useTypeLocal =
-			new E.DefLocal typeLocal, E.Use.typeLocal @typeName, @fileName, @options.allModules()
-
+			new E.DefLocal typeLocal, E.Use.typeLocal @typeName, @fileName, @allModules
+		autoUses =
+			@autoUses()
+		autoUses.forEach (use) =>
+			@locals.addLocal use.local
 		[ meta, restTokens ] =
-			@takeAllMeta tokens, [], useTypeLocal
-
+			@takeMeta tokens, [ ], useTypeLocal
 		[ sooper, bodyTokens ] =
 			@readSuper restTokens #TODO: don't conflict with auto
 		superAccess =
@@ -40,72 +61,100 @@ class Parser
 				type sooper, E.Use
 				@locals.addLocalMayShadow sooper.local
 				sooper
-				#new E.LocalAccess Pos.start, sooper.local
 			else
-				new E.Null Pos.start, 0
-
-		#if sooper?
-		#	autoUses.push sooper
-
+				new E.Null Pos.start()
 		body =
 			@locals.withLocal typeLocal, =>
 				@block bodyTokens
-
 		if sooper?
 			body.subs.unshift E.DefLocal.fromUse sooper
-
 		thisTypeLocal =
 			new E.DefLocal typeLocal, new E.Me @pos
-
 		body.subs.unshift thisTypeLocal
-
-
-		fun = E.FunDef.plain @pos, meta, [], body
-
+		fun =
+			E.FunDef.plain @pos, meta, [ ], body
 		[ superAccess, autoUses, fun ]
 
+	###
+	All `use` statements automatically added due to
+		an `auto` declaration in a `modules` file.
+	This type is not automatically used even if it is in `auto`,
+		because that would be a cycle of `require`s.
+	See `thisTypeLocal` in `all` for that.
+	@return [Array<DefLocal>]
+	###
 	autoUses: ->
 		noUseMe =
-			(@options.allModules().autoUses @fileName).filter (use) =>
+			(@allModules.autoUses @fileName).filter (use) =>
 				use.local.name != @typeName
-		autoUses =
-			noUseMe.map (use) =>
-				@locals.addLocal use.local
-				new E.DefLocal.fromUse use
-
-		autoUses
+		noUseMe.map (use) ->
+			new E.DefLocal.fromUse use
 
 	###
-	Returns: [ super, restOfTokens ]
+	Parse the contents of a block.
+	@return [E.Block]
 	###
-	readSuper: (tokens) ->
-		if T.super tokens[0]
-			[ (new E.Use tokens[0], @fileName, @options.allModules()), (tail tokens) ]
-		else
-			[ null, tokens ]
-
 	block: (tokens) ->
-		type tokens, Array
+		# newlines before '|' and '.' where removed during lexing.
+		lines =
+			(splitWhere tokens, T.nl).filter (line) ->
+				not isEmpty line
+		subs =
+			lines.map (line) =>
+				@expression line
 
-		exprs =
-			(split tokens, T.nl).filter (toks) ->
-				not isEmpty toks
-
-		parsed =
-			exprs.map (tokens) =>
-				@expression tokens
-
-		new E.Block @pos, parsed
-
-	unexpected: (token) ->
-		cFail @pos, "Unexpected #{token}"
-
-	valueExpression: (tokens) ->
-		@expression tokens, yes
+		new E.Block @pos, subs
 
 	###
-	isValue is whether the expression *must* be a value.
-	Use expressions in parentheses must be values.
+	Whether `phrase` contains `it`.
+	Sub-phrases that are themselves indented blocks are not counted.
+	###
+	containsIt: (phrase) ->
+		type phrase, Array
+		containsWhere phrase, (sub) =>
+			type sub, T.Token
+			if sub instanceof T.Group
+				(not T.indented sub) and @containsIt sub.body
+			else
+				T.it sub
+
+	###
+	Define a local val or local fun.
+	Also adds it to @locals.
+	###
+	defLocal: (tokens, lazy) ->
+		type tokens, Array, lazy, Boolean
+		[ before, value ] =
+			rightUnCons tokens
+		[ locals, rest ] =
+			@takeNewLocals before
+
+		cCheck locals.length == 1 and rest == null, @pos, 'TODO: Multiple assignments'
+		local = locals[0]
+		local.lazy = lazy
+
+		@pos = value.pos
+
+		val =
+			switch value.kind
+				when '|'
+					# A local fun, eg . fun |arg
+					cCheck not lazy, @pos, 'Local fun can not be lazy'
+					@fun value.body
+				when '→'
+					@block value.body
+				else
+					@unexpected value
+
+		@locals.addLocal local
+		new E.DefLocal local, val
+
+
+	###
+	A single expression.
+	@param isValue [Boolean]
+	  Whether the expression must be a value, and not a local def.
+	  Expressions in parentheses must be values.
 	###
 	expression: (tokens, isValue = no) ->
 		type tokens, Array, isValue, Boolean
@@ -129,7 +178,11 @@ class Parser
 			else
 				new E.Call.of e0, rest
 
-
+	###
+	Gets the arguments of a call.
+	`a b.c d` has 2 arguments: `b.c` and `d`.
+	@return [Array<Token>]
+	###
 	expressionParts: (tokens, isValue) ->
 		type tokens, Array, isValue, Boolean
 
@@ -141,16 +194,16 @@ class Parser
 		if token instanceof T.Use
 			plain @use tokens, isValue
 		else if token instanceof T.Def
+			plain E.Call.def @pos, token, @fun tail tokens
+		else if T.defLocal token
 			cCheck not isValue, @pos,
 				'Can not have local def in inner expression.'
-			plain @def token, tokens
-		else if T.defLocal token
 			plain @defLocal (tail tokens), token.kind == '∘'
 		else
-			slurped = []
+			slurped = [ ]
 
 			tokens.forEach (token) =>
-				x =
+				part =
 					if T.dotLikeName token
 						pop = slurped.pop()
 						if pop?
@@ -158,7 +211,7 @@ class Parser
 								when '.x'
 									new E.Call.noArgs pop, token
 								when '@x'
-									new E.PropertyAccess pop, token
+									new E.AccessProperty pop, token
 								when '.x_'
 									new E.BoundFun pop, token
 								else
@@ -168,111 +221,17 @@ class Parser
 						else
 							@unexpected token
 					else if T.ellipsisName token
-						new E.ManyArgs @get token
+						new E.ManyArgs @access token
 					else
 						@soloExpression token
 
-				if x?
-					type x, E.Expression
-					slurped.push x
-				else
-					fail() # this never happens, right?
+				slurped.push part
 
 			slurped
 
-
 	###
-	Expression of a single token
+	Parses a fun (including the header).
 	###
-	soloExpression: (token) ->
-		@pos = token.pos
-		type token, T.Token, @pos, Pos
-
-		switch token.constructor
-			when T.Name
-				switch token.kind
-					when 'x'
-						@get token
-					when '_x'
-						new E.ItFunDef token
-					when 'x_'
-						new E.BoundFun.me token
-					when '@x'
-						E.PropertyAccess.me @pos, token
-					else
-						@unexpected token
-			when T.Group
-				switch token.kind
-					when '|'
-						@fun token.body
-					when '('
-						new E.Parend @valueExpression token.body
-					when '['
-						@unexpected token
-					when '→'
-						@fun [ token ]
-					when '"'
-						@quote token
-					else
-						@unexpected token
-			when T.Special
-				switch token.kind
-					when 'me'
-						new E.Me token.pos
-					when 'it'
-						@locals.getIt @pos
-					else
-						@unexpected token
-			else
-				if token instanceof T.Literal
-					new E.Literal token
-				else
-					@unexpected token
-
-	quote: (quote) ->
-		if quote instanceof T.Group
-			# every part is a string literal or () group
-			new E.Quote quote.pos, quote.body.map (litOrGroup) =>
-				@soloExpression litOrGroup
-		else
-			new E.Literal quote
-
-	_accessLocalOr: (name, orElse) ->
-		type name, T.Name
-		local = @locals.get name
-		if local?
-			new E.LocalAccess @pos, local
-		else
-			orElse()
-
-	get: (name) ->
-		@_accessLocalOr name, ->
-			E.Call.me name.pos, name.text, []
-
-	checkPlainName: (name) ->
-		cCheck (T.plainName name), @pos, ->
-			"Expected local name, not #{name}"
-
-	getLocalOnly: (name) ->
-		###
-		Can only be a local, not a method.
-		###
-		@_accessLocalOr name, =>
-			cFail @pos, "Type #{name.text} must be a local (not in #{@locals})"
-
-	containsIt: (x) ->
-		if x instanceof Array
-			containsWhere x, (sub) =>
-				@containsIt sub
-		else
-			type x, T.Token
-			if x instanceof T.Group and not T.indented x
-				@containsIt x.body
-			else if T.it x
-				yes
-			else
-				no
-
 	fun: (tokens) ->
 		type tokens, Array
 
@@ -286,7 +245,7 @@ class Parser
 
 		[ returnType, argsTokens ] =
 			if T.typeName before[0]
-				[ (@get before[0]), (tail before) ]
+				[ (@accessLocal before[0]), (tail before) ]
 			else
 				[ null, before ]
 
@@ -310,64 +269,12 @@ class Parser
 		new E.FunDef @pos, meta, returnType, args, maybeRest, body
 
 	###
-	Returns [plainLocals, restLocal]
-	###
-	takeNewLocals: (tokens) ->
-		type tokens, Array
-
-		out = []
-		rest = null
-
-		index = 0
-		while index < tokens.length
-			name = tokens[index]
-			type name, T.Token
-			index += 1
-
-			if T.ellipsisName name
-				cCheck index == tokens.length, @pos, ->
-					"Did not expect anything after ellipsis"
-				rest = E.Local.eager name, null
-
-			else if T.plainName name
-				typeName =
-					if T.typeName tokens[index]
-						index += 1
-						tokens[index - 1]
-					else
-						null
-				out.push @newLocal name, typeName
-			else
-				@unexpected name
-
-		[out, rest]
-
-	###
-	Returns: [ Meta, bodyTokens ]
-	###
-	takeAllMeta: (tokens, newLocals = [], useTypeLocal) ->
-		type tokens, Array, newLocals, Array
-		typeExist useTypeLocal, E.DefLocal
-
-		[ metaToks, bodyToks ] =
-			splitOnceWhere tokens, (x) ->
-				(T.nl x) or \
-					x instanceof T.MetaText or \
-					T.metaGroup x
-		meta =
-			new E.Meta @pos
-
-		metaToks.forEach (tok) =>
-			@meta meta, tok, newLocals, useTypeLocal
-
-		[ meta, bodyToks ]
-
-	###
-	Returns: [ Meta, Block ]
+	Parses the meta and body of a fun.
+	@return [(Meta, Block)]
 	###
 	funBody: (tokens, newLocals) ->
 		[ meta, bodyTokens] =
-			@takeAllMeta tokens, newLocals
+			@takeMeta tokens, newLocals
 
 		body =
 			@locals.withLocals newLocals, =>
@@ -376,31 +283,96 @@ class Parser
 		[ meta, body ]
 
 	###
-	Eg: ‣deffer def-name arg1 arg2
+	Parse a `"` group.
 	###
-	def: (def, tokens) ->
-		type def, T.Def, tokens, Array
+	quote: (quote) ->
+		if quote instanceof T.Group
+			# every part is a string literal or () group
+			new E.Quote quote.pos, quote.body.map (litOrGroup) =>
+				@soloExpression litOrGroup
+		else
+			type quote, T.StringLiteral
+			new E.Literal quote
 
-		check not (isEmpty tokens), "Expected something after #{def}"
 
-		check tokens[0] instanceof T.Def
+	###
+	If possible, read in this type's `super`.
+	@return [ (Use?, Array ]
+	  (super, restOfTokens)
+	###
+	readSuper: (tokens) ->
+		if T.super tokens[0]
+			[ (new E.Use tokens[0], @fileName, @allModules), (tail tokens) ]
+		else
+			[ null, tokens ]
 
-		fun =
-			@fun tail tokens
-		args =
-			[ (new E.Literal new T.StringLiteral @pos, def.name2), fun ]
+	###
+	Expression of a single token
+	###
+	soloExpression: (token) ->
+		@pos = token.pos
+		type token, T.Token, @pos, Pos
 
-		E.Call.me @pos, def.name, args
+		switch token.constructor
+			when T.Name
+				switch token.kind
+					when 'x'
+						@access token
+					when '_x'
+						new E.ItFunDef token
+					when 'x_'
+						new E.BoundFun.me token
+					when '@x'
+						E.AccessProperty.me @pos, token
+					else
+						@unexpected token
+			when T.Group
+				switch token.kind
+					when '|'
+						@fun token.body
+					when '('
+						new E.Parend @expression token.body, yes
+					when '['
+						@unexpected token
+					when '→'
+						@fun [ token ]
+					when '"'
+						@quote token
+					else
+						@unexpected token
+			when T.Special
+				switch token.kind
+					when 'me'
+						new E.Me token.pos
+					when 'it'
+						@locals.getIt @pos
+					else
+						@unexpected token
+			else
+				if token instanceof T.Literal
+					new E.Literal token
+				else
+					@unexpected token
 
-	meta: (meta, token, newLocals, useTypeLocal) ->
-		type meta, E.Meta, newLocals, Array
+	###
+	Takes a fun's Meta.
+	@return [(Meta, Array<Token>]
+	  The Meta and remaining tokens.
+	###
+	takeMeta: (tokens, newLocals = [ ], useTypeLocal) ->
+		type tokens, Array, newLocals, Array
 		typeExist useTypeLocal, E.DefLocal
 
-		return if T.nl token
+		meta =
+			new E.Meta @pos
 
-		meta[token.kind] =
+		index = 0
+		while true
+			token = tokens[index]
+			index += 1
+
 			if token instanceof T.MetaText
-				@quote token.text
+				meta[token.kind] = @quote token.text
 			else if T.metaGroup token
 				check token.body.length == 1
 				indented = token.body[0]
@@ -424,80 +396,108 @@ class Parser
 							@locals.withLocal (E.Local.res @pos), getBlock
 					else
 						fail()
-
+			else if T.nl token
+				continue
 			else
-				fail()
+				return [ meta, tokens.slice index - 1 ]
 
-	# Local from function arg
-	newLocal: (name, typeName) ->
-		@checkPlainName name
+	###
+	Looks like `a` or `a:Class`
+	###
+	takeNewLocal: (name, typeName) ->
+		cCheck (T.plainName name), @pos, ->
+			"Expected local name, not #{name}"
 
 		localType =
 			if typeName?
-				@getLocalOnly typeName
+				@accessLocal typeName
 			else
 				null
 
-		E.Local.eager name, localType
+		new E.Local name, localType
 
+	###
+	@return [(Array, E.Local?)]
+	  List of normal locals, and maybe a rest argument.
+	###
+	takeNewLocals: (tokens) ->
+		type tokens, Array
+
+		out = [ ]
+		rest = null
+
+		index = 0
+		while index < tokens.length
+			name = tokens[index]
+			type name, T.Token
+
+			if T.ellipsisName name
+				cCheck index == tokens.length - 1, @pos, 'Expected nothing after ellipsis'
+				rest =
+					new E.Local name, null
+
+			else if T.plainName name
+				typeName =
+					if T.typeName tokens[index + 1]
+						index += 1
+						tokens[index]
+					else
+						null
+
+				out.push @takeNewLocal name, typeName
+
+			else
+				@unexpected name
+
+			index += 1
+
+		[ out, rest ]
+
+	###
+	Fail because `token` is in the wrong place.
+	###
+	unexpected: (token) ->
+		cFail @pos, "Unexpected #{token}"
+
+	###
+	A use expression.
+	If `isValue`, just the value.
+	Otherwise, a local def.
+	###
 	use: (tokens, isValue) ->
 		check tokens.length == 1, =>
 			"Did not expect anything after use at #{@pos}"
 
 		use =
-			new E.Use tokens[0] , @fileName, @options.allModules()
+			new E.Use tokens[0] , @fileName, @allModules
 
 		if isValue
-			cCheck use.kind == 'use', @pos,
-				"Use as value must be of kind 'use'"
+			cCheck use.kind == 'use', @pos, 'Use as value must be of kind `use`.'
 			use.local.isUsed()
 			use
 
 		else
-			cCheck use.kind != 'super', @pos, 'super must be at top of file'
+			cCheck use.kind != 'super', @pos, '`super` must be at top of file.'
 			@locals.addLocalMayShadow use.local
 			if use.kind == 'trait'
 				new E.Trait use
 			else
 				new E.DefLocal.fromUse use
 
-	defLocal: (tokens, lazy) ->
-		type tokens, Array, lazy, Boolean
-		[ before, value ] =
-			rightUnCons tokens
-
-		type value, T.Group
-
-		[ locals, rest ] =
-			@takeNewLocals before
-
-		cCheck locals.length == 1, @pos, "Multiple assignments are TODO"
-		cCheck rest == null, @pos, "Multiple assignments are TODO"
-
-		local = locals[0]
-		local.lazy = lazy
-
-		@pos = value.pos
-
-		val =
-			switch value.kind
-				when '|'
-					# A local fun, eg . fun |arg
-					check not lazy, =>
-						"[#{@pos}] must use ∙ before local fun, not ∘"
-					@fun value.body
-				when '→'
-					@block value.body
-				else
-					@unexpected val
-
-		@locals.addLocal local
-
-		new E.DefLocal local, val
-
 
 ###
-Returns: [ sooperAccess, autoUses, fun ]
+@param tokens [Array]
+  Tokenized source file.
+@param typeName [String]
+  Name of the file's type. ('Cool.smith' has typeName 'Cool')
+@param fileName [String]
+  Full name of the file.
+@param options [Options]
+@param allModules [AllModules]
+@return [(Expression, Array<DefLocal>, FunDef)]
+  (superAccess, autoUses, fun)
 ###
-module.exports = (tokens, typeName, fileName, options) ->
-	(new Parser typeName, fileName, options).all tokens
+module.exports = parse = (tokens, typeName, fileName, options, allModules) ->
+	type tokens, Array, typeName, String, fileName, String,
+		options, Options, allModules, AllModules
+	(new Parser typeName, fileName, options, allModules).all tokens

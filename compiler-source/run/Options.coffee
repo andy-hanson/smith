@@ -1,30 +1,44 @@
 nopt = require 'nopt'
 AllModules = require '../compile/AllModules'
 { type } = require '../help/✔'
+{ read } = require '../help/meta'
 
+###
+Stores compilation options.
+Run `smith --help` to see all.
+###
 module.exports = class Options
-	constructor: (opts) ->
-		@_checks = opts.checks ? yes
-		@_in = opts.in ? 'source'
-		@_out = opts.out ? 'js'
-		@_meta = opts.meta ? yes
-		@_printModuleDefines = opts['print-module-defines'] ? no
-		@_verbose = opts.verbose ? no
-		@_watch = opts.watch ? no
-		@_nazi = opts.nazi ? yes
-		@_just = opts.just
+	###
+	Constructs options from an object.
+	All members are  optional.
+	@param options
+	  Object containing options specified in `smith --help`.
+	@example
+	  Options
+	  	'print-module-defines': yes
+	  	nazi: yes
+	###
+	constructor: (options) ->
+		@_in = options.in ? 'source'
+		@_out = options.out ? 'js'
+		@_checks = options.checks ? yes
+		@_copySources = options['copy-sources'] ? no
+		@_just = options.just
+		@_meta = options.meta ? yes
+		@_nazi = options.nazi ? yes
+		@_printModuleDefines = options['print-module-defines'] ? no
+		@_verbose = options.verbose ? no
+		@_watch = options.watch ? no
 
-		@_allModules =
-			AllModules.load @in()
+	read @, 'allModules', 'in', 'out', 'checks',
+		'copySources', 'just', 'meta', 'nazi',
+		'printModuleDefines', 'verbose', 'watch'
 
-	[	'checks', 'in', 'out', 'meta',
-		'printModuleDefines', 'verbose',
-		'watch', 'nazi', 'just', 'allModules' ].forEach (x) =>
-		@prototype[x] = ->
-			@["_#{x}"]
-
-	@fromCommandLine = ->
-		opts = nopt
+	###
+	Gets Options from this processe's command line.
+	###
+	@fromCommandLine: ->
+		options = nopt
 			checks: Boolean
 			'in': String
 			out: String
@@ -36,7 +50,7 @@ module.exports = class Options
 			watch: Boolean
 			nazi: Boolean
 
-		if opts.help
+		if options.help
 			info = require './info'
 			console.log """
 			Smith compiler version #{info.version}.
@@ -46,44 +60,14 @@ module.exports = class Options
 			--out: Ouput directory (default 'js').
 			--checks: Turns on in, out, and type checks.
 				(Does not affect ✔ not in a in or out block).
+			--copy-sources: If so, copies .smith files to out directory.
 			--help: Print this.
+			--just: Only compile one file.
 			--meta: Include meta with functions (default yes).
-			--print-module-defines: Include statements that print when a module is defined. (Debug)
+			--nazi: Suppress unconventional syntax (default yes).
+			--print-module-defines: Output code prints when modules are defined.
 			--verbose: Print when compiling files.
 			--watch: Wait and compile again whenever files are changed.
-			--nazi: Suppress unconventional syntax (default yes).
-			--just: Only compile one file.
 			"""
 
-		new Options opts
-
-
-
-	###
-	opts.checks ?= yes
-	opts.in ?= 'source'
-	opts.out ?= 'js'
-	opts.meta ?= yes
-	opts['print-module-defines'] ?= no
-	opts.verbose ?= no
-	opts.watch ?= no
-	opts.nazi ?= yes
-
-	constructor: (@_checks, @_meta, @_printModuleDefines, @_nazi, inDir) ->
-		type @_checks, Boolean,
-			@_meta, Boolean,
-			@_printModuleDefines, Boolean,
-			@_nazi, Boolean,
-			inDir, String
-
-		@_allModules =
-			AllModules.load inDir
-
-		type @_allModules, AllModules
-
-	checks: -> @_checks
-	meta: -> @_meta
-	printModuleDefines: -> @_printModuleDefines
-	allModules: -> @_allModules
-	nazi: -> @_nazi
-	###
+		new Options options

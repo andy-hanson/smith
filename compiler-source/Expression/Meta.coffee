@@ -1,29 +1,41 @@
-{ type } =  require '../help/✔'
+{ check, type } =  require '../help/✔'
 { interleave } = require '../help/list'
 keywords = require '../compile-help/keywords'
 Pos = require '../compile-help/Pos'
 Expression = require './Expression'
 Local = require './Local'
 
+###
+The meta of a `FunDef`.
+###
 module.exports = class Meta extends Expression
+	###
+	Starts with only @pos, but new members are added named _in, _out, etc.
+	###
 	constructor: (@pos) ->
 		type @pos, Pos
 
-	@all =
-		[ 'eg', 'sub-eg' ].concat keywords.metaText
-
+	###
+	I must be the meta of `fun`.
+	Returns `_make-meta-pre`, a closure that, when called,
+	returns a structure that can be converted to an instance of Smith's Meta.
+	@return [Chunk]
+	###
 	make: (fun, context) ->
 		FunDef = require './FunDef'
-		parts = []
+		type fun, FunDef
+		check fun.meta == @
 
-		Meta.all.forEach (name) =>
-			if context.options.meta() or name == '_arguments'
+		parts = [ ]
+
+		keywords.allMeta.forEach (name) =>
+			if context.options().meta() or name == '_arguments'
 				val =
 					@[name]
 				if val?
 					part =
 						if name in keywords.metaFun
-							(FunDef.body val).toNode context.indented()
+							x = (FunDef.body val).toNode context.indented()
 						else
 							val.toNode context
 
@@ -45,11 +57,10 @@ module.exports = class Meta extends Expression
 		rest 'rest-argument', 'maybeRest'
 
 		body =
-			interleave parts, ",\n\t#{context.indent}"
+			interleave parts, ",\n\t#{context.indent()}"
 
-		[ ', function() { return {\n\t', context.indent, body, '\n', context.indent, '}; }' ]
+		x = [ ', function() { return {\n\t',
+			context.indent(), body, '\n',
+			context.indent(), '}; }' ]
 
-
-	toString: ->
-		"doc: #{@doc}; eg: #{@eg}; how: #{@how}; sub-eg: #{@['sub-eg']}"
-
+		@nodeWrap x, context

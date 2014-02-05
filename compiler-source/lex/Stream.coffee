@@ -1,84 +1,84 @@
 Pos = require '../compile-help/Pos'
 { cCheck } = require '../compile-help/✔'
+{ check, type } = require '../help/✔'
 { times } = require '../help/oth'
-{ check } = require '../help/✔'
 
+###
+Pretends that a string is streaming.
+###
 module.exports = class Stream
+	###
+	@param str [String]
+	  Full text (this is not a real stream).
+	###
 	constructor: (@str) ->
-		@idx = 0
-		@pos = Pos.start
+		@index = 0
+		@pos = Pos.start()
 
-	hasMore: ->
-		@idx < @str.length
+	###
+	If the next character is in `charClass`, read it.
+	###
+	maybeTake: (charClass) ->
+		type charClass, RegExp
+		@readChar() if charClass.test @peek()
 
-	stepBack: (n = 1) ->
-		times n, =>
-			@idx -= 1
-			if @peek() == '\n'
-				@pos = @pos.minusLine()
-			else
-				@pos = @pos.minusColumn()
-
-	prev: ->
-		@str[@idx - 1]
-
+	###
+	The next (or skip-th next) character without modifying the stream.
+	###
 	peek: (skip = 0) ->
-		@str[@idx + skip]
+		@str[@index + skip]
 
+	###
+	The character before `peek()`.
+	###
+	prev: ->
+		@peek -1
+
+	###
+	Takes the next character (modifying the stream).
+	###
 	readChar: ->
 		x = @peek()
 		if x == '\n'
 			@pos = @pos.plusLine()
 		else
 			@pos = @pos.plusColumn()
-		@idx += 1
+		@index += 1
 		x
 
-	takeWhile: (cond) ->
-		old_idx = @idx
-		while @peek() and cond @peek()
+	###
+	Goes back `n` characters.
+	(If it goes back a line, column info is destroyed,
+		but that's OK since \n doesn't become an Expression.)
+	###
+	stepBack: (n = 1) ->
+		times n, =>
+			@index -= 1
+			if @peek() == '\n'
+				@pos = @pos.minusLine()
+			else
+				@pos = @pos.minusColumn()
+
+	###
+	Reads as long as characters satisfy `condition`.
+	@param condition [Function, RegExp]
+	@return [String]
+	###
+	takeWhile: (condition) ->
+		if condition instanceof RegExp
+			charClass = condition
+			condition = (char) ->
+				charClass.test char
+
+		start = @index
+		while @peek() and condition @peek()
 			@readChar()
-		@str.slice old_idx, @idx
+		@str.slice start, @index
 
-	maybeTake: (ch) ->
-		take = @peek() == ch
-		@readChar() if take
-		take
-
-	takeMatching: (regex) ->
-		@takeWhile (x) ->
-			regex.test x
-
-	takeNotMatching: (regex) ->
-		@takeWhile (x) ->
-			not regex.test x
-
-	takeUpToString: (str) ->
-		start = @idx
-		end = @str.indexOf str, start
-
-		cCheck end != -1, @pos, ->
-			"Expected to find #{str} before end of file."
-
-		times (end - start), =>
-			@readChar()
-
-		if str.length == 1
-			check @peek() == '\n'
-
-		@str.slice start, end
-
-	takeUpToAndIncludingString: (str) ->
-		x = @takeUpToString str
-		times str.length, =>
-			@readChar()
-		x
-
-
-	maybeTake2More: (ch) ->
-		isMore = @peek() == ch
-		if isMore
-			@readChar()
-			cCheck @readChar() == ch, @pos, ->
-				"Expected #{ch}"
-		isMore
+	###
+	Reads until a character is in `charClass`.
+	###
+	takeUpTo: (charClass) ->
+		type charClass, RegExp
+		@takeWhile (char) ->
+			not charClass.test char

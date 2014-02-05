@@ -5,6 +5,9 @@ use Console
 
 use! Str-Color
 
+use Global
+use! Array
+
 use! all-modules
 
 Str-Color.styles.each-property |name

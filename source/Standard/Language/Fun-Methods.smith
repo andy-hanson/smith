@@ -2,8 +2,8 @@ Fun.do
 	‣ new-bound-of new-bound-to ...arguments
 		unbound.apply new-bound-to arguments
 
-	‣new inspect
-		"Fun(...)"
+	\‣new inspect
+	\	"Fun(...)"
 
 	‣ of ...args
 		apply () args
@@ -22,12 +22,6 @@ Fun.do
 
 	alias 'of 'run!
 
-	\‣ be-any!
-	\	new! '_is-any Bool.⊤
-
-	\‣ is-any?
-	\	has-property? '_is-any
-
 	‣ cache
 		doc
 			This function must have 0 arguments.
@@ -35,11 +29,11 @@ Fun.do
 		eg
 			∙ r
 				Ref 0
-			∙ make-3 |
+			∙ make-three |
 				r.! _increment
 				3
 			∙ cached
-				make-3.cache
+				make-three.cache
 			✔= 3
 				cached.run!
 			✔= 3

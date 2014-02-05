@@ -5,7 +5,7 @@ use! Global
 
 static!
 
-‣‣ in-0-1:ℝ
+‣‣ fraction:ℝ
 	doc
 		Random fraction.
 
@@ -20,7 +20,7 @@ static!
 	∙ size
 		max.- min
 	∙ offset
-		in-0-1.× size
+		fraction.× size
 	min.+ offset
 
 ‣‣ int:ℕ min:ℕ max:ℕ
@@ -35,5 +35,5 @@ static!
 	(of min max).round-down
 
 ‣‣ bool:Bool
-	in-0-1.< 0.5
+	fraction.< 0.5
 

@@ -13,6 +13,6 @@ Any-Class.do-meta
 
 			export 3
 			✔= 3
-				@__exported
+				`this.__exported`
 			✔.fails
 				export 4

@@ -1,6 +1,5 @@
 use Test
 
-
 Test "Many Arguments"
 	∙ fun |a ...b
 		✔= a

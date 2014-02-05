@@ -13,8 +13,8 @@ F.do
 		how
 			Must be in JS.
 
-		(property~ '_meta).or
-			(property~ '_make-meta-pre).~
+		(property~ "_meta").or
+			(property~ "_make-meta-pre").~
 				Meta it.of
 			|
 				Meta.Empty

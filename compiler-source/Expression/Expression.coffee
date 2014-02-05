@@ -1,29 +1,38 @@
 { SourceNode } = require 'source-map'
-{ type } =  require '../help/✔'
+{ abstract, type } =  require '../help/✔'
 Pos = require '../compile-help/Pos'
 Context = require './Context'
 
+###
+Represents the meaning of the source code.
+All must have @pos and @compile()
+###
 module.exports = class Expression
 	###
-	All must have @pos
-	All must have compile (produces an array)
+	A SourceNode with my @pos,
+	the context's `fileName()`,
+	and the `chunk` of JavaScript code.
+	@param chunk [Chunk]
+	  Chunk = JavaScript code, a SourceNode, or an Array of chunks.
+	@return [SourceNode]
 	###
-	inspect: ->
-		@toString()
-
 	nodeWrap: (chunk, context) ->
-		type context, Context, context.fileName, String
+		type context, Context
+		new SourceNode @pos.line(), @pos.column(), context.fileName(), chunk
 
-		new SourceNode \
-			@pos.line,
-			@pos.column,
-			context.fileName,
-			chunk
-
+	###
+	Return a SourceNode representing this Expression.
+	@return [SourceNode]
+	###
 	toNode: (context) ->
-		type @pos, Pos, context, Context
+		type context, Context
+		@nodeWrap (@compile context), context
 
-		chunk =
-			@compile context
-
-		@nodeWrap chunk, context
+	###
+	Produce a Chunk of JavaScript for this Expression.
+	@abstract
+	@return [Chunk]
+	  Chunk = JavaScript code, a SourceNode, or an Array of chunks.
+	###
+	compile: (context) ->
+		abstract()

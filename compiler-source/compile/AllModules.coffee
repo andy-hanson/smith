@@ -9,30 +9,41 @@ Pos = require '../compile-help/Pos'
 T = require '../Token'
 keywords = require '../compile-help/keywords'
 
+###
+Represents how to access a single module.
+`@force`: If so, the module is not a file in the source directory.
+###
 class Module
 	###
-	Represents how to access a single module.
-	`@force`: If so, the module is not a file in the source directory.
+	@param fullName [String] Full path to the module.
+	@param force [Boolean] If so, module path is not checked.
 	###
 	constructor: (@fullName, @force) ->
 		type @fullName, String, @force, Boolean
 		Object.freeze @
 
+###
+The result of parsing a single `modules` file.
+`@autos` and `@autoBangs` store what files in its directory automatically use.
+###
 class Modules
-	###
-	The result of parsing a single `modules` file.
-	`@autos` and `@autoBangs` store what files in its directory automatically use.
-	###
-
+	# Starts empty.
 	constructor: ->
 		@modules = new StringMap
-		@autos = []
-		@autoBangs = []
+		@autos = [ ]
+		@autoBangs = [ ]
 
+	###
+	Get a new module.
+	###
 	add: (name, fullName, force) ->
 		type name, String, fullName, String, force, Boolean
 		@modules.add name, new Module fullName, force
 
+	###
+	@param names [Array<String>] `use`s to be included automatically.
+	@param kind [String] 'auto' or 'auto!'
+	###
 	addAutos: (names, kind) ->
 		switch kind
 			when 'auto'
@@ -40,28 +51,27 @@ class Modules
 			when 'auto!'
 				@autoBangs = @autoBangs.concat names
 			else
-				fail "Unexpected kind #{kind}"
+				fail()
 
+###
+Handles every `modules` file.
+###
 module.exports = class AllModules
 	###
-	Handles every `modules` file.
+	@param baseDir [String] Top-level source directory.
 	###
-
 	constructor: (@baseDir) ->
-		###
-		`@baseDir`: Top-level source directory.
-		###
 		type @baseDir, String
 		# Maps dir names to their `modules` files.
 		@moduleses = new StringMap
 
-	parse: (dir, text) ->
-		###
-		Gets the info of a single modules file.
-		`dir`: directory of the modules file
-		`text`: its contents
-		###
-		type dir, String, text, String
+	###
+	Gets the info of a single modules file.
+	@param dirName [String] directory of the `modules` file.
+	@param text [String] Contents of the file.
+	###
+	parse: (dirName, text) ->
+		type dirName, String, text, String
 
 		try
 			modules =
@@ -93,26 +103,32 @@ module.exports = class AllModules
 						if force
 							modulePath
 						else
-							path.join dir, @_findLocal dir, modulePath
+							path.join dirName, @_findLocal dirName, modulePath
 					type fullName, String
 					modules.add name, fullName, force
 
-			@moduleses.add dir, modules
+			@moduleses.add dirName, modules
 
 		catch error
 			error.message =
 				"In module file #{dir}/modules: #{error.message}"
 			throw error
 
-	_findLocal: (dir, name) ->
-		(@_maybeFindLocal dir, name) ? fail "Can not find #{dir}/#{name}"
+	###
+	Get a module relative to `dirName`.
+	@private
+	###
+	_findLocal: (dirName, name) ->
+		(@_maybeFindLocal dirName, name) ? fail "Can not find #{dir}/#{name}"
 
 	###
-	dir - path relative to @baseDir
-	name - module name
+	Get a module name relative to `dirName`, or `null`.
+	@param dirName [String] Path relative to `@baseDir`.
+	@param name [String] Module name.
+	@private
 	###
-	_maybeFindLocal: (dir, name) ->
-		type dir, String
+	_maybeFindLocal: (dirName, name) ->
+		type dirName, String
 		type name, String
 
 		full = path.join @baseDir, name
@@ -127,7 +143,7 @@ module.exports = class AllModules
 				"#{name}#{extension}"
 
 		for mayBeModule in mayBeModules
-			full = path.join @baseDir, dir, mayBeModule
+			full = path.join @baseDir, dirName, mayBeModule
 			if fs.existsSync full
 				return name
 
@@ -135,17 +151,18 @@ module.exports = class AllModules
 
 
 	###
-	Returns a list of every automatic use for a given file.
+	List of every automatic use for a given file.
+	@return [Array<E.Use>]
 	###
 	autoUses: (fileName) ->
 		lookupDir = path.dirname fileName
-		uses = []
+		uses = [ ]
 
 		loop
 			modules = @moduleses.maybeGet lookupDir
 			if modules?
 				au = (bang) => (auto) =>
-					useT = new T.Use Pos.start, auto, (if bang then 'use!' else 'use')
+					useT = new T.Use Pos.start(), auto, (if bang then 'use!' else 'use')
 					E = require '../Expression'
 					uses.push new E.Use useT, fileName, @
 
@@ -162,8 +179,9 @@ module.exports = class AllModules
 	Get the module for a given name.
 	Returns the module's path relative to the access directory.
 
-	name: What follows 'use'
-	accessFile: file accessing it (relative to top)
+	@param name [String] What follows `use`.
+	@param pos [Pos] Position of use.
+	@param accessFile [String File accessing it (relative to top).
 	###
 	get: (name, pos, accessFile) ->
 		type name, String
@@ -207,9 +225,9 @@ module.exports = class AllModules
 				"./#{path.relative fullAccess, full}"
 
 	###
-	Load the modules listings for a directory.
+	Loads the modules listings for a directory.
 	###
-	@load = (dir) ->
+	@load: (dir) ->
 		type dir, String
 
 		allModules =

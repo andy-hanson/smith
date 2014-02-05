@@ -6,19 +6,15 @@ keywords = require '../compile-help/keywords'
 { check, type } = require '../help/✔'
 { isEmpty } = require '../help/list'
 { repeated, withoutStart } = require '../help/str'
+{ quoteEscape } = require '../compile-help/language'
 
 module.exports = (quoteType, stream, oldIndent) ->
 	type quoteType, String, stream, Stream, oldIndent, Number
 
-	escape =
-		't': '\t'
-		'n': '\n'
-		'{': '{'
-		'"': '"'
-		'\\': '\\'
+	tokenize = require './tokenize'
 
 	read = ''
-	out = []
+	out = [ ]
 	startPos = stream.pos
 
 	indented =
@@ -67,8 +63,6 @@ module.exports = (quoteType, stream, oldIndent) ->
 				else
 					fail()
 
-
-
 	loop
 		ch = stream.readChar()
 
@@ -76,8 +70,8 @@ module.exports = (quoteType, stream, oldIndent) ->
 
 		if ch == '\\' and canEscape
 			next = stream.readChar()
-			if escape.hasOwnProperty next
-				read += escape[next]
+			if quoteEscape.has next
+				read += quoteEscape.get next
 			else
 				cFail startPos, "No need to escape '#{next}'"
 
@@ -87,18 +81,18 @@ module.exports = (quoteType, stream, oldIndent) ->
 			startPos =
 				stream.pos
 			interpolated =
-				(require './lexPlain') stream, yes
+				tokenize stream, yes
 
 			out.push new T.Group startPos, stream.pos, '(', interpolated
 
 		else if ch == '\n'
 			cCheck indented, startPos, 'Unclosed quote.'
 			# Read an indented section.
-			nowIndent = (stream.takeMatching /\t/).length
+			nowIndent = (stream.takeWhile /\t/).length
 			if nowIndent == 0 and stream.peek() == '\n'
 				read += '\n'
 			else if nowIndent < quoteIndent
-				# undo reading those tabs
+				# undo reading those tabs and that new line.
 				stream.stepBack nowIndent + 1
 				check stream.peek() == '\n'
 				return finish()

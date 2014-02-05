@@ -10,6 +10,11 @@ Represents requiring something.
 Does NOT represent defining the local.
 ###
 module.exports = class Use extends Expression
+	###
+	@param use [T.Use]
+	@param fileName [String]
+	@param allModules [AllModules]
+	###
 	constructor: (use, fileName, allModules) ->
 		type use, T.Use, fileName, String, allModules, AllModules
 		{ @pos, @kind } = use
@@ -20,14 +25,13 @@ module.exports = class Use extends Expression
 		@fullName =
 			allModules.get use.used, @pos, fileName
 
-	toString: ->
-		"<#{@kind} #{@fullName}>"
-
+	# @noDoc
 	compile: (context) ->
 		"require('#{@fullName}')"
-		#(Literal.JS @pos, "require('#{@fullName}')").compile context
 
-	# used in type-level eg
+	###
+	Type-level `eg` must `use` the type.
+	###
 	@typeLocal = (typeName, fileName, allModules) ->
-		x = new T.Use Pos.start, typeName, 'use!'
+		x = new T.Use Pos.start(), typeName, 'use!'
 		new Use x, fileName, allModules
