@@ -1,10 +1,10 @@
 doc
 	TODO
 
-Prelude@Any.‣new-ok 'do |fun
+Prelude@Any.$new-ok 'do |fun
 	fun.unbound.call me
 
-Prelude@Any.‣new-ok 'new! |name:Str value
+Prelude@Any.$new-ok 'new! |name:Str value
 	doc
 		Defines a new immutable property on this object.
 	how
@@ -19,14 +19,14 @@ use! Any-Class
 use! Any
 
 use! Language/Fun-Methods
-use! ✔
+use! !
 use! Bool
 use! Meta
 
 use! Language/Any-Class-Statics
 use! Language/Any-Statics
 use! Language/Fun-Statics
-use! Logic/✔-Statics
+use! Logic/!-Statics
 use! Logic/Bool-Statics
 
 use! Language/Meta/Meta-Metas
@@ -35,7 +35,7 @@ use! Language/Fun-Meta
 use! Language/Any-Class-Meta
 use! Language/Any-Meta
 
-use! ℝ
+use! Real
 
 use! List
 \use! Bag

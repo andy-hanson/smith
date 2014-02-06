@@ -5,7 +5,7 @@ doc
 (use Source-Map-Support).install
 \(use Segfault-Handler).registerHandler
 
-∙ f |
+val f |
 	use! Standard
 	use! Main
 

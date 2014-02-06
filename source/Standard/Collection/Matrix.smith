@@ -1,40 +1,40 @@
 super Iterable
 
-‣‣new of width height fill
+$$new of width height fill
 	TODO
 
 data |width height data
 	()
 
-‣ -to-index x y
-	(y.× x).+ x
+$ -to-index x y
+	(y.* x).+ x
 
-‣new of x:ℕ y:ℕ
+$new of x:Nat y:Nat
 	(data) (to-index x y)
 
-‣ ! x:ℕ y:ℕ value
+$ ! x:Nat y:Nat value
 	data.! (to-index x y) value
 
-‣ row row:ℕ
+$ row row:Nat
 	in
 		(Range 0 height).row
 
-	data.slice (row.× width) width
+	data.slice (row.* width) width
 
-‣new size
+$new size
 	data.size
 
-‣ collect-with-indices collector:Fun
+$ collect-with-indices collector:Fun
 	doc
 		`fun` should accept args: x y value
 
-	∙ s
+	val s
 		size
-	∙ w
+	val w
 		width
-	∙ d
+	val d
 		data
-	∙ collected
+	val collected
 		Array.of-capacity s
 	`
 		var x = 0;
@@ -46,11 +46,11 @@ data |width height data
 
 	Matrix width height collected
 
-‣ zip-with-indices
+$ zip-with-indices
 	collect-with-indices ...args
 		args
 
 
 
-‣delegate iterator
+$delegate iterator
 	data

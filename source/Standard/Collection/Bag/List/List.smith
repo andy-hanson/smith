@@ -2,4 +2,7 @@ super Bag
 
 abstract!
 
-alias '» '+
+alias '> '+
+
+$$new of ...members
+	members

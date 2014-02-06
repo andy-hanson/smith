@@ -6,5 +6,5 @@ super Iterator
 data |iterators:Array
 	()
 
-‣ next
+$ next
 	iterators.collect _next

@@ -7,18 +7,18 @@ class.do
 	doc
 		All Iterable types have these methods.
 
-	‣ iterator iterator-class-body:Fun
+	$ iterator iterator-class-body:Fun
 		doc
 			TODO
 
-		∙ iterator-class
+		val iterator-class
 			Iterator.sub-class "{name}-Iterator"
 				do iterator-class-body
 
-		‣ iterator
+		$ iterator
 			iterator-class me
 
-∙ methods
+val methods
 	(use Global)@Array.of.do
 		push '++ '∃ '∀ '∋ 'count 'collect 'drop 'each 'empty?
 		push 'fold 'first 'group 'keep 'last 'make-string 'of 'size 'to-bag 'zip 'same-members
@@ -28,5 +28,5 @@ class.do
 delegate-many methods
 	iterator
 
-\‣new toString
+\$new toString
 \	"({type.name} {make-string})"

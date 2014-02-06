@@ -1,43 +1,43 @@
 super Iterable
 
-‣‣new of min:ℝ max:ℝ step~
-	∙ step
+$$new of min:Real max:Real step~
+	val step
 		step~.or
 			1
 
 	new min max step
 
-‣new ∋ value:ℝ
+$new ∋ value:Real
 	eg
-		✔ ((Range 1 5 ).∋ 3)
-		✔ ((Range 1 5 ).∋ 6).¬
-		✔ ((Range 1 5 2).∋ 4).¬
+		! ((Range 1 5 ).∋ 3)
+		! ((Range 1 5 ).∋ 6).not
+		! ((Range 1 5 2).∋ 4).not
 
-	(value.< max).∧
-		∙ rel
+	(value.< max).and
+		val rel
 			value.- min
-		rel.negative?.¬.∧
+		rel.negative?.not.and
 			rel.divisible? step
 
-data |min:ℝ max:ℝ step:ℝ
+data |min:Real max:Real step:Real
 	in
-		✔.≤ min
+		!.<= min
 			max
-		✔ step.positive?
+		! step.positive?
 
 iterator
-	‣‣new of range
+	$$new of range
 		new range range.min
 
-	data |range:Range !current:ℝ
+	data |range:Range !current:Real
 		()
 
-	‣ next
+	$ next
 		(current.< range.max).?
-			◆.returning current
+			Control.returning current
 				current! range.step.+_
 		|
 			stop
 
-‣new toString
+$new toString
 	"<{min}..{max} by {step}>"

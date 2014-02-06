@@ -1,8 +1,0 @@
-∙ N
-	(use Global)@Number.to-class 'ℝ
-
-N.do-meta
-	doc
-		A quantity.
-
-export N

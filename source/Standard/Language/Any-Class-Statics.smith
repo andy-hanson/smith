@@ -1,13 +1,13 @@
 use! Global
 
 Any-Class.do
-	‣‣new of super-class:Any-Class name:Str do-meta~:Fun
+	$$new of super-class:Any-Class name:Str do-meta~:Fun
 		Prelude.class name super-class do-meta~.to-nullable
 
-	‣‣ all-classes
+	$$ all-classes
 		Prelude.all-classes
 
-	‣‣ show-all-todo
+	$$ show-all-todo
 		todo
 			Put this somewhere!
 
@@ -21,16 +21,16 @@ Any-Class.do
 				method.meta.todo~.each
 					Console.log! "{class}##{name}: {it}"
 
-	‣‣ singleton super-class~:Any-Class name:Str do-meta:Fun
-		\∙ args
+	$$ singleton super-class~:Any-Class name:Str do-meta:Fun
+		\val args
 		\	Array.proto@slice.call `arguments`
-		∙ super-class
+		val super-class
 			super-class~.or
 				Any
-		∙ class
+		val class
 			super-class.sub-class name do-meta
-		∙ instance
+		val instance
 			Global@Object.create class.proto
-		\class.‣ 'constructor
+		\class.$ 'constructor
 		\	fail "Singleton class!"
 		instance

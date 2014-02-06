@@ -1,17 +1,17 @@
 use Yaml
 
-‣‣ console?
-	Bool.⊤
+$$ console?
+	Bool.True
 
-‣val styles
+$val styles
 	(Yaml.load "{`__dirname`}/styles.yaml")@console
 
-∙ color |str:Str color-name:Str
-	∙ style
+val color |str:Str color-name:Str
+	val style
 		(styles.property color-name).split "|"
 
 	"{style 0}{str}{style 1}"
 
 styles.each-property |name
-	Str.‣new-ok name
+	Str.$new-ok name
 		color me name

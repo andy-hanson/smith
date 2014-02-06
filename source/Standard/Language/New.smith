@@ -1,4 +1,5 @@
 export |constructor:Fun ...arguments
-	∙ boundConstructor
+	val boundConstructor
 		constructor.bind constructor ...arguments
+
 	`new boundConstructor`

@@ -4,11 +4,11 @@ GroupPre = require './GroupPre'
 lexQuote = require './lexQuote'
 { cFail, cCheck } = require '../compile-help/✔'
 keywords = require '../compile-help/keywords'
+{ char } = require '../compile-help/language'
 { check, type, typeEach, typeExist } = require '../help/✔'
 { isEmpty, last, pushAll, repeat } = require '../help/list'
 { endsWith, startsWith, withoutEnd } = require '../help/str'
 
-{ char } = require '../compile-help/language'
 
 ###
 Gets `Token`s out of a `Stream`.
@@ -29,10 +29,10 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 	# returns String
 	takeName = ->
-		cCheck not (char.digit.test stream.peek()), stream.pos,
+		cCheck not (char.digit.test stream.peek()), stream.pos(),
 			'Expected name, got number'
 		name = stream.takeWhile char.name
-		cCheck not (isEmpty name), stream.pos,
+		cCheck not (isEmpty name), stream.pos(),
 			'Expected name, got nothing'
 		name
 
@@ -41,7 +41,7 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 	indent = 0
 
 	while ch = stream.peek()
-		pos = stream.pos
+		pos = stream.pos()
 
 		if inQuoteInterpolation and ch == '}'
 			stream.readChar()
@@ -54,6 +54,9 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 
 		token =
 			switch
+				when (match char.reserved)
+					cFail pos, "Reserved character '#{ch}'"
+
 				when (match char.digit) or (ch == '-' and char.digit.test stream.peek 1)
 					first = stream.readChar()
 					num = stream.takeWhile char.number
@@ -64,12 +67,12 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					new T.NumberLiteral pos, "#{first}#{num}"
 
 				when maybeTake char.groupPre
-					new GroupPre stream.pos, ch
+					new GroupPre stream.pos(), ch
 
 				when maybeTake char.precedesName
 					kind =
 						if ch == '.' and stream.maybeTake /\./ #stream.maybeTake2More '.'
-							cCheck stream.readChar() == '.', stream.pos,
+							cCheck stream.readChar() == '.', stream.pos(),
 								"Must have 1 '.' or 3, never 2"
 							'...x'
 						else
@@ -102,7 +105,7 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 						new T.Use pos, used, name
 					else if name in keywords.special
 						new T.Special pos, name
-					else if startsWith name, '‣'
+					else if startsWith name, '$'
 						stream.takeWhile char.space
 						name2 = takeName()
 						new T.Def pos, name, name2
@@ -127,19 +130,19 @@ module.exports = tokenize = (stream, inQuoteInterpolation = no) ->
 					stream.takeWhile /\n/
 					old = indent
 					now = (stream.takeWhile /\t/).length
-					check stream.peek() != ' ', stream.pos, 'Line begins with a space.'
+					check stream.peek() != ' ', stream.pos(), 'Line begins with a space.'
 					indent = now
 					if now == old
 						removePrecedingNL()
 						new T.Special pos, '\n'
 					else if now < old
-						x = repeat (old - now), new GroupPre stream.pos, '←'
-						x.push new T.Special stream.pos, '\n'
+						x = repeat (old - now), new GroupPre stream.pos(), '←'
+						x.push new T.Special stream.pos(), '\n'
 						x
 					else if now == old + 1
-						new GroupPre stream.pos, '→'
+						new GroupPre stream.pos(), '→'
 					else
-						cFail stream.pos, 'Line is indented more than once.'
+						cFail stream.pos(), 'Line is indented more than once.'
 
 				when maybeTake /[`"]/
 					lexQuote ch, stream, indent

@@ -1,50 +1,50 @@
 use! Global
 
-(use ℝ).do
-	‣val E
+(use Real).do
+	$val E
 		Global@Math@E
 
-	‣val Golden-Ratio
+	$val Golden-Ratio
 		5.square-root.increment.half
 
-	‣val Not-A-Number
+	$val Not-A-Number
 		doc
 			A number which is not a number.
 			It's not even equal to itself.
 			I hate everything.
 		eg
-			✔ Not-A-Number.finite?
-			✔ Not-A-Number.positive?
-			✔ Not-A-Number.negative?
-			✔ Not-A-Number.zero?
+			! Not-A-Number.finite?
+			! Not-A-Number.positive?
+			! Not-A-Number.negative?
+			! Not-A-Number.zero?
 
 		Global@NaN
 
-	‣val ∞
+	$val Infinity
 		Global@Infinity
 
-	‣val -∞
-		∞.negate
+	$val -Infinity
+		Infinity.negate
 
-	‣val π
+	$val π
 		doc
 			Halfway around a circle, in radians.
 
 		Global@Math@PI
 
-	‣val π/2
+	$val π/2
 		doc
 			A right angle, in radians.
 
-		π.÷ 2
+		π./ 2
 
-	‣val π3/2
+	$val π3/2
 		doc
 			3/4 of a circle, in radians.
 
 		π.+ π/2
 
-	‣val π2
+	$val π2
 		doc
 			A full circle, in radians.
 

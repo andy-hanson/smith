@@ -84,8 +84,6 @@ class CompileDir
 		io.processDirectorySync @options.in(), @options.out(),
 			((file) => @compilable file), (file, text) => @compile file, text
 
-		@writeUseAll()
-
 	# Ouput the text if `--verbose`
 	log: (text) ->
 		if @options.verbose()
@@ -139,8 +137,6 @@ class CompileDir
 							throw err if err?
 							@log "Wrote to #{outFile}"
 
-			@writeUseAll()
-
 		options =
 			interval: 2000
 			ignoreDotFiles: yes
@@ -155,23 +151,6 @@ class CompileDir
 					@log "Removing #{outFile}"
 					fs.unlink outFile, (err) ->
 						throw err if err?
-					@writeUseAll()
-
-	###
-	TODO: May not be needed.
-	###
-	writeUseAll: ->
-		all = [ ]
-		io.recurseDirectoryFilesSync @options.in(), (-> yes), (inFile) =>
-			(@outNames inFile).forEach (name) ->
-				if endsWith name, 'js'
-					all.push name
-
-		useAll =
-			all.map (module) ->
-				"require('./#{withoutEnd module, '.js'}');"
-			.join '\n'
-		fs.writeFileSync (path.join @options.out(), "#{keywords.useAll}.js"), useAll
 
 ###
 Recursively compiles the directory.

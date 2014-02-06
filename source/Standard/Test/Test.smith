@@ -1,8 +1,8 @@
-‣‣new of name:Str do:Fun
-	✘.annotate
+$$new of name:Str do:Fun
+	Error.annotate
 		do.run!
 	|
 		"Test '{name}'"
 
-‣‣ all!
+$$ all!
 	Any-Class.all-classes.each _test!

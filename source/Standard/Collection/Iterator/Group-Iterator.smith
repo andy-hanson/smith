@@ -1,11 +1,11 @@
 super Iterator
 
-data |original:Iterator group-size:ℕ
+data |original:Iterator group-size:Nat
 	()
 
-‣ next
-	◆.returning (Array.of) |group
-		↺.times group-size
-			group.»! original.next
+$ next
+	Control.returning (Array.of) |group
+		Loop.times group-size
+			group.>! original.next
 
 

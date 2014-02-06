@@ -5,13 +5,11 @@ use Console
 
 use! Str-Color
 
-use Global
-use! Array
+\Str-Color.styles.each-property |name
+\	Console.log! (name.send name)
 
-use! all-modules
+use! Hello-World
 
-Str-Color.styles.each-property |name
-	Console.log! (name.send name)
+(use Use-All-Modules) `__dirname`
 
 Test.all!
-

@@ -1,12 +1,12 @@
 use! Global
 
 Fun.do
-	‣‣ from-JS ...arguments-and-body
-		✘.annotate
+	$$ from-JS ...arguments-and-body
+		Error.annotate
 			Global@Function.apply () arguments-and-body
 		|
-			∙ ab
+			val ab
 				arguments-and-body
-			∙ body
+			val body
 				`ab[ab.length - 1]`
 			"Could not compile function '{body}'"

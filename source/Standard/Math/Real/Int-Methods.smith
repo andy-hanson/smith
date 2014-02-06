@@ -1,208 +1,208 @@
-∙ Math
+val Math
 	(use Global)@Math
 
-(use ℝ).do
-	‣ round-towards-0
+(use Real).do
+	$ round-towards-0
 		doc
 			Rounds down if positive, rounds up if negative.
 		eg
-			✔= 0
+			!= 0
 				-0.5.round-towards-0
-			✔= 0
+			!= 0
 				0.5.round-towards-0
 
 		binary-or 0
 
-	‣ round
+	$ round
 		doc
 			Nearest integer to me.
 			Rounds up when halfway between two integers.
 		eg
-			✔= 0
+			!= 0
 				-0.5.round
-			✔= 1
+			!= 1
 				0.5.round
 
 		Math.round me
 
-	‣ round-down:ℤ
+	$ round-down:Int
 		doc
 			Highest integer lower than me.
 		eg
-			✔= -1
+			!= -1
 				-0.5.round-down
-			✔= 0
+			!= 0
 				0.5.round-down
 
 		Math.floor me
 
-	‣ round-up:ℤ
+	$ round-up:Int
 		doc
 			Lowest integer higher than me.
 		eg
-			✔= 0
+			!= 0
 				-0.5.round-up
-			✔= 1
+			!= 1
 				0.5.round-up
 
 		Math.ceil me
 
-	‣ remainder:ℝ divisor:ℝ
+	$ remainder:Real divisor:Real
 		doc
 			Remainder after division.
 		eg
-			✔= 1
+			!= 1
 				3.remainder 2
 
 		`this % divisor`
 
-	‣ ℕ?
+	$ Nat?
 		doc
 			Am I a natural number, a non-negative integer?
 		eg
-			✔ 0.ℕ?
-			✔ -1.ℕ?.¬
+			! 0.Nat?
+			! -1.Nat?.not
 
-		ℤ?.∧
-			negative?.¬
+		Int?.and
+			negative?.not
 
-	‣ ℤ?
+	$ Int?
 		doc
 			Am I an integer, do I have no fractional parts?
 		eg
-			✔ 42.ℤ?
-			✔ 0.5.ℤ?.¬
-			✔ ∞.ℤ?.¬
-			✔ Not-A-Number.ℤ?.¬
+			! 42.Int?
+			! 0.5.Int?.not
+			! Infinity.Int?.not
+			! Not-A-Number.Int?.not
 		how
 			TODO: Number.isInteger
 
-		finite?.∧
-			(in-range -9007199254740992 9007199254740992).∧
+		finite?.and
+			(in-range -9007199254740992 9007199254740992).and
 				= (Math.floor me)
 
-	‣ divisible? divisor:ℝ
+	$ divisible? divisor:Real
 		doc
 			Whether an ingeger number of divisor can add up to me.
 		eg
-			✔ (4.divisible? 2)
-			✔ (4.divisible? -2)
-			✔ (3.divisible? 2).¬
+			! (4.divisible? 2)
+			! (4.divisible? -2)
+			! (3.divisible? 2).not
 
 		(remainder divisor).zero?
 
-	‣ even?
+	$ even?
 		divisible? 2
 
-	‣ odd?
-		even?.¬
+	$ odd?
+		even?.not
 
-	‣ decrement
+	$ decrement
 		doc
 			One less than me.
 		eg
-			✔= 1.5
+			!= 1.5
 				2.5.decrement
 		- 1
 
-	‣ increment
+	$ increment
 		doc
 			One more than me.
 		eg
-			✔= 2.5
+			!= 2.5
 				1.5.increment
 		+ 1
 
-	‣ factorial
+	$ factorial
 		doc
 			Product of all integers up to me.
 		in
-			✔ ℕ?
+			! Nat?
 		\TODO
 		\eg
-		\	✔= 6
+		\	!= 6
 		\		3.factorial
-		\	✔= 1
+		\	!= 1
 		\		0.factorial
-		\	✔.fails
+		\	!.fails
 		\		-1.factorial
-		\	✔.fails
+		\	!.fails
 		\		0.5.factorial
 
-		(Range 1 increment).fold _×
+		(Range 1 increment).fold _*
 
-	‣ greatest-common-divisor a:ℕ
+	$ greatest-common-divisor a:Nat
 		doc
 			Highest integer that both I and `a` are divisible by.
 		in
-			✔ ℕ?
+			! Nat?
 		eg
-			✔= 6
+			!= 6
 				12.greatest-common-divisor 18
 		out
-			res.divisible? me
-			res.divisible? a
+			! res.divisible? me
+			! res.divisible? a
 
 		(a.= 0).?
 			me
 		|
 			a.greatest-common-divisor (remainder a)
 
-	‣ least-common-multiple a:ℕ
+	$ least-common-multiple a:Nat
 		doc
 			Lowest integer that both I and `a` are factors of.
 		in
-			✔ ℕ?
+			! Nat?
 		out
-			me.divisible? res
-			a.divisible? res
+			! me.divisible? res
+			! a.divisible? res
 		eg
-			✔= 18
+			!= 18
 				6.least-common-multiple 9
 
-		(× a).÷ (greatest-common-divisor a)
+		(* a)./ (greatest-common-divisor a)
 
-	‣ whole-÷ divisor:ℝ
+	$ whole-/ divisor:Real
 		doc
-			Like ÷, but any fractional part is rounded down. _Not_ necessarily rounded towards 0.
+			Like /, but any fractional part is rounded down. _Not_ necessarily rounded towards 0.
 		eg
-			✔= 1
-				3.whole-÷ 2
-			✔= -2
-				3.whole-÷ -2
+			!= 1
+				3.whole-/ 2
+			!= -2
+				3.whole-/ -2
 
-		(÷ divisor).round-down
+		(/ divisor).round-down
 
-	‣ divide-evenly~ divisor:ℝ
+	$ divide-evenly~ divisor:Real
 		doc
-			If possible, an integer which × divisor is me.
+			If possible, an integer which * divisor is me.
 		eg
-			✔= Opt.None
+			!= Opt.None
 				3.divide-evenly~ 2
-			\✔= (Opt.some 2)
+			\!= (Opt.some 2)
 			\	4.divide-evenly~ 2
 		how
 			TODO: Some equality
 
-		Opt.filter (÷ divisor) _ℤ?
+		Opt.filter (/ divisor) _Int?
 
-	‣ binary-or:ℤ n:ℤ
+	$ binary-or:Int n:Int
 		`this | n`
 
-	‣ binary-and:ℤ n:ℤ
+	$ binary-and:Int n:Int
 		`this & n`
 
-	‣ binary-xor:ℤ n:ℤ
+	$ binary-xor:Int n:Int
 		`this ^ n`
 
-	‣ binary-not:ℤ
+	$ binary-not:Int
 		`~this`
 
-	‣ binary-shift-left:ℤ n:ℤ
+	$ binary-shift-left:Int n:Int
 		`this << n`
 
-	‣ binary-shift-right-signed:ℤ n:ℤ
+	$ binary-shift-right-signed:Int n:Int
 		`this >> n`
 
-	‣ binary-shift-right-unsigned:ℤ n:ℤ
+	$ binary-shift-right-unsigned:Int n:Int
 		`this >>> n`

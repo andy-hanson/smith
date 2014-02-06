@@ -6,7 +6,7 @@ super Iterator
 data |!current:Iterator rest:Iterator
 	()
 
-‣ next
+$ next
 	current.next~.~
 		it
 	|

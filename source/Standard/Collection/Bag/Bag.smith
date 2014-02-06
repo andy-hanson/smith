@@ -3,20 +3,20 @@ doc
 
 super Iterable
 
-‣‣new of ...members
+$$new of ...members
 	members
 
-‣new = a
+$new = a
 	`true`
-	\(Bag.subsumes? a).∧
+	\(Bag.subsumes? a).and
 	\	same-members a
 
-\‣new to-bag
+\$new to-bag
 \	me
 
 
-\‣new collect collector:Fun
-\	∙ builder
+\$new collect collector:Fun
+\	val builder
 \		class.builder
 \	each |value
 \		builder.+! (collector value)

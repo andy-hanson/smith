@@ -1,31 +1,31 @@
-‣class X-Y-Pair
+$class X-Y-Pair
 	eg
 		(of 1 2).test
 
 	data |x y
 		()
 
-	‣ test
-		✔.fails
+	$ test
+		!.fails
 			new! 'z 38
-		✔= 1
+		!= 1
 			x
-		✔= 2
+		!= 2
 			y
 
-‣class Mutable
+$class Mutable
 	eg
 		(of 1 2).test
 
 	data |!x y
 		()
 
-	‣ test
-		✔.fails
+	$ test
+		!.fails
 			y! 3
-		✔= 1
+		!= 1
 			x
 		x! _increment
-		✔= 2
+		!= 2
 			x
 

@@ -7,7 +7,7 @@ Looks like `_func`.
 Basically, `function(x, ...rest) { return x.method(...rest); }`.
 Unrelated to keyword 'it'.
 ###
-module.exports = class ItFunDef extends Expression
+module.exports = class ItFun extends Expression
 	###
 	@param name [String]
 	  Name of method to call on it.

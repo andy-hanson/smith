@@ -1,0 +1,23 @@
+use fs
+use path
+
+static!
+
+$$ recurse-directory-sync dir:Str call-back:Fun
+	(fs.readdirSync dir).each |file:Str
+		val full
+			path.join dir file
+		val stat
+			fs.statSync full
+		stat.isFile.?
+			call-back full
+		|
+			stat.isDirectory.if!
+				recurse-directory-sync full call-back
+
+$$new of directory-name:Str
+	recurse-directory-sync directory-name |file
+		((file.slice (file.size.- 3)).= ".js").if!
+			`require(file)`
+
+

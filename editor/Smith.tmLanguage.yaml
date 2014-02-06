@@ -94,7 +94,7 @@ patterns:
   match: \b(me|res|it)\b
 
 - name: local.define.dot
-  match: (∙)\s([^:]+)
+  match: (val)\s([^:]+)
   captures:
     '2':
       name: local.define.strict
@@ -129,7 +129,7 @@ patterns:
 
 - name: variable.parameter
   comment: define type of function
-  begin: (‣)(\S*)(\s+)([^\s:]+)
+  begin: (\$)(\S*)(\s+)([^\s:]+)
   beginCaptures:
     '1':
       name: local.define.dot

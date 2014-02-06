@@ -1,7 +1,0 @@
-super Class-Like
-
-static!
-
-‣‣new subsumes? a
-	(ℝ.subsumes? a).∧
-		a.ℤ?

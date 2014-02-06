@@ -2,15 +2,15 @@ use Ref
 
 static!
 
-‣‣ times n:ℕ do:Fun
+$$ times n:Nat do:Fun
 	doc
 		Runs `do` `n` times.
 	eg
-		∙ r
+		val r
 			Ref 0
 		times 3
 			r.! _increment
-		✔= 3
+		!= 3
 			r.get
 
 	`
@@ -18,20 +18,20 @@ static!
 			_do();
 
 \ must get this here as use in JS will not trigger the use
-∙ Some
+val Some
 	Opt.Some
 
-‣‣ loop do:Fun
+$$new of do:Fun
 	doc
 		Keep running fun until it returns Some.
 		Then return the value in that Some.
 	eg
-		∙ a
+		val a
 			Ref 3
-		∙ b
+		val b
 			Ref 0
-		✔= 3
-			loop
+		!= 3
+			Loop
 				a.! _decrement
 				b.! _increment
 				a.get.positive?.unless
@@ -46,44 +46,44 @@ static!
 				return result.value();
 		}
 
-‣‣ while condition:Fun do:Fun
+$$ while condition:Fun do:Fun
 	doc
 		Run `do` as long as `condition` holds.
 	eg
-		∙ a
+		val a
 			Ref 3
-		∙ b
+		val b
 			Ref 0
 		while
 			a.get.positive?
 		|
 			a.! _decrement
 			b.! _increment
-		✔= 0
+		!= 0
 			a.get
-		✔= 3
+		!= 3
 			b.get
 
 	`
 		while (condition())
 			_do();
 
-‣‣ do-while do:Fun condition:Fun
+$$ do-while do:Fun condition:Fun
 	doc
 		Run `body`, then keep running it as long as `condition` holds.
 	eg
-		∙ a
+		val a
 			Ref 0
 		do-while
 			a.! _increment
 		|
-			Bool.⊥
-		✔.fails
+			Bool.False
+		!.fails
 			do-while
 				1
 			|
 				2
-		✔= 1
+		!= 1
 			a.get
 
 	`

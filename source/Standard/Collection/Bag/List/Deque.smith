@@ -3,23 +3,23 @@ doc
 eg
 	Deque.of.do
 		\print!
-		«! 2
+		<! 2
 		\print!
-		»! 3
+		>! 3
 		\print!
-		«! 1
+		<! 1
 		\print!
-		✔= 3
-			un-»!
-		✔= 2
-			un-»!
-		✔= 1
-			un-»!
-		✔ empty?
+		!= 3
+			un->!
+		!= 2
+			un->!
+		!= 1
+			un->!
+		! empty?
 
 super List
 
-‣‣new of ...members
+$$new of ...members
 	oth
 		TODO:
 		inherit from Bag (builder)
@@ -30,57 +30,57 @@ super List
 		new members 0 members.size.decrement
 
 \ end is non-inclusive, front is
-data |!data:Array !front:ℕ !end:ℕ
+data |!data:Array !front:Nat !end:Nat
 	()
 
-‣ print!
+$ print!
 	Console.log! "{data} {front} {end}"
 
-‣new size
+$new size
 	end.- front
 
-‣new empty?
+$new empty?
 	front.= end
 
-‣ -loop:ℕ index:ℤ
+$ -loop:Nat index:Int
 	(data.size.+ index).remainder data.size
 
-‣ »! value
+$ >! value
 	-maybe-expand!
 	data.! end value
 	end!
 		-loop it.increment
 
-‣ «! value
+$ <! value
 	-maybe-expand!
 	front!
 		-loop it.decrement
 	data.! front value
 
-‣new first:Any
+$new first:Any
 	(data) front
 
-‣new last:Any
+$new last:Any
 	(data) end.decrement
 
-‣ un-«!
-	◆.returning first
+$ un-<!
+	Control.returning first
 		front!
 			-loop it.increment
 
-‣ un-»!
+$ un->!
 	end!
 		-loop it.decrement
 	(data) end
 
-‣ -maybe-expand!
+$ -maybe-expand!
 	doc
 		Puts the data in the middle of a new array twice as big.
 
 	(front.= end.increment).if!
-		∙ new-data
+		val new-data
 			Array.of-capacity data.size.twice
-		∙ offset
+		val offset
 			data.size.half
 		front!
 			offset
@@ -90,17 +90,17 @@ data |!data:Array !front:ℕ !end:ℕ
 
 
 iterator
-	‣‣new of deque
+	$$new of deque
 		new deque deque.front
 
-	data |deque:Deque !index:ℕ
+	data |deque:Deque !index:Nat
 		()
 
-	‣ next
+	$ next
 		(index.= deque.end).?
 			stop
 		|
-			◆.returning (deque.data index)
+			Control.returning (deque.data index)
 				index!
 					deque.-loop it.increment
 

@@ -1,11 +1,11 @@
 Bool.do
-	‣val ⊤
+	$val True
 		doc
 			TODO
 
 		`true`
 
-	‣val ⊥
+	$val False
 		doc
 			TODO
 

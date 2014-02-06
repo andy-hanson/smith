@@ -5,35 +5,35 @@ use! Global
 
 static!
 
-‣‣ fraction:ℝ
+$$ fraction:Real
 	doc
 		Random fraction.
 
 	Global@Math.random
 
-‣‣new of:ℝ min:ℝ max:ℝ
+$$new of:Real min:Real max:Real
 	doc
 		Random number from (inclusive) min to (exclusive) max.
 	in
-		✔ (min.≤ max)
+		! (min.<= max)
 
-	∙ size
+	val size
 		max.- min
-	∙ offset
-		fraction.× size
+	val offset
+		fraction.* size
 	min.+ offset
 
-‣‣ int:ℕ min:ℕ max:ℕ
+$$ int:Nat min:Nat max:Nat
 	doc
 		Random integer from (inclusive) min to (exclusive) max.
 	eg
-		∙ x
+		val x
 			int 3 8
-		✔ (x.≥ 3)
-		✔ (x.< 8)
+		! (x.>= 3)
+		! (x.< 8)
 
 	(of min max).round-down
 
-‣‣ bool:Bool
+$$ bool:Bool
 	fraction.< 0.5
 

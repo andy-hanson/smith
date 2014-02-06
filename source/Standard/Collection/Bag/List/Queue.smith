@@ -4,64 +4,64 @@ eg
 	Queue.of.do
 		add! 1
 		add! 2
-		✔= 1
+		!= 1
 			next!
-		✔= 2
+		!= 2
 			next!
-		✔.fails
+		!.fails
 			next!
 
 super List
 
-‣ iterator
+$ iterator
 	Iterator.slice data left right
 
-‣‣new of ...args
+$$new of ...args
 	new 0 args.size args
 
-data |!left:ℕ !right:ℕ data:Array
+data |!left:Nat !right:Nat data:Array
 	()
 
-‣new empty?:Bool
+$new empty?:Bool
 	left.= right
 
-‣ add!:Void value
+$ add!:Void value
 	doc
 		Adds a value to the end of the queue.
 
 	data.! right value
 	right! _increment
 
-‣ next
+$ next
 	doc
 		Retrieves the next value without removing it.
 	eg
 		(Queue 1 2).do
-			✔= 1
+			!= 1
 				next
-			✔= 1
+			!= 1
 				next
 
 
 	(data) left
 
-‣ next!
+$ next!
 	doc
 		Removes a value from the front of the queue.
 
-	◆.returning next
+	Control.returning next
 		left! _increment
 		(left.> right.half).if!
 			compress!
 
-‣ next~:Opt
+$ next~:Opt
 	doc
 		If there is a next value, `next`.
 
 	empty?.unless
 		next
 
-‣ next~!:Opt
+$ next~!:Opt
 	doc
 		If there is a next value, `next!`.
 
@@ -69,7 +69,7 @@ data |!left:ℕ !right:ℕ data:Array
 		next!
 
 
-‣ compress!:Void
+$ compress!:Void
 	doc
 		Makes internal data as small as possible.
 

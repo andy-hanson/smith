@@ -1,8 +1,8 @@
 use! Arithmetic-Methods
 use! Compare-Methods
-use! ℤ-Methods
-use! ℝ-Methods
+use! Int-Methods
+use! Real-Methods
 use! Trigonometry-Methods
 use! Constants
 
-export ℝ
+export Real

@@ -3,8 +3,8 @@ super Iterator
 data |original:Iterator condition:Fun
 	()
 
-‣ next
-	∙ possible-next
+$ next
+	val possible-next
 		original.next
 	(condition possible-next).?
 		possible-next

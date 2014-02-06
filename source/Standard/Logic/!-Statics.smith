@@ -1,0 +1,52 @@
+!.do
+	$$ fails fun:Fun
+		eg
+			fails
+				Error.throw! "whoops"
+
+			fails
+				fails
+					\doesn't fail
+				Console.log! 0
+
+		Error.catch
+			fun.run!
+
+	$$ fail-message message:Str fun:Fun
+		!= message
+			Error.catch-message
+				fun.run!
+
+	$$ rel relation-name:Str a make-b:Fun
+		val b
+			make-b.of
+
+		! (Any.exists? a)
+			"First argument undefined"
+		\! (Any.exists? b)
+		\	"Second argument undefined"
+		! (a.send relation-name b)
+			"Expected {a}.{relation-name} {b}"
+
+	$$ ~= a make-b significant-digits~
+		val significant-digits
+			significant-digits~.or
+				6
+		val b
+			make-b.of
+		val close
+			a.~= b significant-digits
+		! close
+			"{a} not ~= {b} (to {significant-digits} digits)"
+
+	$$ < a make-b:Fun
+		rel '< a make-b
+
+	$$ > a make-b:Fun
+		rel '< a make-b
+
+	$$ <= a make-b:Fun
+		rel '<= a make-b
+
+	$$ >= a make-b:Fun
+		rel '>= a make-b

@@ -1,72 +1,70 @@
 Prelude@Opt.do
-	‣‣ Some
+	$val Some
 		Prelude@Some
 
-	‣‣ None
+	$val None
 		Prelude@None
 
-	Some.do \‣sub-class Some
-		\ TODO
-		\data |value
-		\	()
+	Some.do
+		\ constructor in Prelude
 
-		‣read value
+		$read value
 
-		‣ force message~\:Str
+		$ force message~:Str
 			value
 
-		‣ or else:Fun
+		$ or else:Fun
 			value
 
-		‣ each do:Fun
+		$ each do:Fun
 			do.run! value
 
-		‣ collect of:Fun
+		$ collect of:Fun
 			Some (of value)
 
-		‣ ~ if-some:Fun if-none:Fun
+		$ ~ if-some:Fun if-none:Fun
 			if-some value
 
-		‣ to-nullable
+		$ to-nullable
 			value
 
-		‣new toString
+		$new toString
 			"(Some {value})"
 
 
 	None.class.do
-		‣ force message~\:Str]
-			∙ message
+		$ force message~:Str
+			val message
 				message~.or
 					"Tried to force None."
-			✘ message
+			Error.throw! message
 
-		‣ or else:Fun
+		$ or else:Fun
 			else.of
 
-		‣ each do:Fun
+		$ each do:Fun
 			()
 
-		‣ collect of:Fun
+		$ collect of:Fun
 			None
 
-		‣ ~ if-some:Fun if-none:Fun
+		$ ~ if-some:Fun if-none:Fun
 			if-none.of
 
-		‣ to-nullable
+		$ to-nullable
 			()
 
-		‣new toString
+		$new toString
 			"None"
 
-	‣‣ some value:Any
+	$$ some value:Any
 		Some.of value
 
-	‣‣ filter value:Any condition:Fun
+	$$ filter value:Any condition:Fun
 		(condition value).if
 			value
 
-	‣‣ from-nullable a
+	$$ from-nullable a
 		`a != null`.if
 			a
 

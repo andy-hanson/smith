@@ -4,20 +4,20 @@ Array.do
 	doc
 		TODO
 
-	‣‣ of-capacity n:ℕ
+	$$ of-capacity n:Nat
 		Global@Array n
 
-	‣‣ fill n:ℕ filler:Fun
+	$$ fill n:Nat filler:Fun
 		(of-capacity n).collect-with-index |value index
 			filler index
 
-	‣‣ from-iterator:Array iterator:Iterator
-		∙ x
+	$$ from-iterator:Array iterator:Iterator
+		val x
 			Array.of
 		iterator.each x.push_
 		x
 
-	‣ collect-with-index do:Fun
+	$ collect-with-index do:Fun
 		todo
 			Seq
 
@@ -27,81 +27,81 @@ Array.do
 				out[index] = _do(this[index], index);
 			return out;
 
-	‣ copy:Array
+	$ copy:Array
 		slice
 
-	‣ »!:Void value
+	$ >!:Void value
 		push value
 		()
 
-	‣ »:Array value
-		◆.returning copy
-			it.»! value
+	$ >:Array value
+		Control.returning copy
+			it.>! value
 
-	‣ »»!:Void value:Iterable
+	$ >>!:Void value:Iterable
 		Array.proto@push.apply me value.to-bag
 
 	\ This goes down here because `trait` needs '+'
 	trait List
 
-	‣ «!:Void value
+	$ <!:Void value
 		unshift value
 		()
 
-	‣ «:Array value
-		◆.returning copy
-			it.«! value
+	$ <:Array value
+		Control.returning copy
+			it.<! value
 
-	\‣ ∋ em
+	\$ ∋ em
 	\	todo
 	\		Call '=' at each element
 	\
 	\	(indexOf em).≠ -1
 
-	‣new size
+	$new size
 		@length
 
-	‣‣new of ...members
+	$$new of ...members
 		members
 
-	‣ iterator
+	$ iterator
 		Iterator.slice me 0 size
 
-	\‣new each do:Fun
-	\	∙ size
+	\$new each do:Fun
+	\	val size
 	\		size
 	\	`
 	\		for (var index = 0; index < size; index++)
 	\			_do(this[index]);
 
-	‣new of:Any index:ℕ
+	$new of:Any index:Nat
 		in
-			✔ (valid-index? index)
+			! (valid-index? index)
 				"Invalid index {index} of array of size {size}"
 
 		`this[index]`
 
-	‣ !:Void index:ℕ value
+	$ !:Void index:Nat value
 		`
 			this[index] = value;
 			return;
 
-	‣ valid-index?:Bool index:ℝ
-		index.ℕ?.∧
+	$ valid-index?:Bool index:Real
+		index.Nat?.and
 			index.< size
 
 
-	‣ collect!:Void collector:Fun
-		∙ size
+	$ collect!:Void collector:Fun
+		val size
 			size
 		`
 			for (var index = 0; index < size; index++)
 				this[index] = collector(this[index]);
 			var res = null;
 
-	‣new collect:Array collector:Fun
-		◆.returning copy
+	$new collect:Array collector:Fun
+		Control.returning copy
 			it.collect! collector
 
-	‣new ++ iter:Iterable
+	$new ++ iter:Iterable
 		concat iter.to-bag

@@ -1,8 +1,8 @@
-∙ C
+val C
 	Prelude@Any.class
 
 C.do
-	‣new-ok export exported
+	$new-ok export exported
 		`
 			if (exported == null)
 				throw new global.Error('Exported nothing');
@@ -12,7 +12,7 @@ C.do
 
 	use! Global
 
-	‣new-ok check name a
+	$new-ok check name a
 		`
 			if (a == null)
 				throw new global.Error("Undefined "+name+":"+this._name);
@@ -24,10 +24,10 @@ C.do
 			}
 			return a;
 
-	‣new-ok subsumes? a
+	$new-ok subsumes? a
 		`a != null && a[this['-id-check']] === true`
 
-	‣new-ok ‣ name:Str method:Fun
+	$new-ok $ name:Str method:Fun
 		doc
 			TODO
 		in
@@ -40,9 +40,9 @@ C.do
 					throw new global.Error(this + ' already has method ' + name + fromStr);
 				}
 
-		me.‣new-ok name method
+		me.$new-ok name method
 
-	‣ ‣new name:Str method:Fun
+	$ $new name:Str method:Fun
 		doc
 			TODO
 		in
@@ -50,32 +50,32 @@ C.do
 				if (this._proto[name] == null)
 					throw new global.Error('No need to override ' + name + ' in ' + this)
 
-		me.‣new-ok name method
+		me.$new-ok name method
 
-	‣ is-meta?
+	$ is-meta?
 		has-property? "_is-meta"
 
-	‣ new ...args
+	$ new ...args
 		doc
 			TODO
 		in
-			✔ is-meta?.¬
+			! is-meta?.not
 				"Can't instantiate meta-class"
 
-		◆.returning (Global@Object.create proto)
+		Control.returning (Global@Object.create proto)
 			it.construct ...args
 
-	‣ seal-proto!
+	$ seal-proto!
 		Global@Object.preventExtensions proto
 
-	‣ seal-static!
+	$ seal-static!
 		Global@Object.preventExtensions me
 
-	‣ seal!
+	$ seal!
 		seal-proto!
 		seal-static!
 
-	‣new toString
+	$new toString
 		doc
 			TODO
 		how
@@ -83,67 +83,67 @@ C.do
 
 		`this._name`
 
-	‣ method name:Str
+	$ method name:Str
 		doc
 			This class' method of the given name.
 			Does not include inherited methods.
 
 		methods.property name
 
-	‣ alias old-name:Str new-name:Str
+	$ alias old-name:Str new-name:Str
 		doc
 			TODO
 
-		∙ old
+		val old
 			old-name
-		me.‣ new-name |...args
+		me.$ new-name |...args
 			`this[old].apply(this, args)`
 
 	alias 'new 'of
 
-	‣ ‣‣new-ok name:Str method:Fun
+	$ $$new-ok name:Str method:Fun
 		doc
 			TODO
 
 		new! name method
 		static-methods.new! name method
 
-	‣ ‣‣ name:Str method:Fun
+	$ $$ name:Str method:Fun
 		doc
 			Defines a method just for this class.
 			Added to `static-methods` too.
 			Not used by sub-classes.
 		in
-			✔ (has-proto-property? name).¬
-				"{me.name}.{name} already defined, use ‣‣new"
+			! (has-proto-property? name).not
+				"{me.name}.{name} already defined, use $$new"
 
-		me.‣‣new-ok name method
+		me.$$new-ok name method
 
-	‣ ‣‣new name:Str method:Fun
+	$ $$new name:Str method:Fun
 		in
-			✔ (has-proto-property? name)
+			! (has-proto-property? name)
 				"{me.name}.{name} not defined, no need to override"
 
-		me.‣‣new-ok name method
+		me.$$new-ok name method
 
-	‣ ‣val name:Str make-val:Fun
+	$ $val name:Str make-val:Fun
 		doc
 			Defines a value on this class.
 
-		∙ val
+		val value
 			make-val.of
-		me.‣‣ name
-			val
-		\me.‣‣ name make-val.cache
+
+		me.$$ name
+			value
 
 
-	\‣ ‣val! name:Str make-val:Fun
-	\	∙ val
+	\$ $val! name:Str make-val:Fun
+	\	val val
 	\		make-val.of
-	\	me.‣‣ name
+	\	me.$$ name
 	\		val
 
-	‣ ‣method-meta name:Str fun:Fun
+	$ $method-meta name:Str fun:Fun
 		how
 			This is used before Bool is defined, so must be in JS.
 
@@ -152,181 +152,181 @@ C.do
 				this.method(name)['meta!'](fun._meta);
 			return;
 
-	∙ maybe-meta |method-name:Str ...meta
-		∙ mn
+	val maybe-meta |method-name:Str ...meta
+		val mn
 			method-name
 		`
 			switch (meta.length) {
 				case 0:
 					break;
 				case 1:
-					this['‣method-meta'](mn, meta[0]);
+					this['$method-meta'](mn, meta[0]);
 					break;
 				case 2:
 					throw new global.Error(meta)
 			}
 
 		\(Opt.from-nullable meta).each
-		\	me.‣method-meta method-name it
+		\	me.$method-meta method-name it
 
-	‣ ‣read name:Str ...meta
+	$ $read name:Str ...meta
 		doc
 			TODO
 
-		me.‣ name
+		me.$ name
 			property "_{name}"
 		maybe-meta.call me name ...meta
 
-	‣ ‣read~ name:Str ...meta
+	$ $read~ name:Str ...meta
 		doc
 			TODO
 
-		∙ method-name
+		val method-name
 			"{name}~"
-		me.‣ method-name
+		me.$ method-name
 			property~ "_{name}"
 		maybe-meta.call me method-name ...meta
 
-	‣ ‣read/~ ...args
+	$ $read/~ ...args
 		doc
 			Both `read` and `read~`.
 
-		me.‣read ...args
-		me.‣read~ ...args
+		me.$read ...args
+		me.$read~ ...args
 
-	‣ ‣write name:Str ...meta
+	$ $write name:Str ...meta
 		doc
 			TODO
 
-		me.‣ "{name}!" |mod:Fun
+		me.$ "{name}!" |mod:Fun
 			modify-property! "_{name}" mod
 		maybe-meta.call me "{name}!" ...meta
-		me.‣ "set-{name}!" |new-value
+		me.$ "set-{name}!" |new-value
 			set-property! "_{name}" new-value
 		maybe-meta.call me "set-{name}!" ...meta
 
-	‣ ‣access name:Str ...meta
+	$ $access name:Str ...meta
 		doc
 			TODO
 
-		me.‣read name ...meta
-		me.‣write name ...meta
+		me.$read name ...meta
+		me.$write name ...meta
 
-	‣ ‣⚐ name:Str ...meta
+	$ $⚐ name:Str ...meta
 		doc
 			TODO
 
-		me.‣ "{name}!"
+		me.$ "{name}!"
 			new! name 0
 		maybe-meta.call me name ...meta
-		me.‣ "not-{name}!"
+		me.$ "not-{name}!"
 			delete-property-if-exists! name
-		me.‣ "{name}?"
+		me.$ "{name}?"
 			has-property? "_{name}"
 		maybe-meta.call me "{name}?" ...meta
 
 	\ by default classes are instantiable and non-extensible.
 
-	‣⚐ instance-less
+	$⚐ instance-less
 
-	‣⚐ extensible
+	$⚐ extensible
 		doc
 			Whether I can have sub-classes.
 
-	\‣ instantiable?
+	\$ instantiable?
 	\	doc
 	\		Whether I can directly have instances.
 	\		Sub-classes could be instantiable; if you want no sub-classes, use `static`.
-	\	non-instantiable?.¬
+	\	non-instantiable?.not
 
-	‣ abstract!
+	$ abstract!
 		instance-less!
 		extensible!
 
-	‣ static!
+	$ static!
 		doc
 			Makes me non-instantiable and non-extensible.
 
 		instance-less!
 		not-extensible!
 
-	‣read methods
+	$read methods
 		doc
 			Dictionary of this class' own methods.
 			Does not include inherited methods.
 
-	‣read static-methods
+	$read static-methods
 		doc
 			TODO
 
-	‣read name
+	$read name
 		doc
 			Name of this class.
 
-	‣read/~ super
+	$read/~ super
 		doc
 			Super-class. Any does not have one, so you may want to use super~.
 
-	‣read proto
+	$read proto
 		doc
 			Instances of this class have this as their prototype.
 
-	‣read id:ℕ
+	$read id:Nat
 		doc
 			Unique number for this class.
 
-	‣read traits
+	$read traits
 		doc
 			TODO
 
-	‣read trait-of
+	$read trait-of
 		doc
 			TODO
 
-	‣read super-of
+	$read super-of
 		doc
 			TODO
 
-	‣read inherits-from
+	$read inherits-from
 		doc
 			TODO
 
-	‣ super-of? class:C
+	$ super-of? class:C
 		doc
 			TODO
 
 		super-of.∋ class
 
-	‣ trait-of? class:C
+	$ trait-of? class:C
 		doc
 			TODO
 
 		trait-of.∋ class
 
-	‣ inherits-from? class:C
+	$ inherits-from? class:C
 		doc
 			TODO
 
 		\ can't use ∋ because Array needs to inherit it using trait
 		(inherits-from.indexOf class).≠ -1
 
-	me.‣ 'trait |new-trait:C
+	me.$ 'trait |new-trait:C
 		in
-			✔ (inherits-from? new-trait).¬
+			! (inherits-from? new-trait).not
 				"{me} already has trait {new-trait}"
 
 		new-trait.trait-of.push me
 		traits.push new-trait
 
 		\ must use forEach because Array neads a trait to get each
-		(new-trait.inherits-from.» new-trait).forEach |inherit-from ...ignore
+		(new-trait.inherits-from.> new-trait).forEach |inherit-from ...ignore
 			(inherits-from? inherit-from).unless!
 				proto.new-unless-exists! inherit-from@-id-check
-					Bool.⊤
+					Bool.True
 				inherits-from.push inherit-from
 				inherit-from.methods.each-property |name value
 					(name.identical? 'class).unless!
-						✔ (proto.has-property? name).¬
+						! (proto.has-property? name).not
 							"{me} already has method {name}, can't inherit from {inherit-from}"
 						`this.proto()[name] = value`
 						\proto.set-property! name value
@@ -336,112 +336,112 @@ C.do
 
 	use Meta
 
-	‣ meta
+	$ meta
 		(property~ "_meta").or
 			Meta.from-maybe-pre (property~ "_make-meta-pre")
 
-	‣ meta! mod:Fun
+	$ meta! mod:Fun
 		set-property! "_meta" (mod meta)
 
-	‣ do-meta fun:Fun
+	$ do-meta fun:Fun
 		meta!
 			it.merge fun.meta
 		do fun
 
-	‣ test-method! name:Str
+	$ test-method! name:Str
 		(method name).meta.test-eg! me
 
-	‣ test!
+	$ test!
 		doc
 			Runs the `eg` of all of my static and instance methods.
 			I am used as the delegate in the `eg`.
 
-		✘.annotate
+		Error.annotate
 			meta.test-eg! me
 		|
 			name
 
-		∙ test |is-static
+		val test |is-static
 			|name method
-				✘.annotate
+				Error.annotate
 					method.meta.test-eg! me
 				|
-					∙ def
+					val def
 						is-static.?
-							'‣‣
+							'$$
 						|
-							'‣
+							'$
 					"{me}{def}{name}"
 
 
-		methods.each-property (test Bool.⊥)
-		static-methods.each-property (test Bool.⊤)
+		methods.each-property (test Bool.False)
+		static-methods.each-property (test Bool.True)
 
-	‣ sub-class name:Str do-meta~:Fun
+	$ sub-class name:Str do-meta~:Fun
 		C me name do-meta~.to-nullable
 
-	‣ ‣class name:Str do-meta~:Fun
-		me.‣val name
+	$ $class name:Str do-meta~:Fun
+		me.$val name
 			do-meta~.~
 				C Any name it
 			|
 				C Any name
 
-	‣ export-singleton super-class~:C do-meta~:Fun
-		∙ args
+	$ export-singleton super-class~:C do-meta~:Fun
+		val args
 			Array.proto@slice.call `arguments`
 		export (C.singleton args)
 
-	‣ ‣singleton super-class~:C name:Str do-meta:Fun
-		∙ args
+	$ $singleton super-class~:C name:Str do-meta:Fun
+		val args
 			Array.proto@slice.call `arguments`
-		me.‣val name
+		me.$val name
 			C.singleton ...args
 
-	‣ ‣sub-class name:Str do-to:Fun
-		me.‣val name
+	$ $sub-class name:Str do-to:Fun
+		me.$val name
 			sub-class name do-to
 
-	‣ ‣sub-singleton name:Str do-to:Fun
-		me.‣singleton me name do-to
+	$ $sub-singleton name:Str do-to:Fun
+		me.$singleton me name do-to
 
-	‣ data can-extend~:Bool constructor:Fun
+	$ data can-extend~:Bool constructor:Fun
 		oth
 			TODO:
 			move elsewhere
 
-		∙ can-extend
+		val can-extend
 			can-extend~.or
-				Bool.⊥
+				Bool.False
 		\ arg, writable
-		∙ names
+		val names
 			Global@Array.of
-		∙ assigns
+		val assigns
 			Global@Array.of
-		∙ mangled
+		val mangled
 			Global@Array.of
 
-		∙ ctrArgs
+		val ctrArgs
 			constructor.meta.arguments
 
-		∙ useIndex |index
-			∙ arg
+		val useIndex |index
+			val arg
 				ctrArgs index
-			∙ writable
+			val writable
 				(arg.name.charAt 0).identical? '!
-			∙ name
+			val name
 				writable.?
 					arg.name.slice 1
 				|
 					arg.name
-			∙ mangle
+			val mangle
 				Global@String.fromCharCode (('a.charCodeAt).+ index)
 
-			me.‣read name
+			me.$read name
 			writable.if!
-				me.‣write name
+				me.$write name
 
-			∙ assign
+			val assign
 				"'_{name}': \{ value: {mangle}, writable: {writable} }"
 
 			\(Global@Array name assign)
@@ -453,41 +453,41 @@ C.do
 			for (var index = 0; index < ctrArgs.size(); index++)
 				useIndex(index);
 
-		∙ assigns-str
+		val assigns-str
 			assigns.join ",\n\t"
-		∙ maybe-no-extend
+		val maybe-no-extend
 			can-extend.?
 				""
 			|
 				"global.Object.preventExtensions(this);"
-		∙ body
+		val body
 			"
 				global.Object.defineProperties(this, \{
 					{assigns-str}
 				});
 				{maybe-no-extend}
 
-		∙ define-properties
+		val define-properties
 			Fun.from-JS mangled body
 
-		‣ construct ...args
+		$ construct ...args
 			define-properties.apply me args
 			constructor.unbound.apply me args
 
-	‣ ‣delegate name:Str delegate-to:Fun
+	$ $delegate name:Str delegate-to:Fun
 		doc
 			TODO
 
-		∙ dt
+		val dt
 			delegate-to.unbound
-		me.‣ name |...args
-			∙ delegated
+		me.$ name |...args
+			val delegated
 				dt.call me
 			`_c(delegated, name, [args])`
 		\(method name).meta! delegate-to.meta
 
-	‣ delegate-many names:Array delegate-to:Fun
+	$ delegate-many names:Array delegate-to:Fun
 		names.forEach |name ...ignore
-			me.‣delegate name delegate-to
+			me.$delegate name delegate-to
 
 export C

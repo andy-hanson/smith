@@ -37,9 +37,9 @@ keywords = require '../compile-help/keywords'
 # Whether `token` is indented JavaScript.
 @indentedJS = (token) ->
 	token instanceof exports.JavascriptLiteral and token.kind == 'indented'
-# Whether `token` is a local definer (∙∘)
+# Whether `token` is a local definer (vallazy)
 @defLocal = (token) ->
-	token instanceof exports.Special and token.kind in [ '∙', '∘' ]
+	token instanceof exports.Special and token.kind in [ 'val', 'lazy' ]
 # Whether `token` is a super use.
 @super = (token) ->
 	token instanceof exports.Use and token.kind == 'super'

@@ -15,7 +15,7 @@ module.exports = (quoteType, stream, oldIndent) ->
 
 	read = ''
 	out = [ ]
-	startPos = stream.pos
+	startPos = stream.pos()
 
 	indented =
 		stream.peek() == '\n'
@@ -43,12 +43,12 @@ module.exports = (quoteType, stream, oldIndent) ->
 
 		getInterpolatedGroup = ->
 			check canInterpolate
-			literal = new T.StringLiteral stream.pos, text
+			literal = new T.StringLiteral stream.pos(), text
 			if isEmpty out
 				literal
 			else
 				out.push literal
-				new T.Group startPos, stream.pos, '"', out
+				new T.Group startPos, stream.pos(), '"', out
 
 		if quoteType in keywords.metaText
 			new T.MetaText startPos, quoteType, getInterpolatedGroup()
@@ -76,14 +76,14 @@ module.exports = (quoteType, stream, oldIndent) ->
 				cFail startPos, "No need to escape '#{next}'"
 
 		else if ch == '{' and canInterpolate
-			out.push new T.StringLiteral stream.pos, read
+			out.push new T.StringLiteral stream.pos(), read
 			read = ''
 			startPos =
-				stream.pos
+				stream.pos()
 			interpolated =
 				tokenize stream, yes
 
-			out.push new T.Group startPos, stream.pos, '(', interpolated
+			out.push new T.Group startPos, stream.pos(), '(', interpolated
 
 		else if ch == '\n'
 			cCheck indented, startPos, 'Unclosed quote.'

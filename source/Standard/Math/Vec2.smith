@@ -1,144 +1,144 @@
-data |x:ℝ y:ℝ
+data |x:Real y:Real
 	()
 
-‣new toString
+$new toString
 	"<#{x} #{y}>"
 
-‣ +:Vec2 v:Vec2
+$ +:Vec2 v:Vec2
 	doc
 		Translates by `v`.
 	eg
-		✔= (Vec2 4 6)
+		!= (Vec2 4 6)
 			(Vec2 1 2).+ (Vec2 3 4)
 
 	Vec2 (x.+ v.x) (y.+ v.y)
 
-‣ -:Vec2 v:Vec2
+$ -:Vec2 v:Vec2
 	doc
 		Translates by the opposite of `v`.
 	eg
-		✔= (Vec2 1 3)
+		!= (Vec2 1 3)
 			(Vec2 3 4).- (Vec2 2 1)
 
 	+ v.negate
 
-‣ negate-x:Vec2
+$ negate-x:Vec2
 	doc
 		Flips me around x-axis.
 	eg
-		✔= →
+		!= implies
 			←.negate-x
 
 	Vec2 x.negate y
 
-‣ negate-y:Vec2
+$ negate-y:Vec2
 	doc
 		Flips me around y-axis.
 	eg
-		✔= ↑
+		!= ↑
 			↓.negate-y
 
 	Vec2 x y.negate
 
-‣ negate:Vec2
+$ negate:Vec2
 	doc
 		Opposite vector. Our sum is 0.
 	eg
-		✔= ↖
+		!= ↖
 			↘.negate
 
 	negate-x.negate-y
 
-‣ length^2:ℝ
+$ length^2:Real
 	x.square.+ y.square
 
-‣ length:ℝ
+$ length:Real
 	length^2.square-root
 
-‣val zero
+$val zero
 	Vec2 0 0
 
-‣ zero?
-	x.zero?.∧
+$ zero?
+	x.zero?.and
 		y.zero?
 
-‣ ↺:Vec2 amount:ℝ
+$ Loop:Vec2 amount:Real
 	TODO
 
-‣ ↻:Vec2 amount:ℝ
+$ ↻:Vec2 amount:Real
 	TODO
 
-‣ ← amount:ℝ
+$ ← amount:Real
 	Vec2 (x.- amount) y
 
-‣ → amount:ℝ
+$ implies amount:Real
 	Vec2 (x.+ amount) y
 
-‣ ↓ amount:ℝ
+$ ↓ amount:Real
 	Vec2 x (y.- amount)
 
-‣ ↑ amount:ℝ
+$ ↑ amount:Real
 	Vec2 x (y.+ amount)
 
-‣ ←?
+$ ←?
 	doc
 		Whether I lean left.
 	eg
-		✔ ↖.←?
-		✔ ↗.←?.¬
+		! ↖.←?
+		! ↗.←?.not
 
 	x.negative?
 
-‣ →?
+$ implies?
 	doc
 		Whether I lean right.
 	eg
-		✔ ↖.→?.¬
-		✔ ↗.→?
+		! ↖.implies?.not
+		! ↗.implies?
 
 	x.positive?
 
-‣ ↓?
+$ ↓?
 	doc
 		Whether I lean down.
 	eg
-		✔ ↖.↓?.¬
-		✔ ↙.↓?
+		! ↖.↓?.not
+		! ↙.↓?
 
 	y.negative?
 
-‣ ↑?
+$ ↑?
 	doc
 		Whether I lean up.
 	eg
-		✔ ↖.↑?
-		✔ ↙.↑?.¬
+		! ↖.↑?
+		! ↙.↑?.not
 
 	y.positive?
 
 
-‣val ←
+$val ←
 	Vec2 -1 0
 
-‣val →
+$val implies
 	Vec2 1 0
 
-‣val ↓
+$val ↓
 	Vec2 0 -1
 
-‣val ↑
+$val ↑
 	Vec2 0 1
 
-‣val ↗
+$val ↗
 	Vec2 2.square-root 2.square-root
 
-‣val ↖
+$val ↖
 	↗.negate-x
 
-‣val ↘
+$val ↘
 	↗.negate-y
 
-‣val ↙
+$val ↙
 	↗.negate
 
 

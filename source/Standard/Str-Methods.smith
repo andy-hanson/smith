@@ -4,10 +4,7 @@ Str.do-meta
 	doc
 		...
 
-	‣new inspect
-		"\"{me}\""
-
-	‣‣new of a
+	$$new of a
 		`
 			switch (typeof a) {
 				case 'undefined':
@@ -20,13 +17,13 @@ Str.do-meta
 					return a.toString();
 			}
 
-	‣new = a
+	$new = a
 		identical? a
 
-	‣ ++ a:Str
+	$ ++ a:Str
 		`this + a`
 
-	\‣ index-of-substring~ |needle
+	\$ index-of-substring~ |needle
 	\	. js-index-of
 	\		`this.indexOf(needle)`
 	\	(Some `this.indexOf(needle)`).filter-not -1.=_
@@ -35,13 +32,13 @@ Str.do-meta
 	alias 'toUpperCase 'to-upper-case
 	alias 'toLowerCase 'to-lower-case
 
-	‣ split-whitespace
+	$ split-whitespace
 		`this.split("\\s+")`
 
-	‣ size
+	$ size
 		`this.length`
 
-	‣ tail
+	$ tail
 		how
 			TODO - inherit from Seq
 

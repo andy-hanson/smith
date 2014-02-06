@@ -1,16 +1,16 @@
 static!
 
-‣‣ race! ...raced
+$$ race! ...raced
 	Console.log! (raced.collect of_).make-string
 
-‣‣new of do:Fun
-	∙ start
+$$new of do:Fun
+	val start
 		now-secs
 	do.run!
 	now-secs.- start
 
-‣‣ now-secs:ℝ
-	(New Global@Date).getTime.÷ 1000
+$$ now-secs:Real
+	(New Global@Date).getTime./ 1000
 
 
 

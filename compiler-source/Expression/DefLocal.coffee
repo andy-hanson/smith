@@ -5,10 +5,10 @@ Local = require './Local'
 ###
 Looks like:
 
-	∙ local
-	  value
+	val local
+	    value
 
-(or ∘ local).
+(or lazy local).
 Assigns a value to a local variable.
 ###
 module.exports = class DefLocal extends Expression

@@ -1,14 +1,14 @@
 doc
 	BLAH
 eg
-	∙ ref
+	val ref
 		Ref 1
 	ref.!
 		2
-	✔= 2
+	!= 2
 		ref.get
 	ref.! _increment
-	✔= 3
+	!= 3
 		ref.get
 
 data |!get

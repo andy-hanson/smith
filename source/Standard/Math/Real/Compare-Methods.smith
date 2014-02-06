@@ -1,136 +1,136 @@
-∙ Math
+val Math
 	(use Global)@Math
 
-(use ℝ).do
-	‣new = a
+(use Real).do
+	$new = a
 		`Object(a) instanceof Number && (this + 0) === (a + 0)`
 
-	‣ ≈ a:ℝ significant-digits~:ℕ
+	$ ~= a:Real significant-digits~:Nat
 		doc
 			Whether two I am equal to a to within `significant-digits` digits.
-			Delegates to ≈0 when I or a are 0.
+			Delegates to ~=0 when I or a are 0.
 		eg
-			✔ (1001.≈ 1000 3)
-			✔ (1001.≈ 1000 4).¬
-			✔ (0.001001.≈ 0.001 3)
-			✔ (0.001001.≈ 0.001 4).¬
+			! (1001.~= 1000 3)
+			! (1001.~= 1000 4).not
+			! (0.001001.~= 0.001 3)
+			! (0.001001.~= 0.001 4).not
 
-		∙ significant-digits
+		val significant-digits
 			significant-digits~.or
 				6
 
 		zero?.?
-			a.≈0 significant-digits
+			a.~=0 significant-digits
 		|
 			a.zero?.?
-				≈0 significant-digits
+				~=0 significant-digits
 			|
-				∙ avg-mag
+				val avg-mag
 					magnitude.average a.magnitude
-				∙ n-digits
+				val n-digits
 					avg-mag.log-10.round-down
-				∙ scale
+				val scale
 					10.^ n-digits
-				∙ scaled-me
-					÷ scale
-				∙ scaled-a
-					a.÷ scale
-				∙ scaled-diff
+				val scaled-me
+					/ scale
+				val scaled-a
+					a./ scale
+				val scaled-diff
 					scaled-a.distance scaled-me
-				∙ epsilon
+				val epsilon
 					10.^ significant-digits.negate
 
 				scaled-diff.< epsilon
 
-	‣ ≈0 significant-digits~:ℕ
+	$ ~=0 significant-digits~:Nat
 		doc
 			Whether a number is close to zero;
 			it must be 0.00... for sig-figs digits.
 		eg
-			✔ (0.00999.≈0 2)
-			✔ (0.01.≈0 2).¬
+			! (0.00999.~=0 2)
+			! (0.01.~=0 2).not
 
-		∙ significant-digits
+		val significant-digits
 			significant-digits~.or
 				6
 
-		∙ max
+		val max
 			10.^ significant-digits.negate
 
 		magnitude.< max
 
-	‣ in-range min max
+	$ in-range min max
 		oth
 			TODO: Move to Comparable
 
-		(≥ min).∧
+		(>= min).and
 			(< max)
 
-	‣ < a:ℝ
+	$ < a:Real
 		doc
-			Whether I am closer to -∞ than a.
+			Whether I am closer to -Infinity than a.
 		eg
-			✔ (-1.< 2)
-			✔ (1.< 1).¬
+			! (-1.< 2)
+			! (1.< 1).not
 
 		`this < a`
 
-	‣ > a:ℝ
+	$ > a:Real
 		doc
-			Whether I am closer to ∞ than a.
+			Whether I am closer to Infinity than a.
 		eg
-			✔ (1.> -2)
-			✔ (1.> 1).¬
+			! (1.> -2)
+			! (1.> 1).not
 
 		`this > a`
 
-	‣ ≤ a:ℝ
+	$ <= a:Real
 		doc
 			Whether I am < or = a.
 		eg
-			✔ (1.≤ 1)
+			! (1.<= 1)
 
 		`this <= a`
 
-	‣ ≥ a:ℝ
+	$ >= a:Real
 		doc
 			Whether I am > or = a.
 		eg
-			✔ (1.≥ 1)
+			! (1.>= 1)
 
 		`this >= a`
 
-	‣ min a:ℝ
+	$ min a:Real
 		doc
 			Lower of me and `a`.
 		eg
-			✔= 1
+			!= 1
 				1.min 2
 		how
 			TODO: in Comparable
 
 		Math.min me a
 
-	‣ max a:ℝ
+	$ max a:Real
 		doc
 			Higher of me and `a`.
 		eg
-			✔= 2
+			!= 2
 				1.max 2
 
 		Math.max me a
 
-	‣ crop min:ℝ max:ℝ
+	$ crop min:Real max:Real
 		doc
 			Forces me in between min and max.
 		in
-			✔ (min.< max)
+			! (min.< max)
 		eg
-			✔= 1
+			!= 1
 				0.crop 1 2
-			✔= 2
+			!= 2
 				3.crop 1 2
-			✔= 1.5
+			!= 1.5
 				1.5.crop 1 2
 
 		(me.min max).max min

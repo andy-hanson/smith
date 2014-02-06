@@ -1,6 +1,6 @@
 use! Global
 
-‣‣ log!:Void ...args
+$$ log!:Void ...args
 	doc
 		Immediately prints arguments to the console, separated by spaces, followed by a new-line.
 

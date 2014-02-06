@@ -2,18 +2,18 @@ eg
 	use Super
 	use Trait-A
 
-	✔ (Super.super-of? Sub)
-	✔ (Trait-A.trait-of? Super)
-	✔ (Sub.inherits-from? Super)
-	✔ (Sub.inherits-from? Trait-A)
-	∙ sub
+	! (Super.super-of? Sub)
+	! (Trait-A.trait-of? Super)
+	! (Sub.inherits-from? Super)
+	! (Sub.inherits-from? Trait-A)
+	val sub
 		Sub.of
-	✔= 'super
+	!= 'super
 		sub.super-method
-	✔= 'trait
+	!= 'trait
 		sub.trait-method
 
 super Super
 
-‣ construct
+$ construct
 	()

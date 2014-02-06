@@ -1,7 +1,7 @@
 use! Meta
 use! Argument
 
-Meta.‣‣ 'Argument
+Meta.$$ 'Argument
 	Argument
 
 export Meta

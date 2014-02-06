@@ -1,11 +1,11 @@
 use! Global
 
-∙ A
+val A
 	Prelude@Any
 
 A.do
 
-	‣ inspect
+	$ show-properties
 		`
 			var s = '{ ', me = this, keys = global.Object.getOwnPropertyNames(me);
 			keys.forEach(function(key) {
@@ -13,31 +13,34 @@ A.do
 			});
 			return s + ' }';
 
-	‣ has-property? name:Str
+	\$ inspect
+	\	show-properties
+
+	$ has-property? name:Str
 		doc
 			TODO
 
 		`Object.prototype.hasOwnProperty`.call me name
 
-	‣ has-proto-property? name:Str
+	$ has-proto-property? name:Str
 		doc
 			TODO
 
 		`this[name] != null`
 
-	‣ proto-property name:Str
+	$ proto-property name:Str
 		doc
 			TODO
 
 		`this[name]`
 
-	‣ unsafe-property name:Str
+	$ unsafe-property name:Str
 		doc
 			May return undefined.
 
 		`this[name]`
 
-	‣ property name:Str
+	$ property name:Str
 		doc
 			TODO
 		how
@@ -51,14 +54,14 @@ A.do
 					"Object does not have property " + name +
 					", has [" + global.Object.getOwnPropertyNames(this) + "]");
 
-	‣ property~ name:Str
+	$ property~ name:Str
 		doc
 			TODO
 
 		(has-property? name).if
 			property name
 
-	‣ property-names:Array
+	$ property-names:Array
 		doc
 			TODO
 		err
@@ -66,7 +69,7 @@ A.do
 
 		Global@Object.getOwnPropertyNames me
 
-	‣ each-property fun:Fun
+	$ each-property fun:Fun
 		doc
 			TODO
 		oth
@@ -77,15 +80,15 @@ A.do
 		property-names.forEach |name ...ignore
 			fun name (property name)
 
-	‣ new-mutable! name:Str value
+	$ new-mutable! name:Str value
 		doc
 			TODO
 		in
-			✔ (has-property? name).¬
+			! (has-property? name).not
 
 		set-property! name value
 
-	‣ set-property!:Void name:Str value
+	$ set-property!:Void name:Str value
 		doc
 			TODO
 
@@ -93,67 +96,67 @@ A.do
 			this[name] = value;
 			return;
 
-	‣ delete-property! name:Str
+	$ delete-property! name:Str
 		in
 			has-property? name
 
 		delete-property-if-exists! name
 
-	‣ delete-property-if-exists! name:Str
+	$ delete-property-if-exists! name:Str
 		`delete this[name]`
 
-	‣ new-unless-exists! name:Str make-value:Fun
+	$ new-unless-exists! name:Str make-value:Fun
 		doc
 			TODO
 
 		(has-property? name).unless!
 			new! name make-value.of
 
-	‣ modify-property! name:Str mod:Fun
+	$ modify-property! name:Str mod:Fun
 		doc
 			TODO
 
-		∙ old
+		val old
 			property name
-		∙ new
+		val new
 			mod old
 		set-property! name new
 
-	\‣ is-a?:Bool class:Any-Class
+	\$ is-a?:Bool class:Any-Class
 	\	doc
 	\		TODO
 
 	\	class.subsumes? me
 
-	‣ identical?:Bool a
+	$ identical?:Bool a
 		doc
 			Whether I and a are the very same object, at the same place in memory.
 			For testing whether we are the same in every respect, use `structual-=`.
 		eg
-			∙ a
+			val a
 				Opt.some 1
-			✔ (a.identical? a)
-			✔ (a.identical? (Opt.some 3)).¬
-			✔ ("123".identical? "123")
+			! (a.identical? a)
+			! (a.identical? (Opt.some 3)).not
+			! ("123".identical? "123")
 
 		`this === a`
 
-	‣ structural-=:Bool a
+	$ structural-=:Bool a
 		doc
 			Whether I and `a` have equal (by calling `=`) properties and are of the same class.
 		eg
-			∙ a
+			val a
 				Opt.some 1
-			✔ (a.structural-= (Opt.some 1))
-			✔ (a.structural-= (Opt.some 2)).¬
-			✔ (a.structural-= `{ _value: 1 }`).¬
+			! (a.structural-= (Opt.some 1))
+			! (a.structural-= (Opt.some 2)).not
+			! (a.structural-= `{ _value: 1 }`).not
 
-		(class.= a.class).∧
-			∙ keys
+		(class.= a.class).and
+			val keys
 				property-names
 
 			keys.∀ |key
-				(a.has-property? key).∧
+				(a.has-property? key).and
 					(property key).= (a.property key)
 
 		\`
@@ -167,29 +170,29 @@ A.do
 		\		return this[key]['='](a[key]);
 		\	})
 
-	‣ =:Bool a
+	$ =:Bool a
 		doc
 			TODO
 
-		(identical? a).∨
+		(identical? a).or
 			structural-= a
 
-	‣ ≠ a
+	$ ≠ a
 		doc
 			Not `=`.
 
-		(= a).¬
+		(= a).not
 
-	‣ send name:Str ...args
+	$ send name:Str ...args
 		doc
 			Calls the method of the name on the arguments.
 		eg
-			✔= 3
+			!= 3
 				1.send '+ 2
 
 		(proto-property name).apply me args
 
-	∙ oi
+	val oi
 		proto@inspect
 
 export A

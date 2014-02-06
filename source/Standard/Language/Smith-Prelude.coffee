@@ -153,14 +153,14 @@ Any = Object['to-class'] 'Any'
 
 AnyClass = Any.class()
 
-def.call AnyClass, '‣new-ok', def
+def.call AnyClass, '$new-ok', def
 
-#AnyClass['‣new-ok'] 'construct', makeAnyClass
+#AnyClass['$new-ok'] 'construct', makeAnyClass
 
 Meta =
 	makeAnyClass 'Meta'
 
-Meta['‣new-ok'] 'construct', (meta) ->
+Meta['$new-ok'] 'construct', (meta) ->
 	(Object.keys meta).forEach (name) =>
 		unless meta[name]?
 			throw new Error '?'
@@ -214,13 +214,6 @@ lazy = (delegate, make) ->
 	->
 		cached ? (cached = make.call delegate)
 
-
-checkNumberOfArguments = (args, expectedNumber) ->
-	if args.length < expectedNumber
-		throw new global.Error \
-			"Expected #{expectedNumber} arguments, got #{args.length} " +
-			"(#{Array.prototype.join.call args, '; '})"
-
 call = (subject, verb, argumentses) ->
 	# argumentses is an array of arrays
 
@@ -230,7 +223,7 @@ call = (subject, verb, argumentses) ->
 			Array.prototype.push.apply args, newArgs
 		else
 			throw up
-			args['»»!'] newArgs
+			args['>>!'] newArgs
 
 	method =
 		subject[verb] ?
@@ -242,7 +235,7 @@ Argument = makeAnyClass 'Argument'
 
 Opt = makeAnyClass 'Opt'
 Some = makeAnyClass 'Some', Opt
-Some['‣new-ok'] 'construct', (x) ->
+Some['$new-ok'] 'construct', (x) ->
 	@_value = x
 	Object.freeze @
 
@@ -265,7 +258,6 @@ module.exports =
 	Any: Any
 	Meta: Meta
 	'all-classes': -> allClasses
-	checkNumberOfArguments: checkNumberOfArguments
 	call: call
 	argument: (name, clazz) ->
 		Argument.of name, clazz
@@ -273,5 +265,4 @@ module.exports =
 	Opt: Opt
 	Some: Some
 	None: None
-	#makeAnyClass: makeAnyClass
 

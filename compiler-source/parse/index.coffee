@@ -72,7 +72,7 @@ class Parser
 			new E.DefLocal typeLocal, new E.Me @pos
 		body.subs.unshift thisTypeLocal
 		fun =
-			E.FunDef.plain @pos, meta, [ ], body
+			E.Fun.plain @pos, meta, [ ], body
 		[ superAccess, autoUses, fun ]
 
 	###
@@ -198,7 +198,7 @@ class Parser
 		else if T.defLocal token
 			cCheck not isValue, @pos,
 				'Can not have local def in inner expression.'
-			plain @defLocal (tail tokens), token.kind == '∘'
+			plain @defLocal (tail tokens), token.kind == 'lazy'
 		else
 			slurped = [ ]
 
@@ -266,7 +266,7 @@ class Parser
 			else
 				[ (new E.Meta @pos), null ]
 
-		new E.FunDef @pos, meta, returnType, args, maybeRest, body
+		new E.Fun @pos, meta, returnType, args, maybeRest, body
 
 	###
 	Parses the meta and body of a fun.
@@ -319,7 +319,7 @@ class Parser
 					when 'x'
 						@access token
 					when '_x'
-						new E.ItFunDef token
+						new E.ItFun token
 					when 'x_'
 						new E.BoundFun.me token
 					when '@x'
@@ -381,21 +381,22 @@ class Parser
 				getBlock = =>
 					@block indented.body
 
-				switch token.kind
-					when 'in'
-						@locals.withLocals newLocals, getBlock
-					when 'eg', 'sub-eg'
-						if useTypeLocal?
-							x = @locals.withLocal useTypeLocal.local, getBlock
-							x.subs.unshift useTypeLocal
-							x
+				meta[token.kind] =
+					switch token.kind
+						when 'in'
+							@locals.withLocals newLocals, getBlock
+						when 'eg', 'sub-eg'
+							if useTypeLocal?
+								x = @locals.withLocal useTypeLocal.local, getBlock
+								x.subs.unshift useTypeLocal
+								x
+							else
+								@locals.withFrame getBlock
+						when 'out'
+							@locals.withLocals newLocals, =>
+								@locals.withLocal (E.Local.res @pos), getBlock
 						else
-							@locals.withFrame getBlock
-					when 'out'
-						@locals.withLocals newLocals, =>
-							@locals.withLocal (E.Local.res @pos), getBlock
-					else
-						fail()
+							fail()
 			else if T.nl token
 				continue
 			else
@@ -413,6 +414,8 @@ class Parser
 				@accessLocal typeName
 			else
 				null
+
+		cCheck name.text != 'res', @pos, "Can not name a local 'res'"
 
 		new E.Local name, localType
 
@@ -494,7 +497,7 @@ class Parser
   Full name of the file.
 @param options [Options]
 @param allModules [AllModules]
-@return [(Expression, Array<DefLocal>, FunDef)]
+@return [(Expression, Array<DefLocal>, Fun)]
   (superAccess, autoUses, fun)
 ###
 module.exports = parse = (tokens, typeName, fileName, options, allModules) ->

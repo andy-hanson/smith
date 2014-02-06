@@ -6,7 +6,7 @@ Expression = require './Expression'
 Local = require './Local'
 
 ###
-The meta of a `FunDef`.
+The meta of a `Fun`.
 ###
 module.exports = class Meta extends Expression
 	###
@@ -22,8 +22,8 @@ module.exports = class Meta extends Expression
 	@return [Chunk]
 	###
 	make: (fun, context) ->
-		FunDef = require './FunDef'
-		type fun, FunDef
+		Fun = require './Fun'
+		type fun, Fun
 		check fun.meta == @
 
 		parts = [ ]
@@ -35,7 +35,7 @@ module.exports = class Meta extends Expression
 				if val?
 					part =
 						if name in keywords.metaFun
-							x = (FunDef.body val).toNode context.indented()
+							x = (Fun.body val).toNode context.indented()
 						else
 							val.toNode context
 
@@ -59,8 +59,8 @@ module.exports = class Meta extends Expression
 		body =
 			interleave parts, ",\n\t#{context.indent()}"
 
-		x = [ ', function() { return {\n\t',
+		x = [ ', _f(this, function() { return {\n\t',
 			context.indent(), body, '\n',
-			context.indent(), '}; }' ]
+			context.indent(), '}; })' ]
 
 		@nodeWrap x, context

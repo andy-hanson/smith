@@ -15,6 +15,10 @@ Maps escapes to what they represent.
 Character classes used during tokenization.
 ###
 @char =
+	# Illegal to use these characters.
+	reserved:
+		/[\[\[\]\{\}#%&,;]/
+
 	precedesName:
 		/[_:@'\.]/
 	# Not _, space, bracket, punc, quote, \, |, @, :, or dot.
@@ -43,4 +47,4 @@ Maps group openers to closers.
 	[ '(', '→', '"', '|' ].concat keywords.metaFun
 
 @nameKinds =
-	['x', '_x', 'x_', '.x', '.x_', '@x', ':x', '‣x', '...x']
+	['x', '_x', 'x_', '.x', '.x_', '@x', ':x', '$x', '...x']

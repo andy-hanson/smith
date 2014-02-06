@@ -1,11 +1,11 @@
 Any.do
-	‣‣new inspect a
+	$$ inspect a
 		`a != null`.?
 			a.inspect
 		|
 			`(a === null) ? "NULL" : "UNDEFINED"`
 
-	‣‣ exists?:Bool a
+	$$ exists?:Bool a
 		doc
 			TODO
 

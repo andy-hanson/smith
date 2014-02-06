@@ -27,22 +27,11 @@ module.exports = class Block extends Expression
 			@subs.push new Null @pos
 
 	###
-	Wrap this block in `function() { ...block... }()`
-		so it can be treated as a single value.
-	(Wrapping may not be necessary.
-		In that case just returns the only sub-Expression.)
-	@return [SourceNode]
+	Usual compile;  the last expression is returned.
 	###
-	toValue: (context) ->
-		if @subs.length == 1 and not (@subs[0] instanceof DefLocal)
-			@subs[0].toNode context
-		else
-			x =
-				[ '_f(this, function() {\n\t',
-					context.indent(),
-					(@toNode context.indented()),
-					'\n', context.indent(), '})()' ]
-			@nodeWrap x, context
+	compile: (context) ->
+		@_compileWithLast context, (x) ->
+			[ 'return ', x, ';' ]
 
 	###
 	Results of compiling each sub-Expression.
@@ -58,23 +47,6 @@ module.exports = class Block extends Expression
 			if compiled != ''
 				out.push sub.nodeWrap compiled, context
 		out
-
-	###
-	Usual compile;  the last expression is returned.
-	###
-	compile: (context) ->
-		@_compileWithLast context, (x) ->
-			[ 'return ', x, ';' ]
-
-	###
-	The last expression is assigned to a new local 'res'.
-	###
-	toMakeRes: (context) ->
-		x =
-			@_compileWithLast context, (x) ->
-				[ 'var res = ', x, ';' ]
-
-		@nodeWrap x, context
 
 	###
 	Compiled body, with `doIfNotSpecial` done on the last expression.
@@ -104,3 +76,38 @@ module.exports = class Block extends Expression
 		compiled.push lastNode
 
 		interleave compiled, ";\n#{context.indent()}"
+
+	###
+	When nothing is returned.
+	Used by `in` and `out`.
+	###
+	noReturn: (context) ->
+		interleave (@_compiledSubs @subs, context), ";\n#{context.indent()}"
+
+	###
+	The last expression is assigned to a new local 'res'.
+	###
+	toMakeRes: (context) ->
+		x =
+			@_compileWithLast context, (x) ->
+				[ 'var res = ', x, ';' ]
+
+		@nodeWrap x, context
+
+	###
+	Wrap this block in `function() { ...block... }()`
+		so it can be treated as a single value.
+	(Wrapping may not be necessary.
+		In that case just returns the only sub-Expression.)
+	@return [SourceNode]
+	###
+	toValue: (context) ->
+		if @subs.length == 1 and not (@subs[0] instanceof DefLocal)
+			@subs[0].toNode context
+		else
+			x =
+				[ '_f(this, function() {\n\t',
+					context.indent(),
+					(@toNode context.indented()),
+					'\n', context.indent(), '})()' ]
+			@nodeWrap x, context

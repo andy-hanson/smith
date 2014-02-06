@@ -4,14 +4,14 @@ doc
 
 super Iterator
 
-data |array:Array !index:ℕ end:ℕ
+data |array:Array !index:Nat end:Nat
 	in
 		index.< end
 	()
 
-‣ next
+$ next
 	(index.< end).?
-		◆.returning ((array) index)
+		Control.returning ((array) index)
 			index! _increment
 	|
 		stop

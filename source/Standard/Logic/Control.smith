@@ -1,16 +1,16 @@
 doc
 	Flow methods
 
-‣‣ returning value do-after:Fun
+$$ returning value do-after:Fun
 	doc
 		Calls do-after on the value, then returns the value.
 	eg
-		∙ r
+		val r
 			Ref 0
-		✔= 'returned
-			◆.returning 'returned
+		!= 'returned
+			Control.returning 'returned
 				r.! _increment
-		✔= 1
+		!= 1
 			r.get
 
 	do-after.run! value

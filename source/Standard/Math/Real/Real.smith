@@ -1,0 +1,8 @@
+val N
+	(use Global)@Number.to-class 'Real
+
+N.do-meta
+	doc
+		A quantity.
+
+export N

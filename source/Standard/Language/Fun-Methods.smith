@@ -1,20 +1,20 @@
 Fun.do
-	‣ new-bound-of new-bound-to ...arguments
+	$ new-bound-of new-bound-to ...arguments
 		unbound.apply new-bound-to arguments
 
-	\‣new inspect
+	\$new inspect
 	\	"Fun(...)"
 
-	‣ of ...args
+	$ of ...args
 		apply () args
 
-	‣ compose b:Fun
+	$ compose b:Fun
 		doc
 			Function composition; must have only 1 argument
 		eg
-			∙ increment-then-twice
+			val increment-then-twice
 				_twice.compose _increment
-			✔= 6
+			!= 6
 				increment-then-twice 2
 
 		| x
@@ -22,23 +22,23 @@ Fun.do
 
 	alias 'of 'run!
 
-	‣ cache
+	$ cache
 		doc
 			This function must have 0 arguments.
 			Returns a Fun which lazily produces my result.
 		eg
-			∙ r
+			val r
 				Ref 0
-			∙ make-three |
+			val make-three |
 				r.! _increment
 				3
-			∙ cached
+			val cached
 				make-three.cache
-			✔= 3
+			!= 3
 				cached.run!
-			✔= 3
+			!= 3
 				cached.run!
-			✔= 1
+			!= 1
 				r.get
 
 		`

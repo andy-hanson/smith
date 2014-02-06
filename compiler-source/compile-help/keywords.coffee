@@ -29,7 +29,7 @@ Followed by a module name.
 Introduce a DefLocal.
 ###
 @local =
-	[ '∙', '∘' ]
+	[ 'val', 'lazy' ]
 
 ###
 Have special meanings (not Names).
@@ -39,7 +39,3 @@ Have special meanings (not Names).
 
 @special =
 	(exports.local.concat exports.specialVar).concat [ '\n' ]
-
-# TODO: remove
-@useAll =
-	'all-modules'

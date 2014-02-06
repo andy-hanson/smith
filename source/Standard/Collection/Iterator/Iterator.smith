@@ -24,18 +24,18 @@ use Zip-Iterator
 
 abstract!
 
-‣ same-members
+$ same-members
 	(use Console).log! 'Hi
 	`true`
 
-‣‣new of ...members
+$$new of ...members
 	members.iterator
 
-‣sub-singleton Empty
-	‣ next
+$sub-singleton Empty
+	$ next
 		stop
 
-‣‣ flatten ...iterators
+$$ flatten ...iterators
 	doc
 		TODO
 
@@ -43,42 +43,42 @@ abstract!
 		Empty-Iterator
 	++-iterator iterators.first iterators.tail
 
-‣‣ sample
+$$ sample
 	doc
 		TODO: delete here, use abstractly
 
 	(Bag 1 2 3).iterator
 
-‣‣ slice array-like start end
+$$ slice array-like start end
 	Slice-Iterator array-like start end
 
-‣ ++ ...iterators
+$ ++ ...iterators
 	doc
 		TODO
 	eg
-		✔= (Array 0 1 2 3)
+		!= (Array 0 1 2 3)
 			((Iterator 0).++ (Iterator 1 2) Iterator.Empty (Iterator 3)).to-bag
 
 	++-Iterator me iterators.iterator
 
-‣ ∃:Bool condition:Fun
+$ ∃:Bool condition:Fun
 	doc
 		TODO
 	eg
-		✔ (sample.∃ _even?)
-		✔ (sample.∃ _negative?).¬
+		! (sample.∃ _even?)
+		! (sample.∃ _negative?).not
 
-	∙ none
+	val none
 		∀
-			(condition it).¬
-	none.¬
+			(condition it).not
+	none.not
 
-‣ ∀:Bool condition:Fun
+$ ∀:Bool condition:Fun
 	doc
 		TODO
 	eg
-		✔ (sample.∀ _ℕ?)
-		✔ (sample.∀ _odd?).¬
+		! (sample.∀ _Nat?)
+		! (sample.∀ _odd?).not
 
 	`
 		var all = true;
@@ -93,22 +93,22 @@ abstract!
 			});
 		return all;
 
-‣ ∋ value
+$ ∋ value
 	doc
 		Whether I contain the value.
 	eg
-		✔ (sample.∋ 3)
+		! (sample.∋ 3)
 
 	∃ value.=_
 
-‣ collect collector:Fun
+$ collect collector:Fun
 	Collect-Iterator me collector
 
-‣ count:ℕ condition:Fun
+$ count:Nat condition:Fun
 	doc
 		How many elements satisfy the condition.
 	eg
-		✔= 2
+		!= 2
 			sample.count _odd?
 
 	fold 0 |count em
@@ -117,72 +117,72 @@ abstract!
 		|
 			count
 
-‣ delete condition:Fun
+$ delete condition:Fun
 	doc
 		Opposite of `keep`.
 
 	Keep-Iterator me
-		(condition it).¬
+		(condition it).not
 
-‣ drop n:ℕ
+$ drop n:Nat
 	doc
 		TODO
 	eg
-		✔= 3
+		!= 3
 			(sample.drop 2).fold _+
 
-	↺.times n
+	Loop.times n
 		next
 	me
 
-‣ each do:Fun
+$ each do:Fun
 	doc
 		TODO
 	eg
-		∙ r
+		val r
 			Ref 0
 		sample.each
 			r.! it.+_
-		✔= 6
+		!= 6
 			r.get
 
 	∀
 		do it
-		Bool.⊤
+		Bool.True
 	()
 
-‣ empty?
+$ empty?
 	doc
 		Whether I contain no elements.
 		AKA, whether `next` will fail.
 	eg
-		✔ sample.empty?.¬
+		! sample.empty?.not
 
-	✘.throws? next_
+	Error.throws? next_
 
-‣ fold-while combine:Fun
+$ fold-while combine:Fun
 \	eg
-\		✔= 10
+\		!= 10
 \			sample.fold-while |so-far next
 \				Opt.filter (next.< 3)
 \					so-far.+ next
 
 	TODO
 
-‣ fold initial~ combine:Fun
+$ fold initial~ combine:Fun
 	doc
 		TODO
 	eg
-		✔= 10
+		!= 10
 			sample.fold 4 _+
-		✔= 6
+		!= 6
 			sample.fold _+
 	oth
 		TODO:
 		fold-while |acc next
 			Opt.some (combine acc next)
 
-	∙ init
+	val init
 		initial~.or
 			next
 
@@ -198,17 +198,17 @@ abstract!
 			});
 		return res;
 
-‣ first
+$ first
 	eg
-		✔= 1
+		!= 1
 			sample.first
 
 	of 0
 
-‣ group group-size:ℕ
+$ group group-size:Nat
 	Group-Iterator me group-size
 
-‣ if-next a:Fun b:Fun
+$ if-next a:Fun b:Fun
 	doc
 		If there is a next element, calls a on it.
 		Else calls b.
@@ -226,22 +226,22 @@ abstract!
 				throw error;
 		}
 
-‣new inspect
+$ inspect
 	"({class.name} {make-string})"
 
-‣ keep condition:Fun
+$ keep condition:Fun
 	doc
 		TODO
 
 	Keep-Iterator me condition
 
-‣ next~
+$ next~
 	if-next Opt.some_ Opt.None_
 
 
-‣ last
+$ last
 	eg
-		✔= 3
+		!= 3
 			sample.last
 
 	`
@@ -257,22 +257,22 @@ abstract!
 				throw error;
 		}
 
-‣ make-string:Str joiner~
+$ make-string:Str joiner~
 	doc
 		TODO
 	eg
-		✔= "1 2 3"
+		!= "1 2 3"
 			sample.make-string
-		✔= "1+2+3"
+		!= "1+2+3"
 			sample.make-string '+
 
-	∙ joiner
+	val joiner
 		joiner~.or
 			" "
 
 	(to-bag.collect Str.of_).join joiner
 
-‣ of index:ℕ
+$ of index:Nat
 	doc
 		TODO
 	err
@@ -285,11 +285,11 @@ abstract!
 			this.next();
 		return this.next();
 
-‣ size
+$ size
 	count
-		Bool.⊤
+		Bool.True
 
-‣ stop
+$ stop
 	doc
 		TODO
 	err
@@ -297,22 +297,22 @@ abstract!
 	oth
 		TODO: Use native StopIteration
 
-	✘ 'StopIteration
+	Error.throw! 'StopIteration
 
-∙ Bag-Class
+val Bag-Class
 	Bag.class
 
-‣ to-bag class~:Bag-Class
-	∙ class:Bag-Class
+$ to-bag class~:Bag-Class
+	val class:Bag-Class
 		class~.or
 			Array
 	class.from-iterator me
 
-‣ zip ...iterators
+$ zip ...iterators
 	doc
 		TODO
 	eg
-		✔= (Array (Array 0 2 4) (Array 1 3 5))
+		!= (Array (Array 0 2 4) (Array 1 3 5))
 			((Iterator 0 1).zip (Iterator 2 3) (Iterator 4 5)).to-bag
 
-	Zip-Iterator (iterators.« me)
+	Zip-Iterator (iterators.< me)

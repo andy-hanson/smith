@@ -1,17 +1,16 @@
-auto ↺ ✔ ✔= ✘ ◆ ℝ ℤ ℕ Any Any-Class Array Bag Bool
+auto Loop ! != Control Real Int Nat Any Any-Class Array Bag Bool
 auto Error Fun Iterable Iterator
 auto New Opt Queue Range Ref Time List Str Test Void
 
 Standard Standard/index
 
-↺ Standard/Logic/↺
-✔ Standard/Logic/✔
-✔= Standard/Logic/✔=
-✘ Standard/Logic/✘
-◆ Standard/Logic/◆
-ℝ Standard/Math/ℝ
-ℤ Standard/Math/ℝ/ℤ
-ℕ Standard/Math/ℝ/ℕ
+Loop Standard/Logic/Loop
+! Standard/Logic/!
+!= Standard/Logic/!=
+Control Standard/Logic/Control
+Real Standard/Math/Real
+Int Standard/Math/Real/Int
+Nat Standard/Math/Real/Nat
 Any Standard/Language/Any
 Any-Class Standard/Language/Any-Class
 Array Standard/Collection/Bag/List/Array
@@ -40,6 +39,10 @@ Test Standard/Test
 Time Standard/Time
 Vec2 Standard/Math/Vec2
 Void Standard/Void
+
+
+fs fs FORCE
+path path FORCE
 
 Source-Map-Support source-map-support FORCE
 

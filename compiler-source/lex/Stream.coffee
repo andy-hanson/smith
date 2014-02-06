@@ -13,7 +13,7 @@ module.exports = class Stream
 	###
 	constructor: (@str) ->
 		@index = 0
-		@pos = Pos.start()
+		@_pos = Pos.start()
 
 	###
 	If the next character is in `charClass`, read it.
@@ -29,6 +29,12 @@ module.exports = class Stream
 		@str[@index + skip]
 
 	###
+	Current position in the file.
+	###
+	pos: ->
+		@_pos
+
+	###
 	The character before `peek()`.
 	###
 	prev: ->
@@ -40,9 +46,9 @@ module.exports = class Stream
 	readChar: ->
 		x = @peek()
 		if x == '\n'
-			@pos = @pos.plusLine()
+			@_pos = @_pos.plusLine()
 		else
-			@pos = @pos.plusColumn()
+			@_pos = @_pos.plusColumn()
 		@index += 1
 		x
 
@@ -55,9 +61,9 @@ module.exports = class Stream
 		times n, =>
 			@index -= 1
 			if @peek() == '\n'
-				@pos = @pos.minusLine()
+				@_pos = @_pos.minusLine()
 			else
-				@pos = @pos.minusColumn()
+				@_pos = @_pos.minusColumn()
 
 	###
 	Reads as long as characters satisfy `condition`.

@@ -1,66 +1,66 @@
-∙ M
+val M
 	Prelude@Meta
 
 M.do
 	\(Bag 'doc 'in 'out 'eg 'how 'todo 'rest-argument 'rest).each
-	\	me.‣read/~ it
-	‣read/~ doc
+	\	me.$read/~ it
+	$read/~ doc
 		doc
 			TODO
 
-	‣read/~ in
+	$read/~ in
 		doc
 			TODO
 
-	‣read/~ out
+	$read/~ out
 		doc
 			TODO
 
-	‣read/~ eg
+	$read/~ eg
 		doc
 			TODO
 
-	‣read/~ how
+	$read/~ how
 		doc
 			TODO
 
-	‣read/~ todo
+	$read/~ todo
 		doc
 			TODO
 
-	‣read arguments
+	$read arguments
 		doc
 			TODO
 
-	‣read~ rest-argument
+	$read~ rest-argument
 		doc
 			TODO
 
-	‣read options
+	$read options
 		doc
 			TODO
 
-	‣read~ rest-option
+	$read~ rest-option
 		doc
 			TODO
 
-	‣ test-eg! caller~
+	$ test-eg! caller~
 		eg~.each |egg
 			caller~.~
 				egg.new-bound-of it
 			|
 				egg.run!
 
-	‣val Empty
+	$val Empty
 		of `{ }`
 
-	‣‣ from-maybe-pre maybe-make-meta-pre:Opt
+	$$ from-maybe-pre maybe-make-meta-pre:Opt
 		maybe-make-meta-pre.~ |make-pre:Fun
 			M make-pre.of
 		|
 			M.Empty
 
-	‣ merge other:M
+	$ merge other:M
 		how
 			TODO: write in Smith
 
@@ -92,7 +92,7 @@ M.do
 
 			return M.of(m);
 
-	‣new toString
+	$new toString
 		show-properties
 
 export M

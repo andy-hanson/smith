@@ -3,35 +3,35 @@ doc
 
 use! Global
 
-‣‣new of ...args
-	◆.returning (new (Global@Object.create `null`)) |map
+$$new of ...args
+	Control.returning (new (Global@Object.create `null`)) |map
 		(args.group 2).each
 			map.+! (it 0) (it 1)
 
-‣‣ sample
+$$ sample
 	of 'a 1 'b 2 'c 3
 
-‣ -call name ...args
+$ -call name ...args
 	(Any.method name).apply data args
 
 data |data
 	()
 
-‣ empty?
+$ empty?
 	eg
-		✔ String-Map!.of.empty?
+		! String-Map!.of.empty?
 
 	keys.empty?
 
-‣ key? name:Str
+$ key? name:Str
 	eg
-		✔ (sample.key? 'a)
+		! (sample.key? 'a)
 
 	-call 'has-property? name
 
-‣ of~ name:Str
+$ of~ name:Str
 	eg
-		✔= (Opt.some 1)
+		!= (Opt.some 1)
 			sample.of~ 'a
 	how
 		Can't simply -call 'property~ because that calls methods on 'this'.
@@ -39,40 +39,40 @@ data |data
 	(key? name).if
 		of name
 
-‣ of name:Str
+$ of name:Str
 	eg
-		✔= 1
+		!= 1
 			(sample) 'a
-		✔.fails
+		!.fails
 			(sample) 'eeh
 
 	-call 'property name
 
-‣ +! name:Str value
+$ +! name:Str value
 	in
-		✔ (-call 'has-property? name).¬
+		! (-call 'has-property? name).not
 	eg
-		✔.fails
+		!.fails
 			sample.+! 'a 2
 
 	-call 'set-property! name value
 
-‣ -! name:Str
+$ -! name:Str
 	eg
-		∙ s
+		val s
 			sample
 		s.-! 'a
 		s.-! 'z \ does nothing
-		✔ (s.key? 'a).¬
+		! (s.key? 'a).not
 
 	-call 'delete-property-if-exists! name
 
-‣ keys
+$ keys
 	eg
-		✔= (Bag 'a 'b 'c)
+		!= (Bag 'a 'b 'c)
 			sample.keys
 
 	-call 'property-names
 
-‣new toString
+$new toString
 	-call 'show-properties

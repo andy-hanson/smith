@@ -111,7 +111,7 @@ module.exports = class AllModules
 
 		catch error
 			error.message =
-				"In module file #{dir}/modules: #{error.message}"
+				"In module file #{dirName}/modules: #{error.message}"
 			throw error
 
 	###
@@ -119,7 +119,7 @@ module.exports = class AllModules
 	@private
 	###
 	_findLocal: (dirName, name) ->
-		(@_maybeFindLocal dirName, name) ? fail "Can not find #{dir}/#{name}"
+		(@_maybeFindLocal dirName, name) ? fail "Can not find #{dirName}/#{name}"
 
 	###
 	Get a module name relative to `dirName`, or `null`.
@@ -235,8 +235,5 @@ module.exports = class AllModules
 
 		io.readFilesNamedSync dir, 'modules', (modulesFile, text) ->
 			allModules.parse modulesFile, text
-
-		all = keywords.useAll
-		(allModules.moduleses.get '.').add all, all, no
 
 		allModules

@@ -12,7 +12,7 @@ Local = require './Local'
 ###
 Represents a function.
 ###
-module.exports = class FunDef extends Expression
+module.exports = class Fun extends Expression
 	###
 	Everything but `pos` and `args` may be `null`.
 	@param meta
@@ -120,7 +120,7 @@ module.exports = class FunDef extends Expression
 	compile: (context) ->
 		maybeMeta = (kind) =>
 			if @meta?[kind]?
-				[ (@meta[kind].toNode context), '\n', context.indent() ]
+				[ (@meta[kind].noReturn context), '\n', context.indent() ]
 			else
 				null
 		needRes =
@@ -185,7 +185,7 @@ module.exports = class FunDef extends Expression
 	Function with just meta, args, and body. (No return type or rest parameter).
 	###
 	@plain: (pos, meta, args, body) ->
-		new FunDef pos, meta, null, args,  null, body
+		new Fun pos, meta, null, args,  null, body
 
 	###
 	Just the body, no meta, no args

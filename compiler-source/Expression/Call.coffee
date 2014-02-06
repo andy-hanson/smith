@@ -3,7 +3,7 @@
 Pos = require '../compile-help/Pos'
 T = require '../Token'
 Expression = require './Expression'
-FunDef = require './FunDef'
+Fun= require './Fun'
 Literal = require './Literal'
 ManyArgs = require './ManyArgs'
 Me = require './Me'
@@ -57,7 +57,7 @@ module.exports = class Call extends Expression
 	Calls a definer.
 	###
 	@def: (pos, def, fun) ->
-		type pos, Pos, def, T.Def, fun, FunDef
+		type pos, Pos, def, T.Def, fun, Fun
 		@me pos, def.name, [ (Literal.string pos, def.name2), fun ]
 
 	###

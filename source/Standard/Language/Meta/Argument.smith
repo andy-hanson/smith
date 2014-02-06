@@ -4,15 +4,15 @@ Prelude@Argument.do
 	how
 		TODO: data
 
-	‣ construct name:Str class-of
+	$ construct name:Str class-of
 		new! "_name" name
 		(Opt.from-nullable class-of).each
 			new! "_class-of" it
 
-	‣read name
-	‣read~ class-of
+	$read name
+	$read~ class-of
 
-	‣new toString
+	$new toString
 		class-of~.~
 			"{name}:{it}"
 		|

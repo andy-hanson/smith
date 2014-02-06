@@ -1,196 +1,196 @@
-∙ Math
+val Math
 	(use Global)@Math
 
-(use ℝ).do
-	‣ + a:ℝ
+(use Real).do
+	$ + a:Real
 		doc
 			Combination of two counts, one done after the other.
 			The method is addition and the result is the sum.
 		eg
-			✔= 3
+			!= 3
 				1.+ 2
-			✔= -1
+			!= -1
 				1.+ -2
 
 		`this + a`
 
-	‣ - a:ℝ
+	$ - a:Real
 		doc
 			Number of steps up from `a` to this.
 			For number of steps irrespective of direction, use `distance`.
 			The method is subtraction and the result is the difference.
 		eg
-			✔= 1
+			!= 1
 				3.- 2
-			✔= -1
+			!= -1
 				2.- 3
 
 		`this - a`
 
-	‣ × a:ℝ
+	$ * a:Real
 		doc
 			Sum of this many copies of a.
 			The method is multiplication and the result is the product.
 		eg
-			✔= 6
-				2.× 3
-			✔= -6
-				-2.× 3
-			✔= 6
-				-2.× -3
+			!= 6
+				2.* 3
+			!= -6
+				-2.* 3
+			!= 6
+				-2.* -3
 
 		`this * a`
 
-	‣ ÷ divisor:ℝ
+	$ / divisor:Real
 		doc
 			How many copies of divisor are needed to make me.
 			The method is division and the result is the ratio (or quotient).
 		eg
-			✔= 2
-				6.÷ 3
-			✔= -2
-				-6.÷ 3
-			✔= 2
-				-6.÷ -3
+			!= 2
+				6./ 3
+			!= -2
+				-6./ 3
+			!= 2
+				-6./ -3
 
 		`this / divisor`
 
-	‣ ^ power:ℝ
+	$ ^ power:Real
 		doc
 			The product of `power` of me.
 		eg
-			✔= 8
+			!= 8
 				2.^ 3
 
 		(Math.pow me power).forbid-NaN
 
-	‣ log base:ℝ
+	$ log base:Real
 		doc
 			The number that `base` must be raised to the power of to reach me.
 		eg
-			✔= 3
+			!= 3
 				8.log 2
 
-		log-e.÷ base.log-e
+		log-e./ base.log-e
 
-	‣ log-e
+	$ log-e
 		doc
-			The number that `ℝ.E` must be raised to the power of to reach me.
+			The number that `Real.E` must be raised to the power of to reach me.
 		eg
-			✔= 1
+			!= 1
 				E.log-e
 
 		Math.log me
 
-	‣ log-10
+	$ log-10
 		doc
 			Log base 10.
 		eg
-			✔= 2
+			!= 2
 				100.log-10
 
 		log 10
 
-	‣ log-2
+	$ log-2
 		doc
 			Log base 2.
 		eg
-			✔= 3
+			!= 3
 				8.log-2
 
 		log 2
 
-	‣ inverse
+	$ inverse
 		doc
-			Multiplicative inverse: This number × me is 1.
+			Multiplicative inverse: This number * me is 1.
 		eg
-			✔= 0.5
+			!= 0.5
 				2.inverse
 
-		1.÷ me
+		1./ me
 
-	‣ half
+	$ half
 		doc
 			Half of me.
 		eg
-			✔= 2
+			!= 2
 				4.half
 
-		÷ 2
+		/ 2
 
-	‣ twice
+	$ twice
 		doc
 			Me + me.
 		eg
-			✔= 4
+			!= 4
 				2.twice
 
-		× 2
+		* 2
 
-	‣ square
+	$ square
 		doc
-			Me × me.
+			Me * me.
 		eg
-			✔= 4
+			!= 4
 				2.square
 
-		× me
+		* me
 
-	‣ cube
+	$ cube
 		doc
-			Me × me × me.
+			Me * me * me.
 		eg
-			✔= 8
+			!= 8
 				2.cube
 
-		× square
+		* square
 
-	‣ square-root
+	$ square-root
 		doc
 			Number whose square is me.
 		eg
-			✔= 2
+			!= 2
 				4.square-root
-			✔.fails
+			!.fails
 				-1.square-root
 
 		(Math.sqrt me).forbid-NaN
 
-	‣ cube-root
+	$ cube-root
 		doc
 			Number whose cube is me.
 		eg
-			✔= 2
+			!= 2
 				8.cube-root
-			✔.fails
+			!.fails
 				-1.cube-root
 		how
 			TODO: Math.cbrt
 
 		me.^ 3.inverse
 
-	‣ nth-root n:ℝ
+	$ nth-root n:Real
 		eg
-			✔= 2
+			!= 2
 				8.nth-root 3
 		^ n.inverse
 
 
-	‣ square-hypoteneuse a:ℝ
+	$ square-hypoteneuse a:Real
 		doc
 			Square of the hypoteneuse.
 			Easier to compute than it.
 		eg
-			✔= 25
+			!= 25
 				3.square-hypoteneuse 4
 
 		square.+ a.square
 
-	‣ hypoteneuse a:ℝ
+	$ hypoteneuse a:Real
 		doc
 			After moving me far right and `a` far up, the displacement.
 		eg
-			✔= 5
+			!= 5
 				3.hypoteneuse 4
 		how
 			TODO: Math.hypot
@@ -198,61 +198,46 @@
 		(square-hypoteneuse a).square-root
 
 
-	‣ average a:ℝ
+	$ average a:Real
 		doc
 			Number in between this and a.
 		eg
-			✔= 2
+			!= 2
 				1.average 3
 
 		(+ a).half
 
-	‣ negate
+	$ negate
 		doc
 			Opposite of this number.
 		eg
-			✔= -1
+			!= -1
 				1.negate
-			✔= 1
+			!= 1
 				-1.negate
 
 		`-this`
 
-	‣ magnitude
+	$ magnitude
 		doc
 			Forces me to have a positive sign.
 			Also called the absolute value.
 		eg
-			✔= 1
+			!= 1
 				1.magnitude
-			✔= 1
+			!= 1
 				-1.magnitude
 
 		Math.abs me
 
-	‣ distance a:ℝ
+	$ distance a:Real
 		doc
 			Space between two numbers.
 			Never returns a negative result.
 		eg
-			✔= 2
+			!= 2
 				4.distance 6
-			✔= 2
+			!= 2
 				6.distance 4
 
 		(- a).magnitude
-
-	‣ % ...args
-		doc
-			With no argument: me out of 100.
-			With one argument: Me percent of it.
-		eg
-			✔= 1
-				100.%
-			✔= 2
-				50.% 4
-
-		(args.size.= 1).?
-			%.× (args 0)
-		|
-			÷ 100

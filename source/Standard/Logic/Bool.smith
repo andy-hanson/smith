@@ -1,133 +1,133 @@
-∙ B
+val B
 	(use Global)@Boolean.to-class 'Bool
 
 B.do
-	‣new inspect
+	$ inspect
 		?
-			'⊤
+			"Bool.True"
 		|
-			'⊥
+			"Bool.False"
 
-	‣ ? then:Fun else:Fun
+	$ ? then:Fun else:Fun
 		doc
 			TODO
 
 		`this.valueOf() ? then() : _else()`
 
-	‣ ∨:B else:Fun
+	$ or:B else:Fun
 		doc
-			Whether either this or `a` is ⊤.
+			Whether either this or `a` is True.
 		eg
-			✔= ⊥
-				⊥.∨
-					⊥
-			✔= ⊤
-				⊤.∨
-					⊥
+			!= False
+				False.or
+					False
+			!= True
+				True.or
+					False
 
 		`this || B.check('else-result', _else())`
 
-	‣ ∧:B also:Fun
+	$ and:B also:Fun
 		doc
-			Whether both I and the result of `a` are ⊤.
+			Whether both I and the result of `a` are True.
 		eg
-			✔= ⊤
-				⊤.∧
-					⊤
-			✔= ⊥
-				⊤.∧
-					⊥
+			!= True
+				True.and
+					True
+			!= False
+				True.and
+					False
 
 		`this && B.check('also-result', also())`
 
-	‣ ¬:B
+	$ not:B
 		doc
 			TODO
 		eg
-			✔= ⊥
-				⊤.¬
-			✔= ⊤
-				⊥.¬
+			!= False
+				True.not
+			!= True
+				False.not
 
 		`!this`
 
-	‣ →:B then:Fun
+	$ implies:B then:Fun
 		doc
-			Whether this is ⊥ or the result of `a` is ⊤.
+			Whether this is False or the result of `a` is True.
 		eg
-			✔= ⊤
-				⊤.→
-					⊤
-			✔= ⊤
-				⊥.→
-					⊥
-			✔= ⊥
-				⊤.→
-					⊥
+			!= True
+				True.implies
+					True
+			!= True
+				False.implies
+					False
+			!= False
+				True.implies
+					False
 
 		`!this || B.check('then-result', then())`
 
-	‣ ↔ a:B
+	$ ↔ a:B
 		doc
 			Same as =, but for Bools only.
 
 		= a
 
-	‣ ⊕ a:B
+	$ xor a:B
 		doc
 			Same as ≠, but for Bools only.
 
 		≠ a
 
-	‣ nor:B neither:B
+	$ nor:B neither:B
 		doc
-			Whether I and `a` are both ⊥.
+			Whether I and `a` are both False.
 		eg
-			✔= ⊤
-				⊥.nor ⊥
+			!= True
+				False.nor False
 
 		`!(this || neither)`
 
-	‣ if! then:Fun
+	$ if! then:Fun
 		doc
-			Runs `then` if I am ⊤.
+			Runs `then` if I am True.
 
 		`
 			if (this)
 				then()
 			return;
 
-	‣ if:Opt then:Fun
+	$ if:Opt then:Fun
 		doc
-			If I am ⊤, returns Some of the result of `then`.
+			If I am True, returns Some of the result of `then`.
 			Else, returns None.
 		eg
-			✔= (Opt.some 1)
-				⊤.if
+			!= (Opt.some 1)
+				True.if
 					1
-			✔= Opt.None
-				⊥.if
+			!= Opt.None
+				False.if
 					1
 
 		`this ? Opt().some(then()) : Opt().None()`
 
-	‣ unless! then:Fun
+	$ unless! then:Fun
 		doc
 			Opposite of `if!`.
 
-		¬.if! then
+		not.if! then
 
-	‣ unless:Opt then:Fun
+	$ unless:Opt then:Fun
 		doc
 			Opposite of `if`.
 
-		¬.if then
+		not.if then
 
-	\alias '∨ 'or
-	\alias '∧ 'and
-	\alias '¬ 'not
-	\alias '→ 'implies
-	\alias '⊕ 'xor
+	\alias 'or 'or
+	\alias 'and 'and
+	\alias 'not 'not
+	\alias 'implies 'implies
+	\alias 'xor 'xor
 
 
 

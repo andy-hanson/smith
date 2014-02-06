@@ -1,23 +1,136 @@
-∙ JS-Error
+val JS-Error
 	(use Global)@Error
 
-∙ E
+val E
 	JS-Error.to-class
 
 E.do
-	‣‣new of message
+	$$new of message
 		New JS-Error message
 
-	‣ throw!
+	$ throw!
 		doc
 			Throw this error.
 		eg
-			✔.fails
-				(Error 'err).throw
+			!.fails
+				(E 'err).throw
 
 		`
 			throw this;
 
 	alias 'throw! 're-throw!
+
+	$$ TODO
+		E 'TODO
+
+	$$ throw! message
+		(E message).throw!
+
+	$$ catch~ try:Fun
+		try-catch
+			try.run!
+			Opt.None
+		|
+			Opt.some it
+
+	$$ catch try:Fun
+		(catch~ try).force "Expected to throw an error."
+
+	$$ catch-message try:Fun
+		(catch try)@message
+
+	$$ try try:Fun
+		doc
+			If an error occurs in `try`, ignores it and returns None.
+			Else, returns Some of the result.
+		eg
+			!= (Opt.some 'success)
+				try
+					'success
+			!= Opt.None
+				try
+					E.throw! 'fail
+
+		try-catch
+			Opt.some try.of
+		|
+			Opt.None
+
+	$$ try-catch try:Fun catch:Fun
+		doc
+			If an error occurs in `try`, returns `catch` of that error.
+			Else returns the result of `try`.
+		eg
+			!= 'success
+				try-catch
+					'success
+				|
+					'fail
+			!= 'fail
+				try-catch
+					E.throw! 'fail
+				|
+					it@message
+
+		try-catch-finally try catch
+			()
+
+	$$ try-catch-finally try:Fun catch:Fun finally:Fun
+		doc
+			If an error occurs in `try`, returns `catch` of that error.
+			Else returns the result of `try`.
+			`finally` is called before returning the result.
+		eg
+			val ref
+				Ref 0
+			!= 'fail
+				try-catch-finally
+					E.throw! 'fail
+				|
+					it@message
+				|
+					ref.! _increment
+			!= 1
+				ref.get
+
+		`
+			var res;
+			try {
+				res = _try();
+			}
+			catch (error) {
+				res = _catch(error);
+			}
+			finally {
+				_finally();
+			}
+			return res;
+
+	$$ throws? try:Fun
+		doc
+			Whether `try` has an error.
+
+		try-catch
+			try.run!
+			Bool.False
+		|
+			Bool.True
+
+
+	$$ annotate try:Fun make-annotation:Fun
+		doc
+			If an error happens in `try`, prepend new text to its message and throw it again.
+		eg
+			!.fail-message "4: fail"
+				annotate
+					E.throw! 'fail
+				|
+					it@message@length
+
+		try-catch try |error
+			val annotation
+				make-annotation error
+			`error.message = annotation + ': ' + error.message`
+			error.re-throw!
 
 export E

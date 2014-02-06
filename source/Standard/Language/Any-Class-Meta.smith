@@ -2,17 +2,17 @@ Any-Class.do-meta
 	doc
 		DOC
 	eg
-		✔ (Any-Class.subsumes? Any-Class)
-		✔ (Any-Class.super.identical? Any)
+		! (Any-Class.subsumes? Any-Class)
+		! (Any-Class.super.identical? Any)
 
 		Any-Class Bag 'Sample-Class
-			✔ (inherits-from? Bag)
-			✔= Bag
+			! (inherits-from? Bag)
+			!= Bag
 				me.super
-			✔ (Bag.super-of? me)
+			! (Bag.super-of? me)
 
 			export 3
-			✔= 3
+			!= 3
 				`this.__exported`
-			✔.fails
+			!.fails
 				export 4

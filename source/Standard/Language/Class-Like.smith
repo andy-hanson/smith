@@ -1,7 +1,7 @@
 abstract!
 
 class.do
-	‣new check name a
+	$new check name a
 		doc
 			TODO
 
@@ -10,6 +10,6 @@ class.do
 				if (a == null)
 					throw new global.Error("Undefined "+name+":"+this._name);
 				else
-					throw new Error(name+' is not a '+this+'; is '+a+'; a '+a.class());
+					throw new global.Error(name+' is not a '+this+'; is '+a+'; a '+a.class());
 			}
 			return a;

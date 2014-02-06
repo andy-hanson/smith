@@ -106,13 +106,13 @@ Everything up to the first element not satisfying `condition`, and the rest.
 If nothing satisfies `condition`, ( list, [ ] ).
 @return [(Array, Array)]
 ###
-@takeAndAfter = (list, condition) ->
-	afterLastIndex =
-		module.exports.indexOfWhere list, (value) -> not condition value
-	if afterLastIndex == -1
-		[ list, [ ] ]
-	else
-		[ (list.slice 0, afterLastIndex), (list.slice afterLastIndex, list.length) ]
+#@takeAndAfter = (list, condition) ->
+#	afterLastIndex =
+#		module.exports.indexOfWhere list, (value) -> not condition value
+#	if afterLastIndex == -1
+#		[ list, [ ] ]
+#	else
+#		[ (list.slice 0, afterLastIndex), (list.slice afterLastIndex, list.length) ]
 
 ###
 The first element, and everything else.
