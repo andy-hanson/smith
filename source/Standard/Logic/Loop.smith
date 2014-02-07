@@ -2,7 +2,7 @@ use Ref
 
 static!
 
-$$ times n:Nat do:Fun
+$$ times times:Nat do:Fun
 	doc
 		Runs `do` `n` times.
 	eg
@@ -14,7 +14,7 @@ $$ times n:Nat do:Fun
 			r.get
 
 	`
-		for (var i = n; i > 0; i--)
+		for (var timesLeft = times; timesLeft > 0; timesLeft -= 1)
 			_do();
 
 \ must get this here as use in JS will not trigger the use

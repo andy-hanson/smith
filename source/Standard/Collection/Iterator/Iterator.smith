@@ -24,7 +24,11 @@ use Zip-Iterator
 
 abstract!
 
-$ same-members
+$ same-members a:Iterator
+	doc
+		TODO
+
+
 	(use Console).log! 'Hi
 	`true`
 
@@ -61,24 +65,24 @@ $ ++ ...iterators
 
 	++-Iterator me iterators.iterator
 
-$ ∃:Bool condition:Fun
+$ any?:Bool condition:Fun
 	doc
 		TODO
 	eg
-		! (sample.∃ _even?)
-		! (sample.∃ _negative?).not
+		! (sample.any? _even?)
+		! (sample.any? _negative?).not
 
 	val none
-		∀
+		all?
 			(condition it).not
 	none.not
 
-$ ∀:Bool condition:Fun
+$ all?:Bool condition:Fun
 	doc
 		TODO
 	eg
-		! (sample.∀ _Nat?)
-		! (sample.∀ _odd?).not
+		! (sample.all? _Nat?)
+		! (sample.all? _odd?).not
 
 	`
 		var all = true;
@@ -93,13 +97,13 @@ $ ∀:Bool condition:Fun
 			});
 		return all;
 
-$ ∋ value
+$ has value
 	doc
 		Whether I contain the value.
 	eg
-		! (sample.∋ 3)
+		! (sample.has 3)
 
-	∃ value.=_
+	any? value.=_
 
 $ collect collector:Fun
 	Collect-Iterator me collector
@@ -146,7 +150,7 @@ $ each do:Fun
 		!= 6
 			r.get
 
-	∀
+	all?
 		do it
 		Bool.True
 	()
@@ -160,14 +164,31 @@ $ empty?
 
 	Error.throws? next_
 
-$ fold-while combine:Fun
-\	eg
-\		!= 10
-\			sample.fold-while |so-far next
-\				Opt.filter (next.< 3)
-\					so-far.+ next
+$ fold-while initial~ combine:Fun
+	eg
+		!= 3
+			sample.fold-while |so-far next
+				Opt.filter (so-far.+ next)
+					it.< 6
 
-	TODO
+	val init
+		initial~.or
+			next
+
+	`
+		var res = init;
+		var over = false;
+		while (!over)
+			over = this['if-next'](function(next) {
+				var x = Opt().check('combine-result', combine(res, next), x);
+				var notOver = Opt().Some()['subsumes?'](x);
+				if (notOver)
+					res = x.value();
+				return !notOver;
+			}, function() {
+				return true;
+			});
+		return res;
 
 $ fold initial~ combine:Fun
 	doc
@@ -177,10 +198,6 @@ $ fold initial~ combine:Fun
 			sample.fold 4 _+
 		!= 6
 			sample.fold _+
-	oth
-		TODO:
-		fold-while |acc next
-			Opt.some (combine acc next)
 
 	val init
 		initial~.or

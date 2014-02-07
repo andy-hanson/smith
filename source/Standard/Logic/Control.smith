@@ -1,17 +1,15 @@
 doc
-	Flow methods
+	Control flow methods.
 
 $$ returning value do-after:Fun
 	doc
 		Calls do-after on the value, then returns the value.
 	eg
-		val r
-			Ref 0
-		!= 'returned
-			Control.returning 'returned
-				r.! _increment
-		!= 1
-			r.get
+
+		!.runs |run
+			!= 'returned
+				Control.returning 'returned
+					run.run!
 
 	do-after.run! value
 	value

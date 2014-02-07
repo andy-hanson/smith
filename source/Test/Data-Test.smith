@@ -1,6 +1,9 @@
+
+use Console
+
 $class X-Y-Pair
 	eg
-		(of 1 2).test
+		((X-Y-Pair) 1 2).test
 
 	data |x y
 		()
@@ -15,7 +18,7 @@ $class X-Y-Pair
 
 $class Mutable
 	eg
-		(of 1 2).test
+		((Mutable) 1 2).test
 
 	data |!x y
 		()

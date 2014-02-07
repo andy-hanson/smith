@@ -4,8 +4,10 @@ val A
 	Prelude@Any
 
 A.do
-
 	$ show-properties
+		doc
+			TODO
+
 		`
 			var s = '{ ', me = this, keys = global.Object.getOwnPropertyNames(me);
 			keys.forEach(function(key) {
@@ -13,18 +15,21 @@ A.do
 			});
 			return s + ' }';
 
-	\$ inspect
-	\	show-properties
-
 	$ has-property? name:Str
 		doc
-			TODO
+			Whether `name` is directly a property of this object.
+			(In the case of most Smith objects, `name` should begin with an `_`.)
+		eg
+			! (`{ a: 3 }`.has-property? 'a)
+			! (`{ }`.has-property? 'a).not
 
-		`Object.prototype.hasOwnProperty`.call me name
+		Global@Object@prototype@hasOwnProperty.call me name
 
 	$ has-proto-property? name:Str
 		doc
-			TODO
+			Whether this or any prototype has the property `name`.
+		eg
+			! ((Global@Object.create `{ a: 3 }`).has-proto-property? 'a)
 
 		`this[name] != null`
 
@@ -155,7 +160,7 @@ A.do
 			val keys
 				property-names
 
-			keys.∀ |key
+			keys.all? |key
 				(a.has-property? key).and
 					(property key).= (a.property key)
 
@@ -177,7 +182,7 @@ A.do
 		(identical? a).or
 			structural-= a
 
-	$ ≠ a
+	$ /= a
 		doc
 			Not `=`.
 

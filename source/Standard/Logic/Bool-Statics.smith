@@ -1,12 +1,20 @@
 Bool.do
 	$val True
 		doc
-			TODO
+			Represents that somet condition is the case.
+		eg
+			!= Bool.True
+				1.< 2
 
 		`true`
 
 	$val False
 		doc
-			TODO
+			Represents that some condition is not the case.
+		eg
+			!= Bool.False
+				1.> 2
+			use Console
+			Console.log! 'asb
 
 		`false`

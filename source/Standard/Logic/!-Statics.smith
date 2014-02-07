@@ -1,16 +1,39 @@
 !.do
+	$$ runs should-call-run:Fun
+		doc
+			The block should call its input function.
+		eg
+			!.runs |run
+				run.run!
+			!.fails
+				!.runs |run
+					()
+
+		val ref
+			Ref 0
+		val run |
+			ref.! _increment
+		should-call-run run
+		!= 1
+			ref.get
+
 	$$ fails fun:Fun
+		doc
+			TODO
 		eg
 			fails
 				Error.throw! "whoops"
 
 			fails
 				fails
-					\doesn't fail
-				Console.log! 0
+					() \ doesn't fail
 
-		Error.catch
-			fun.run!
+		Error.try-catch
+			Error.catch
+				fun.run!
+		|
+			throw up
+
 
 	$$ fail-message message:Str fun:Fun
 		!= message

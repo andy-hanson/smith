@@ -58,12 +58,13 @@ C.do
 	$ new ...args
 		doc
 			TODO
-		in
-			! is-meta?.not
-				"Can't instantiate meta-class"
+		how
+			Can't use `Control.returning`, `Control` relies on `$$` relies on `!` relies on `Some.new`.
 
-		Control.returning (Global@Object.create proto)
-			it.construct ...args
+		val x
+			Global@Object.create proto
+		x.construct ...args
+		x
 
 	$ seal-proto!
 		Global@Object.preventExtensions proto
@@ -135,13 +136,6 @@ C.do
 
 		me.$$ name
 			value
-
-
-	\$ $val! name:Str make-val:Fun
-	\	val val
-	\		make-val.of
-	\	me.$$ name
-	\		val
 
 	$ $method-meta name:Str fun:Fun
 		how
@@ -233,12 +227,6 @@ C.do
 		doc
 			Whether I can have sub-classes.
 
-	\$ instantiable?
-	\	doc
-	\		Whether I can directly have instances.
-	\		Sub-classes could be instantiable; if you want no sub-classes, use `static`.
-	\	non-instantiable?.not
-
 	$ abstract!
 		instance-less!
 		extensible!
@@ -295,20 +283,20 @@ C.do
 		doc
 			TODO
 
-		super-of.∋ class
+		super-of.has class
 
 	$ trait-of? class:C
 		doc
 			TODO
 
-		trait-of.∋ class
+		trait-of.has class
 
 	$ inherits-from? class:C
 		doc
 			TODO
 
-		\ can't use ∋ because Array needs to inherit it using trait
-		(inherits-from.indexOf class).≠ -1
+		\ can't use has because Array needs to inherit it using trait
+		(inherits-from.indexOf class)./= -1
 
 	me.$ 'trait |new-trait:C
 		in
@@ -348,35 +336,6 @@ C.do
 			it.merge fun.meta
 		do fun
 
-	$ test-method! name:Str
-		(method name).meta.test-eg! me
-
-	$ test!
-		doc
-			Runs the `eg` of all of my static and instance methods.
-			I am used as the delegate in the `eg`.
-
-		Error.annotate
-			meta.test-eg! me
-		|
-			name
-
-		val test |is-static
-			|name method
-				Error.annotate
-					method.meta.test-eg! me
-				|
-					val def
-						is-static.?
-							'$$
-						|
-							'$
-					"{me}{def}{name}"
-
-
-		methods.each-property (test Bool.False)
-		static-methods.each-property (test Bool.True)
-
 	$ sub-class name:Str do-meta~:Fun
 		C me name do-meta~.to-nullable
 
@@ -387,7 +346,7 @@ C.do
 			|
 				C Any name
 
-	$ export-singleton super-class~:C do-meta~:Fun
+	$ export-singleton super-class~:C name:Str do-meta:Fun
 		val args
 			Array.proto@slice.call `arguments`
 		export (C.singleton args)

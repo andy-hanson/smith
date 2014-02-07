@@ -1,14 +1,14 @@
 doc
 	Here's my nifty program.
 
-use Console
+\use Console
 
-use! Str-Color
+\use! Str-Color
 
 \Str-Color.styles.each-property |name
 \	Console.log! (name.send name)
 
-use! Hello-World
+\(use Hello-World).main!
 
 (use Use-All-Modules) `__dirname`
 

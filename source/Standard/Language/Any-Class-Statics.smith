@@ -22,8 +22,6 @@ Any-Class.do
 					Console.log! "{class}##{name}: {it}"
 
 	$$ singleton super-class~:Any-Class name:Str do-meta:Fun
-		\val args
-		\	Array.proto@slice.call `arguments`
 		val super-class
 			super-class~.or
 				Any
@@ -31,6 +29,4 @@ Any-Class.do
 			super-class.sub-class name do-meta
 		val instance
 			Global@Object.create class.proto
-		\class.$ 'constructor
-		\	fail "Singleton class!"
 		instance

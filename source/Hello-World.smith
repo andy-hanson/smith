@@ -9,83 +9,84 @@ how
 
 use! Console
 
-\ I'm a comment.
-val three
-	val two
-		2
-	two.+ 1
+$$ main!
+	\ I'm a comment.
+	val three
+		val two
+			2
+		two.+ 1
 
-! (1.< 2) \ In other words, !.of (1.< 2)
+	! (1.< 2) \ In other words, !.of (1.< 2)
 
 
-$$ twice a
-	a.* 2
+	$$ twice a
+		a.* 2
 
-me.$$ "ugly-twice" |a \ '|' opens a function
-	a.* 2
+	me.$$ "ugly-twice" |a \ '|' opens a function
+		a.* 2
 
-!= 6
-	twice 3
+	!= 6
+		twice 3
 
-(1.< 2).if!
-	Console.log! "Still sane!"
+	(1.< 2).if!
+		Console.log! "Still sane!"
 
-val list
-	List 1 2 3
-val doubles
-	List 2 4 6
-!= doubles
-	list.map |list-element
-		twice list-element
-!= doubles
-	list.map
-		twice it
-!= doubles
-	list.map twice_
-list.each Console.log!_
-!= doubles
-	list.map
-		it.twice
-!= doubles
-	list.map _twice
-!= ((1.+ 2).+ 3)
-	list.fold _+
+	val list
+		List 1 2 3
+	val doubles
+		List 2 4 6
+	!= doubles
+		list.map |list-element
+			twice list-element
+	!= doubles
+		list.map
+			twice it
+	!= doubles
+		list.map twice_
+	list.each Console.log!_
+	!= doubles
+		list.map
+			it.twice
+	!= doubles
+		list.map _twice
+	!= ((1.+ 2).+ 3)
+		list.fold _+
 
-(1.< 2).?
-	"Still sane"
-|
-	"Not feelin' so good"
+	(1.< 2).?
+		"Still sane"
+	|
+		"Not feelin' so good"
 
-val six:Nat
-	(List 1 2 3).fold |:Nat x:Nat y:Nat \ return type and argument types
-		x.+ y
+	val six:Nat
+		(List 1 2 3).fold |:Nat x:Nat y:Nat \ return type and argument types
+			x.+ y
 
-$$ twice-typed:Nat a:Nat \ again, return type and argument types
-	a.* 2
+	$$ twice-typed:Nat a:Nat \ again, return type and argument types
+		a.* 2
 
-$$ better-twice n:Nat
-	doc
-		Product of all numbers 1 to `n`.
-	in
-		\ '!' asserts that its argument is `true`.
-		! (n.= 333).not \ I refuse to double this number.
-	out
-		res.divisible? n
-	eg
-		!= 6
-			better-twice 3
-	how
-		Turns out someone wrote it for me.
-	oth
-		Put any other meta-info here.
-		version
-			0.0.0
-		author
-			Andy
-		listening-to
-			Gossippo Perpetuo
+	$$ better-twice n:Nat
+		doc
+			Product of all numbers 1 to `n`.
+		in
+			\ '!' asserts that its argument is `true`.
+			! (n.= 333).not \ I refuse to double this number.
+		out
+			res.divisible? n
+		eg
+			!= 6
+				better-twice 3
+		how
+			Turns out someone wrote it for me.
+		oth
+			Put any other meta-info here.
+			version
+				0.0.0
+			author
+				Andy
+			listening-to
+				Gossippo Perpetuo
 
-	n.twice
+		n.twice
 
-!= 6
-	better-twice 3
+	!= 6
+		better-twice 3

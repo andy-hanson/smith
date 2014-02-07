@@ -18,9 +18,6 @@ Array.do
 		x
 
 	$ collect-with-index do:Fun
-		todo
-			Seq
-
 		`
 			var out = [];
 			for (var index = 0; index < this.length; index++)
@@ -52,11 +49,11 @@ Array.do
 		Control.returning copy
 			it.<! value
 
-	\$ ∋ em
+	\$ has em
 	\	todo
 	\		Call '=' at each element
 	\
-	\	(indexOf em).≠ -1
+	\	(indexOf em)./= -1
 
 	$new size
 		@length

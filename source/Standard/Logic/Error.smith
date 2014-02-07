@@ -130,7 +130,7 @@ E.do
 		try-catch try |error
 			val annotation
 				make-annotation error
-			`error.message = annotation + ': ' + error.message`
+			error.set-property! 'message "{annotation}: {error@message}"
 			error.re-throw!
 
 export E

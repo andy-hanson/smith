@@ -11,6 +11,3 @@ $$new of do:Fun
 
 $$ now-secs:Real
 	(New Global@Date).getTime./ 1000
-
-
-

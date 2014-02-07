@@ -10,9 +10,34 @@ B.do
 
 	$ ? then:Fun else:Fun
 		doc
-			TODO
+			If I am `Bool.True`, returns the result of `then`.
+			Otherwise, returns the result of `else`.
+		eg
+			!= 1
+				True.?
+					1
+				|
+					2
+			!= 2
+				False.?
+					1
+				|
+					2
 
 		`this.valueOf() ? then() : _else()`
+
+	$ ?!:Void then:Fun else:Fun
+		doc
+			Runs `then` if I am `Bool.True`, and runs `else` if I am `Bool.False`.
+		eg
+			!.runs |run
+				True.?!
+					run.run!
+				|
+					do something else
+
+		? then else
+		()
 
 	$ or:B else:Fun
 		doc
@@ -67,17 +92,11 @@ B.do
 
 		`!this || B.check('then-result', then())`
 
-	$ ↔ a:B
-		doc
-			Same as =, but for Bools only.
-
-		= a
-
 	$ xor a:B
 		doc
-			Same as ≠, but for Bools only.
+			Same as /=, but for Bools only.
 
-		≠ a
+		/= a
 
 	$ nor:B neither:B
 		doc
@@ -122,13 +141,5 @@ B.do
 			Opposite of `if`.
 
 		not.if then
-
-	\alias 'or 'or
-	\alias 'and 'and
-	\alias 'not 'not
-	\alias 'implies 'implies
-	\alias 'xor 'xor
-
-
 
 export B

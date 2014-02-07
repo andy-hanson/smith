@@ -1,2 +1,5 @@
-export |a make-b
+export |a make-b\:Fun
+	doc
+		Asserts that `a`.= the result of `make-b`.
+
 	!.rel '= a make-b

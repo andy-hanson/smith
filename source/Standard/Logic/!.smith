@@ -1,12 +1,29 @@
 static!
 
 \ I know this won't override anything, but $$ relies on !.of.
-$$new-ok of condition:Bool ...args
+$$new-ok of condition:Bool make-message~:Fun
 	doc
-		TODO
+		Asserts that `condition` is `Bool.True`.
+		`message` is a Fun returning an Error or a Str.
+	eg
+		! Bool.True
+		!.fail-message "False still not true!"
+			! Bool.False
+				"False still not true!"
+
+	how
+		Avoids condition.not.if! to save on stack trace.
 
 	`
-		// not using condition.not.if! to save on stack trace
 		if (!condition)
-			throw new global.Error((args.length > 0) ? args[0]() : 'Check failed.');
-
+		{
+			var makeMessage = make_45message_126.or(function() { return function() { return "Check failed"; } });
+			var message = makeMessage();
+			var m = message;
+			if (m instanceof global.Error)
+				throw m;
+			else if (global.Object(m) instanceof global.String)
+				throw new global.Error(m);
+			else
+				throw new Error("Bad message to '!' (and the check failed too).");
+		}

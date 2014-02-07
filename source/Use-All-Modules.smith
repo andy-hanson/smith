@@ -1,3 +1,8 @@
+doc
+	Call like: (use Use-All-Modules) `__dirname`.
+	Recurses through the directory loading all files ending in '.js'.
+	Good if you want to test everything.
+
 use fs
 use path
 
@@ -16,8 +21,13 @@ $$ recurse-directory-sync dir:Str call-back:Fun
 				recurse-directory-sync full call-back
 
 $$new of directory-name:Str
+	how
+		TODO: file.ends-with
+
 	recurse-directory-sync directory-name |file
-		((file.slice (file.size.- 3)).= ".js").if!
+		val not-last-3
+			file.slice (file.size.- 3)
+		(not-last-3.= ".js").if!
 			`require(file)`
 
 

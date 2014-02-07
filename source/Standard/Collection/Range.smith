@@ -7,11 +7,11 @@ $$new of min:Real max:Real step~
 
 	new min max step
 
-$new ∋ value:Real
+$new has value:Real
 	eg
-		! ((Range 1 5 ).∋ 3)
-		! ((Range 1 5 ).∋ 6).not
-		! ((Range 1 5 2).∋ 4).not
+		! ((Range 1 5 ).has 3)
+		! ((Range 1 5 ).has 6).not
+		! ((Range 1 5 2).has 4).not
 
 	(value.< max).and
 		val rel

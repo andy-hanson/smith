@@ -18,8 +18,6 @@ allClasses = []
 Any = null
 
 
-
-
 # call with a class as 'this'
 def = (name, method, overridable = yes) ->
 	unbound = method.unbound()
@@ -155,16 +153,8 @@ AnyClass = Any.class()
 
 def.call AnyClass, '$new-ok', def
 
-#AnyClass['$new-ok'] 'construct', makeAnyClass
-
 Meta =
 	makeAnyClass 'Meta'
-
-Meta['$new-ok'] 'construct', (meta) ->
-	(Object.keys meta).forEach (name) =>
-		unless meta[name]?
-			throw new Error '?'
-		imm @, name, meta[name]
 
 bind = (object, name) ->
 	fun = object[name]
@@ -200,16 +190,6 @@ fun = (delegate, unbound, makeMetaPre) ->
 	f
 
 lazy = (delegate, make) ->
-	#get = ->
-	#	made =
-	#		make.call delegate
-	#	get = ->
-	#		made
-	#	made
-
-	#->
-	#	get()
-
 	cached = undefined
 	->
 		cached ? (cached = make.call delegate)

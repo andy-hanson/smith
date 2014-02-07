@@ -10,7 +10,12 @@ Prelude@Argument.do
 			new! "_class-of" it
 
 	$read name
+		doc
+			TODO
+
 	$read~ class-of
+		doc
+			TODO
 
 	$new toString
 		class-of~.~

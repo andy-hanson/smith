@@ -2,8 +2,15 @@ val M
 	Prelude@Meta
 
 M.do
-	\(Bag 'doc 'in 'out 'eg 'how 'todo 'rest-argument 'rest).each
-	\	me.$read/~ it
+	$new-ok construct meta
+		`
+			var me = this;
+			Object.keys(meta).forEach(function(name) {
+				if (meta[name] == null)
+					throw new global.Error('?')
+				Object.defineProperty(me, name, { value: meta[name] });
+			});
+
 	$read/~ doc
 		doc
 			TODO
